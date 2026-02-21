@@ -8,6 +8,7 @@ Author: Winter AI Assistant
 import os
 import json
 import glob
+import time
 import requests
 import anthropic
 import xml.etree.ElementTree as ET
@@ -20,145 +21,317 @@ except ImportError:
     YFINANCE_OK = False
 
 KST = timezone(timedelta(hours=9))
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+}
 
 
 # ──────────────────────────────────────────────
-# 1. 시장 데이터 수집
+# 1. 미국/글로벌 시장 데이터 수집
 # ──────────────────────────────────────────────
-def get_market_data():
-    symbols = {
-        "S&P 500":      "^GSPC",
-        "NASDAQ":       "^IXIC",
-        "다우존스":     "^DJI",
-        "USD/KRW":      "KRW=X",
-        "BTC/USD":      "BTC-USD",
-        "금 (Gold)":    "GC=F",
-        "WTI 원유":     "CL=F",
-        "VIX 공포지수": "^VIX",
+def fetch_ticker(sym: str, retries: int = 3) -> dict:
+    """Yahoo Finance Chart API로 직접 조회 (Rate Limit 우회)"""
+    # query1 / query2 교대 사용으로 rate limit 분산
+    hosts = ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]
+    url_template = "https://{host}/v8/finance/chart/{sym}"
+    params = {"range": "5d", "interval": "1d", "includePrePost": "false"}
+    req_headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "application/json",
+        "Referer": "https://finance.yahoo.com/",
     }
-    results = {}
-    if not YFINANCE_OK:
-        return results
 
-    for name, sym in symbols.items():
+    for attempt in range(retries):
+        host = hosts[attempt % 2]
+        url  = url_template.format(host=host, sym=sym)
         try:
-            ticker = yf.Ticker(sym)
-            hist = ticker.history(period="5d")
-            if hist.empty or len(hist) < 2:
-                continue
-            last = float(hist["Close"].iloc[-1])
-            prev = float(hist["Close"].iloc[-2])
+            resp = requests.get(url, params=params, headers=req_headers, timeout=15)
+            resp.raise_for_status()
+            body   = resp.json()
+            result = body["chart"]["result"][0]
+            closes = result["indicators"]["quote"][0]["close"]
+            closes = [c for c in closes if c is not None]
+            if len(closes) < 2:
+                return {}
+            last = closes[-1]
+            prev = closes[-2]
             chg  = last - prev
             pct  = (chg / prev) * 100
-            results[name] = {
+            ts   = result["timestamp"]
+            date = datetime.fromtimestamp(ts[-1]).strftime("%Y-%m-%d")
+            return {
                 "price":  round(last, 2),
                 "change": round(chg, 2),
                 "pct":    round(pct, 2),
-                "date":   hist.index[-1].strftime("%Y-%m-%d"),
+                "date":   date,
             }
         except Exception as e:
-            print(f"  [WARN] {name} ({sym}): {e}")
+            wait = 2 * (attempt + 1)
+            if attempt < retries - 1:
+                time.sleep(wait)
+            else:
+                print(f"  [WARN] {sym}: {e}")
+    return {}
+
+
+def get_market_data() -> dict:
+    """미국·글로벌 주요 시장 지표 수집"""
+    symbols = {
+        # ── 미국 주요 지수
+        "S&P 500":          "^GSPC",
+        "NASDAQ":           "^IXIC",
+        "다우존스":         "^DJI",
+        "Russell 2000":     "^RUT",
+        # ── 선물 (야간/프리마켓 동향)
+        "S&P 선물":         "ES=F",
+        "나스닥 선물":      "NQ=F",
+        # ── 반도체 (한국 시장 핵심 지표)
+        "필라델피아 반도체": "^SOX",
+        # ── 변동성
+        "VIX 공포지수":     "^VIX",
+        # ── 금리·달러
+        "미국 10Y 국채금리": "^TNX",
+        "달러인덱스 (DXY)": "DX-Y.NYB",
+        # ── 환율
+        "USD/KRW":          "KRW=X",
+        "USD/JPY":          "JPY=X",
+        "USD/CNY":          "CNY=X",
+        # ── 아시아 시장
+        "닛케이 225":       "^N225",
+        "항셍 지수":        "^HSI",
+        "상하이 종합":      "000001.SS",
+        # ── 원자재·암호화폐
+        "금 (Gold)":        "GC=F",
+        "WTI 원유":         "CL=F",
+        "BTC/USD":          "BTC-USD",
+    }
+
+    results = {}
+    if not YFINANCE_OK:
+        print("  [WARN] yfinance 미설치")
+        return results
+
+    for i, (name, sym) in enumerate(symbols.items()):
+        data = fetch_ticker(sym)
+        if data:
+            results[name] = data
+            direction = "▲" if data["pct"] >= 0 else "▼"
+            print(f"  ✓ {name}: {data['price']} ({direction}{abs(data['pct'])}%)")
+        else:
+            print(f"  ✗ {name}: 수집 실패")
+        # Rate limit 방지: 매 3건마다 0.5초 대기
+        if (i + 1) % 3 == 0:
+            time.sleep(0.5)
 
     return results
 
 
 # ──────────────────────────────────────────────
-# 2. 뉴스 수집 (RSS)
+# 2. 개별 주요 종목 데이터 수집
 # ──────────────────────────────────────────────
-def get_news():
-    feeds = [
-        ("Reuters Business",   "https://feeds.reuters.com/reuters/businessNews"),
-        ("CNBC Markets",       "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258"),
-        ("MarketWatch",        "https://feeds.marketwatch.com/marketwatch/topstories/"),
-        ("Investing.com KR",   "https://kr.investing.com/rss/news_301.rss"),
-        ("Bloomberg Markets",  "https://feeds.bloomberg.com/markets/news.rss"),
-    ]
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; MarketBot/1.0)"}
-    all_news = []
+def get_key_stocks() -> dict:
+    """한국 증시 핵심 종목 미국 상장 ADR / 글로벌 테크 수집"""
+    symbols = {
+        # ── 미국 빅테크 (반도체·AI 동향)
+        "엔비디아 (NVDA)":  "NVDA",
+        "TSMC (TSM)":       "TSM",
+        "AMD":              "AMD",
+        "인텔 (INTC)":      "INTC",
+        "마이크로소프트":   "MSFT",
+        "애플 (AAPL)":      "AAPL",
+        # ── 한국 ADR
+        "삼성전자 ADR":     "SSNLF",
+        "SK하이닉스 ADR":   "HXSCL",
+    }
+    results = {}
+    for name, sym in symbols.items():
+        data = fetch_ticker(sym)
+        if data:
+            results[name] = data
+    return results
 
+
+# ──────────────────────────────────────────────
+# 3. 뉴스 수집 (신뢰도 높은 RSS)
+# ──────────────────────────────────────────────
+def get_news() -> list:
+    """GitHub Actions 환경에서 안정적으로 작동하는 RSS 피드 수집"""
+    feeds = [
+        # Yahoo Finance (매우 안정적)
+        ("Yahoo Finance - Markets",
+         "https://finance.yahoo.com/news/rssindex"),
+        ("Yahoo Finance - World",
+         "https://finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US"),
+        # WSJ
+        ("WSJ Markets",
+         "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"),
+        # NASDAQ
+        ("NASDAQ News",
+         "https://www.nasdaq.com/feed/rssoutbound?category=Markets"),
+        # Seeking Alpha
+        ("Seeking Alpha",
+         "https://seekingalpha.com/market_currents.xml"),
+        # NBC Business
+        ("NBC Business",
+         "https://feeds.nbcnews.com/nbcnews/public/business"),
+        # Barron's
+        ("Barron's",
+         "https://www.barrons.com/xml/rss/3_7523.xml"),
+        # Fortune
+        ("Fortune Finance",
+         "https://fortune.com/feed/fortune-feeds/?id=3230629"),
+    ]
+
+    all_news = []
     for source, url in feeds:
         try:
-            resp = requests.get(url, timeout=10, headers=headers)
+            resp = requests.get(url, timeout=12, headers=HEADERS)
+            resp.raise_for_status()
             root = ET.fromstring(resp.content)
-            for item in root.findall(".//item")[:5]:
+            items = root.findall(".//item")[:5]
+            for item in items:
                 title   = item.find("title")
                 desc    = item.find("description")
                 pubdate = item.find("pubDate")
                 if title is not None and title.text:
+                    clean_title = title.text.strip()
+                    # HTML 태그 제거
+                    clean_title = ET.fromstring(
+                        f"<t>{clean_title}</t>"
+                    ).text or clean_title if "<" not in clean_title else clean_title
                     all_news.append({
-                        "source":  source,
-                        "title":   title.text.strip(),
-                        "desc":    (desc.text or "")[:200].strip() if desc is not None else "",
-                        "date":    pubdate.text if pubdate is not None else "",
+                        "source": source,
+                        "title":  clean_title,
+                        "desc":   (desc.text or "")[:200].strip() if desc is not None else "",
+                        "date":   pubdate.text if pubdate is not None else "",
                     })
+            print(f"  ✓ {source}: {len(items)}건")
         except Exception as e:
-            print(f"  [WARN] RSS {source}: {e}")
+            print(f"  ✗ {source}: {e}")
 
-    return all_news[:20]
+    # 중복 제거 (제목 기준)
+    seen = set()
+    unique = []
+    for n in all_news:
+        key = n["title"][:50]
+        if key not in seen:
+            seen.add(key)
+            unique.append(n)
+
+    return unique[:20]
 
 
 # ──────────────────────────────────────────────
-# 3. Claude AI로 HTML 보고서 생성
+# 4. Claude AI로 HTML 보고서 생성
 # ──────────────────────────────────────────────
-def generate_html(market_data: dict, news: list, report_date: str) -> str:
+def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: str) -> str:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    # 시장 데이터 텍스트 변환
-    market_lines = []
-    for name, d in market_data.items():
+    # ── 시장 지표 섹션별 분류
+    def fmt_section(names):
+        lines = []
+        for name in names:
+            d = market_data.get(name)
+            if d and isinstance(d.get("pct"), float):
+                arrow = "▲" if d["pct"] >= 0 else "▼"
+                lines.append(f"  - {name}: {d['price']:,} ({arrow}{abs(d['pct']):.2f}%) [{d['date']}]")
+        return "\n".join(lines) if lines else "  - 데이터 없음"
+
+    us_indices = ["S&P 500", "NASDAQ", "다우존스", "Russell 2000"]
+    us_futures  = ["S&P 선물", "나스닥 선물"]
+    semi_vix    = ["필라델피아 반도체", "VIX 공포지수"]
+    rates_fx    = ["미국 10Y 국채금리", "달러인덱스 (DXY)", "USD/KRW", "USD/JPY", "USD/CNY"]
+    asia        = ["닛케이 225", "항셍 지수", "상하이 종합"]
+    commodities = ["금 (Gold)", "WTI 원유", "BTC/USD"]
+
+    # ── 주요 종목
+    stock_lines = []
+    for name, d in key_stocks.items():
         if isinstance(d.get("pct"), float):
             arrow = "▲" if d["pct"] >= 0 else "▼"
-            color = "상승" if d["pct"] >= 0 else "하락"
-            market_lines.append(
-                f"- {name}: {d['price']} ({arrow}{abs(d['pct'])}% {color}) [{d['date']}]"
-            )
-    market_str = "\n".join(market_lines) if market_lines else "데이터 수집 불가"
+            stock_lines.append(f"  - {name}: ${d['price']} ({arrow}{abs(d['pct']):.2f}%)")
+    stocks_str = "\n".join(stock_lines) if stock_lines else "  - 데이터 없음"
 
-    # 뉴스 텍스트 변환
+    # ── 뉴스
     news_str = "\n".join(
-        [f"[{n['source']}] {n['title']}" for n in news[:15]]
-    ) if news else "뉴스 수집 불가"
+        [f"  [{n['source']}] {n['title']}" for n in news[:15]]
+    ) if news else "  - 뉴스 수집 불가"
 
     prompt = f"""당신은 한국 증시 전문 애널리스트입니다. 오늘은 {report_date} (일요일)입니다.
+아래 데이터를 분석하여 내일(월요일) 한국 증시 전망 보고서를 작성하세요.
 
-아래 데이터를 바탕으로 내일(월요일) 한국 증시 전망 보고서를 작성해주세요.
+━━━ 미국 주요 지수 (주간 마감) ━━━
+{fmt_section(us_indices)}
 
-## 미국 증시 주간 마감 데이터
-{market_str}
+━━━ 선물 (마감 후 동향) ━━━
+{fmt_section(us_futures)}
 
-## 주말 주요 글로벌 뉴스
+━━━ 반도체 지수 / 변동성 ━━━
+{fmt_section(semi_vix)}
+
+━━━ 금리 / 환율 ━━━
+{fmt_section(rates_fx)}
+
+━━━ 아시아 시장 ━━━
+{fmt_section(asia)}
+
+━━━ 원자재 / 암호화폐 ━━━
+{fmt_section(commodities)}
+
+━━━ 글로벌 주요 종목 ━━━
+{stocks_str}
+
+━━━ 주말 주요 뉴스 (영문) ━━━
 {news_str}
 
----
+━━━ 작성 요건 ━━━
+완성된 HTML 페이지를 작성하세요.
 
-완성된 HTML 페이지를 작성해주세요. 조건:
+디자인 요건:
+- 다크 테마 (배경 #0d1117, 텍스트 #c9d1d9)
+- 전문 금융 리포트 스타일 / 모바일 반응형
+- 상승 수치: #3fb950(초록) / 하락 수치: #f85149(빨강)
+- 카드형 섹션 구성
 
-1. **디자인**: 다크 테마, 전문적이고 세련된 금융 리포트 스타일
-2. **반응형**: 모바일/PC 모두 최적화
-3. **포함 섹션**:
-   - 헤더 (보고서 제목, 날짜, "비서 윈터 작성")
-   - 미국 증시 마감 요약 (컬러 테이블 — 상승: 초록, 하락: 빨강)
-   - 주요 주말 이슈 Top 5 분석
-   - 월요일 코스피/코스닥 시나리오 전망 (A: 강세 / B: 중립 / C: 약세, 각 확률 포함)
-   - 업종별 전망 (반도체, 자동차, 금융, 조선·방산, 바이오)
-   - 핵심 투자 포인트 (불릿 포인트)
-   - 이번 주 주요 일정 (날짜별 표)
-   - 푸터 (면책 고지, 자동 생성 안내)
-4. **언어**: 한국어 전체
-5. **출력**: ```html 없이 <!DOCTYPE html> 로 바로 시작하는 완전한 HTML 코드만 출력
+필수 섹션:
+1. 헤더 (제목, 날짜, "비서 윈터 작성" 표시)
+2. 미국 증시 주간 마감 요약 (지수별 컬러 테이블)
+3. 글로벌 시장 현황 (환율, 금리, 원자재, 아시아)
+4. 반도체 섹터 심층 분석 (필라델피아 반도체 + NVDA/TSMC 동향)
+5. 주요 주말 이슈 Top 5 (뉴스 기반 한국어 요약)
+6. 월요일 코스피/코스닥 시나리오 (A강세/B중립/C약세, 예상 지수 범위 포함)
+7. 업종별 전망 (반도체, 자동차, 금융, 조선·방산, 바이오)
+8. 핵심 투자 포인트 3가지
+9. 이번 주 주요 일정 (날짜·이벤트·영향도 표)
+10. 면책 고지 푸터
 
-반드시 완성된 단일 HTML 파일만 출력하세요."""
+출력: <!DOCTYPE html> 로 시작하는 완전한 HTML만 출력 (마크다운 코드블록 없이)"""
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=8000,
         messages=[{"role": "user", "content": prompt}],
     )
-    return response.content[0].text
+
+    html = response.content[0].text
+    # 혹시 마크다운 코드블록이 포함된 경우 제거
+    if html.startswith("```"):
+        html = html.split("\n", 1)[1]
+        if html.endswith("```"):
+            html = html.rsplit("```", 1)[0]
+    return html.strip()
 
 
 # ──────────────────────────────────────────────
-# 4. 인덱스 페이지 업데이트
+# 5. 인덱스 페이지 업데이트
 # ──────────────────────────────────────────────
 def update_index():
     reports = sorted(
@@ -205,40 +378,50 @@ def update_index():
 
 
 # ──────────────────────────────────────────────
-# 5. 텔레그램 전송
+# 6. 텔레그램 전송
 # ──────────────────────────────────────────────
-def send_telegram(pages_url: str, market_data: dict):
+def send_telegram(pages_url: str, market_data: dict, news: list):
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     chat_id   = os.environ.get("TELEGRAM_CHAT_ID", "")
     if not bot_token or not chat_id:
-        print("  [WARN] Telegram 환경변수 미설정, 전송 건너뜀")
+        print("  [WARN] Telegram 환경변수 미설정")
         return
 
-    sp  = market_data.get("S&P 500", {})
-    nq  = market_data.get("NASDAQ", {})
-    dji = market_data.get("다우존스", {})
-
-    def fmt(d):
+    def fmt(key):
+        d = market_data.get(key, {})
         if not d or not isinstance(d.get("pct"), float):
             return "N/A"
         arrow = "▲" if d["pct"] >= 0 else "▼"
-        return f"{d['price']:,.2f} ({arrow}{abs(d['pct']):.2f}%)"
+        return f"{d['price']:,} ({arrow}{abs(d['pct']):.2f}%)"
 
-    sp_e  = "📈" if sp.get("pct", 0) >= 0 else "📉"
-    nq_e  = "📈" if nq.get("pct", 0) >= 0 else "📉"
-    dji_e = "📈" if dji.get("pct", 0) >= 0 else "📉"
+    # 주요 뉴스 헤드라인 3개
+    headlines = "\n".join(
+        [f"  • {n['title'][:60]}..." for n in news[:3]]
+    ) if news else "  • 뉴스 없음"
+
+    sp_e   = "📈" if market_data.get("S&P 500",  {}).get("pct", 0) >= 0 else "📉"
+    nq_e   = "📈" if market_data.get("NASDAQ",   {}).get("pct", 0) >= 0 else "📉"
+    sox_e  = "📈" if market_data.get("필라델피아 반도체", {}).get("pct", 0) >= 0 else "📉"
+    vix    = market_data.get("VIX 공포지수", {}).get("price", "N/A")
+    usdkrw = market_data.get("USD/KRW", {}).get("price", "N/A")
 
     text = (
         "🗞 <b>월요일 한국 증시 전망 보고서 발행</b>\n\n"
-        f"{sp_e} S&P 500  : {fmt(sp)}\n"
-        f"{nq_e} NASDAQ   : {fmt(nq)}\n"
-        f"{dji_e} 다우존스 : {fmt(dji)}\n\n"
+        f"<b>📊 미국 증시 주간 마감</b>\n"
+        f"{sp_e} S&P 500      : {fmt('S&P 500')}\n"
+        f"{nq_e} NASDAQ       : {fmt('NASDAQ')}\n"
+        f"{sox_e} 필라델피아반도체: {fmt('필라델피아 반도체')}\n\n"
+        f"<b>💱 환율 / 변동성</b>\n"
+        f"  USD/KRW : {usdkrw}\n"
+        f"  VIX     : {vix}\n\n"
+        f"<b>📰 주요 뉴스</b>\n{headlines}\n\n"
         f"🔗 <a href=\"{pages_url}\">전체 보고서 보기</a>"
     )
 
     resp = requests.post(
         f"https://api.telegram.org/bot{bot_token}/sendMessage",
-        json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+        json={"chat_id": chat_id, "text": text, "parse_mode": "HTML",
+              "disable_web_page_preview": False},
         timeout=10,
     )
     print(f"  Telegram 응답: {resp.status_code}")
@@ -252,31 +435,33 @@ def main():
     report_date = now.strftime("%Y년 %m월 %d일")
     filename    = f"report_{now.strftime('%Y%m%d')}.html"
 
-    print("=" * 50)
+    print("=" * 55)
     print(f"  📊 보고서 생성 시작: {report_date}")
-    print("=" * 50)
+    print("=" * 55)
 
-    print("\n[1/4] 시장 데이터 수집 중...")
+    print("\n[1/5] 미국·글로벌 시장 데이터 수집 중...")
     market_data = get_market_data()
-    print(f"  → {len(market_data)}개 종목 수집")
+    print(f"  → {len(market_data)}개 지표 수집 완료")
 
-    print("\n[2/4] 뉴스 수집 중...")
+    print("\n[2/5] 주요 종목 데이터 수집 중...")
+    key_stocks = get_key_stocks()
+    print(f"  → {len(key_stocks)}개 종목 수집 완료")
+
+    print("\n[3/5] 뉴스 수집 중...")
     news = get_news()
-    print(f"  → {len(news)}개 뉴스 수집")
+    print(f"  → {len(news)}개 뉴스 수집 완료")
 
-    print("\n[3/4] Claude AI 분석 및 HTML 생성 중...")
-    html_content = generate_html(market_data, news, report_date)
+    print("\n[4/5] Claude AI 분석 및 HTML 생성 중...")
+    html_content = generate_html(market_data, key_stocks, news, report_date)
     os.makedirs("docs", exist_ok=True)
     with open(f"docs/{filename}", "w", encoding="utf-8") as f:
         f.write(html_content)
+    update_index()
     print(f"  → docs/{filename} 저장 완료")
 
-    update_index()
-    print("  → docs/index.html 업데이트 완료")
-
-    print("\n[4/4] 텔레그램 알림 전송 중...")
+    print("\n[5/5] 텔레그램 알림 전송 중...")
     pages_url = f"https://jinhae8971.github.io/gcp/{filename}"
-    send_telegram(pages_url, market_data)
+    send_telegram(pages_url, market_data, news)
 
     print(f"\n✅ 완료! 보고서 URL: {pages_url}")
 
