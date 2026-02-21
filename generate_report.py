@@ -104,6 +104,9 @@ def get_market_data() -> dict:
         "USD/KRW":          "KRW=X",
         "USD/JPY":          "JPY=X",
         "USD/CNY":          "CNY=X",
+        # ── 한국 시장
+        "코스피":           "^KS11",
+        "코스닥":           "^KQ11",
         # ── 아시아 시장
         "닛케이 225":       "^N225",
         "항셍 지수":        "^HSI",
@@ -251,6 +254,7 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
     us_futures  = ["S&P 선물", "나스닥 선물"]
     semi_vix    = ["필라델피아 반도체", "VIX 공포지수"]
     rates_fx    = ["미국 10Y 국채금리", "달러인덱스 (DXY)", "USD/KRW", "USD/JPY", "USD/CNY"]
+    korea       = ["코스피", "코스닥"]
     asia        = ["닛케이 225", "항셍 지수", "상하이 종합"]
     commodities = ["금 (Gold)", "은 (Silver)", "구리 (Copper)", "WTI 원유", "BTC/USD"]
 
@@ -269,6 +273,10 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
 
     prompt = f"""당신은 한국 증시 전문 애널리스트입니다. 오늘은 {report_date} (일요일)입니다.
 아래 데이터를 분석하여 내일(월요일) 한국 증시 전망 보고서를 작성하세요.
+
+━━━ 한국 증시 직전 거래일 마감 (가장 중요) ━━━
+{fmt_section(korea)}
+※ 위 코스피·코스닥 종가를 기준으로 월요일 예상 범위를 산출하세요.
 
 ━━━ 미국 주요 지수 (주간 마감) ━━━
 {fmt_section(us_indices)}
@@ -307,7 +315,7 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
 1. 헤더 (제목, 날짜, "비서 윈터 작성" 표시)
 
 2. ★ 한국 증시 전망 하이라이트 (헤더 바로 아래, 가장 눈에 띄게 배치)
-   - 월요일 코스피 예상 범위 (예: 5,750 ~ 5,870pt) 대형 숫자로 표시
+   - 월요일 코스피 예상 범위: 반드시 위 "한국 증시 직전 거래일 마감" 데이터의 실제 종가를 기준으로 산출 (고정 예시 숫자 절대 금지, 대형 숫자로 표시)
    - 전반적 전망 신호: 🟢강세 / 🟡중립 / 🔴약세 중 하나를 크게 표시
    - 핵심 포인트 3줄 (불릿) — 가장 중요한 시장 동인 요약
    - 주목 업종 TOP 3 (칩/태그 형태로 표시)
