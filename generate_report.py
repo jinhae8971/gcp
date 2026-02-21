@@ -110,6 +110,8 @@ def get_market_data() -> dict:
         "상하이 종합":      "000001.SS",
         # ── 원자재·암호화폐
         "금 (Gold)":        "GC=F",
+        "은 (Silver)":      "SI=F",
+        "구리 (Copper)":    "HG=F",
         "WTI 원유":         "CL=F",
         "BTC/USD":          "BTC-USD",
     }
@@ -250,7 +252,7 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
     semi_vix    = ["필라델피아 반도체", "VIX 공포지수"]
     rates_fx    = ["미국 10Y 국채금리", "달러인덱스 (DXY)", "USD/KRW", "USD/JPY", "USD/CNY"]
     asia        = ["닛케이 225", "항셍 지수", "상하이 종합"]
-    commodities = ["금 (Gold)", "WTI 원유", "BTC/USD"]
+    commodities = ["금 (Gold)", "은 (Silver)", "구리 (Copper)", "WTI 원유", "BTC/USD"]
 
     # ── 주요 종목
     stock_lines = []
