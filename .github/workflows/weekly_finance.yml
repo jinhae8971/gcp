@@ -29,7 +29,6 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          FSS_API_KEY: ${{ secrets.FSS_API_KEY }}   # 금융감독원 금융상품한눈에 API 키 (선택)
         run: python generate_finance_report.py
 
       - name: 💾 Commit & push report to docs/
