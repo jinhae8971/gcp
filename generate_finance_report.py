@@ -330,234 +330,365 @@ def get_finance_news() -> dict:
 
 
 # ──────────────────────────────────────────────
-# 4. HTML 보고서 생성 (Claude AI)
+# 4-A. Python 직접 HTML 빌더 (테이블·구조 생성)
 # ──────────────────────────────────────────────
-def generate_html(kfb: dict, kakao: dict, news: dict, report_date: str, week_str: str) -> str:
+def _safe_float(v):
+    try: return float(v)
+    except: return 0.0
+
+def _build_deposit_table(deposits: list) -> str:
+    """정기예금 비교표 HTML (12개월 기준금리 높은 순)"""
+    rows = sorted(deposits, key=lambda d: _safe_float(d["rate_12m"]), reverse=True)[:15]
+    tr_html = ""
+    for i, d in enumerate(rows):
+        bg = "#1a2744" if i % 2 == 0 else "#161b22"
+        max_style = ' style="color:#3fb950;font-weight:700;"' if d["max_12m"] not in ("-", "") else ""
+        tr_html += (
+            f'<tr style="background:{bg};">'
+            f'<td style="padding:8px 10px;white-space:nowrap;">{d["bank"]}</td>'
+            f'<td style="padding:8px 10px;">{d["product"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;">{d["rate_6m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;color:#58a6ff;font-weight:600;">{d["rate_12m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;">{d["rate_24m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;"{max_style}>{d["max_12m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;">{d["avg_12m"]}</td>'
+            f'</tr>\n'
+        )
+    return (
+        '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">'
+        '<thead><tr style="background:#1f6feb;">'
+        '<th style="padding:10px 8px;text-align:left;">은행명</th>'
+        '<th style="padding:10px 8px;text-align:left;">상품명</th>'
+        '<th style="padding:10px 6px;">6개월</th>'
+        '<th style="padding:10px 6px;">12개월</th>'
+        '<th style="padding:10px 6px;">24개월</th>'
+        '<th style="padding:10px 6px;color:#3fb950;">최고금리(12개월)</th>'
+        '<th style="padding:10px 6px;">전월평균</th>'
+        '</tr></thead><tbody>'
+        + tr_html +
+        '</tbody></table>'
+    )
+
+def _build_savings_table(savings: list) -> str:
+    """정액적립식 적금 비교표 HTML (12개월 기준금리 높은 순)"""
+    rows = sorted(savings, key=lambda s: _safe_float(s["rate_12m"]), reverse=True)[:10]
+    tr_html = ""
+    for i, s in enumerate(rows):
+        bg = "#1a2744" if i % 2 == 0 else "#161b22"
+        max_style = ' style="color:#3fb950;font-weight:700;"' if s["max_12m"] not in ("-", "") else ""
+        tr_html += (
+            f'<tr style="background:{bg};">'
+            f'<td style="padding:8px 10px;white-space:nowrap;">{s["bank"]}</td>'
+            f'<td style="padding:8px 10px;">{s["product"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;">{s["rate_6m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;color:#58a6ff;font-weight:600;">{s["rate_12m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;"{max_style}>{s["max_12m"]}</td>'
+            f'<td style="text-align:center;padding:8px 6px;">{s["avg_12m"]}</td>'
+            f'</tr>\n'
+        )
+    return (
+        '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">'
+        '<thead><tr style="background:#1f6feb;">'
+        '<th style="padding:10px 8px;text-align:left;">은행명</th>'
+        '<th style="padding:10px 8px;text-align:left;">상품명</th>'
+        '<th style="padding:10px 6px;">6개월</th>'
+        '<th style="padding:10px 6px;">12개월</th>'
+        '<th style="padding:10px 6px;color:#3fb950;">최고금리(12개월)</th>'
+        '<th style="padding:10px 6px;">전월평균</th>'
+        '</tr></thead><tbody>'
+        + tr_html +
+        '</tbody></table>'
+    )
+
+def _build_news_section(news: dict) -> str:
+    """신규 상품 + 일반 뉴스 기사 HTML 카드"""
+    card_style = (
+        'style="background:#161b22;border:1px solid #30363d;border-radius:8px;'
+        'padding:14px 16px;margin-bottom:12px;"'
+    )
+    btn_style = (
+        'style="display:inline-block;background:#21262d;color:#58a6ff;'
+        'font-size:0.78rem;padding:4px 10px;border-radius:6px;'
+        'text-decoration:none;margin-top:8px;" target="_blank"'
+    )
+    out = ""
+    all_items = news["new_products"] + news["general_finance"][:8]
+    for n in all_items:
+        tag = '<span style="background:#e3b341;color:#000;font-size:0.7rem;padding:2px 6px;border-radius:4px;margin-right:6px;font-weight:700;">신규</span>' if n["is_new_prod"] else ""
+        link_btn = f'<a href="{n["link"]}" {btn_style}>[기사 원문 보기]</a>' if n.get("link_ok") else ""
+        out += (
+            f'<div {card_style}>'
+            f'<div style="font-size:0.8rem;color:#8b949e;margin-bottom:4px;">{tag}{n["source"]} · {n.get("pub","")[:20]}</div>'
+            f'<div style="font-weight:600;margin-bottom:6px;">{n["title"]}</div>'
+            f'<div style="font-size:0.85rem;color:#8b949e;">{n["desc"][:200]}</div>'
+            f'{link_btn}'
+            f'</div>\n'
+        )
+    if not out:
+        out = '<p style="color:#8b949e;">이번 주 수집된 기사가 없습니다.</p>'
+    return out
+
+def _build_refs_section(news: dict) -> str:
+    """하단 출처 링크 섹션"""
+    btn = (
+        'style="display:inline-block;background:#21262d;color:#58a6ff;'
+        'font-size:0.78rem;padding:4px 10px;border-radius:6px;'
+        'text-decoration:none;margin:3px;" target="_blank"'
+    )
+    out = ""
+    for n in news["new_products"] + news["general_finance"]:
+        if n.get("link_ok"):
+            out += f'<a href="{n["link"]}" {btn}>[{n["source"]}] {n["title"][:50]}…</a>\n'
+    for name, url in VERIFY_URLS:
+        out += f'<a href="{url}" {btn}>{name}</a>\n'
+    return out
+
+
+# ──────────────────────────────────────────────
+# 4-B. Claude AI — 서론·뉴스 분석·큐레이션만 생성
+# ──────────────────────────────────────────────
+def _claude_editorial(kfb: dict, kakao: dict, news: dict, report_date: str, week_str: str) -> dict:
+    """Claude가 서론·뉴스분석·큐레이션 HTML 조각만 생성 (~3000 토큰)"""
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    # ── 은행연합회 정기예금 테이블 포맷 (상위 15개)
-    dep_rows = ""
-    for d in kfb["deposits"][:15]:
-        dep_rows += (
-            f"  {d['bank']} | {d['product']} | "
-            f"6개월:{d['rate_6m']}% | 12개월:{d['rate_12m']}% | "
-            f"24개월:{d['rate_24m']}% | 최고12개월:{d['max_12m']}% | "
-            f"전월평균:{d['avg_12m']}%\n"
-        )
-    sav_rows = ""
-    for s in kfb["savings"][:10]:
-        sav_rows += (
-            f"  {s['bank']} | {s['product']} | "
-            f"6개월:{s['rate_6m']}% | 12개월:{s['rate_12m']}% | "
-            f"최고12개월:{s['max_12m']}% | 전월평균:{s['avg_12m']}%\n"
-        )
+    # 핵심 데이터 요약 (상위만 전달)
+    top_deps = sorted(kfb["deposits"], key=lambda d: _safe_float(d["rate_12m"]), reverse=True)[:8]
+    top_savs = sorted(kfb["savings"], key=lambda s: _safe_float(s["rate_12m"]), reverse=True)[:5]
+    top_max  = sorted(kfb["deposits"], key=lambda d: _safe_float(d["max_12m"]), reverse=True)[:5]
+    top_24m  = sorted(kfb["deposits"], key=lambda d: _safe_float(d["rate_24m"]), reverse=True)[:4]
+    top_6m   = sorted(kfb["deposits"], key=lambda d: _safe_float(d["rate_6m"]),  reverse=True)[:4]
 
-    kfb_str = (
-        f"[수집 시각: {kfb['scraped_at']} / 출처: {kfb['source']} ({kfb['source_url']})]\n\n"
-        f"◆ 정기예금 금리 ({len(kfb['deposits'])}개 상품)\n"
-        f"  은행 | 상품명 | 6개월 | 12개월 | 24개월 | 최고12개월 | 전월평균\n"
-        f"{dep_rows}\n"
-        f"◆ 정액적립식 적금 금리 ({len(kfb['savings'])}개 상품)\n"
-        f"  은행 | 상품명 | 6개월 | 12개월 | 최고12개월 | 전월평균\n"
-        f"{sav_rows}"
-    )
+    def d_line(d): return f'{d["bank"]} {d["product"]} — 기본12개월:{d["rate_12m"]}%, 최고:{d["max_12m"]}%, 24개월:{d.get("rate_24m","-")}%, 6개월:{d.get("rate_6m","-")}%'
+    def s_line(s): return f'{s["bank"]} {s["product"]} — 기본12개월:{s["rate_12m"]}%, 최고:{s["max_12m"]}%'
 
-    # ── 카카오뱅크 공식 데이터 포맷
-    kakao_str = f"[수집 시각: {kakao['scraped_at']} / 출처: {kakao['source']}]\n"
+    dep_summary  = "\n".join(d_line(d) for d in top_deps)
+    sav_summary  = "\n".join(s_line(s) for s in top_savs)
+    max_summary  = "\n".join(d_line(d) for d in top_max)
+    long_summary = "\n".join(d_line(d) for d in top_24m)
+    park_summary = "\n".join(d_line(d) for d in top_6m)
+
+    kakao_rates = ""
     for p in kakao["products"]:
-        kakao_str += f"\n◆ {p['name']} ({p['url']})\n"
-        if p["rate_table"]:
-            kakao_str += f"  금리 테이블: {p['rate_table'][:400]}\n"
-        elif p["rates"]:
-            kakao_str += f"  금리: {' | '.join(p['rates'][:6])}\n"
-        if p["conditions"]:
-            kakao_str += f"  가입조건: {p['conditions'][0][:300]}\n"
+        kakao_rates += f'{p["name"]}: {" | ".join(p["rates"][:4])}\n'
 
-    # ── 뉴스 포맷
-    def fmt_news(lst, label):
-        if not lst:
-            return f"  ({label}: 이번 주 수집된 기사 없음)"
-        return "\n".join(
-            f"  [{i+1}] [{n['source']}] {n['title']}\n"
-            f"      URL: {n['link']}\n"
-            f"      내용: {n['desc'][:200]}"
-            for i, n in enumerate(lst[:10])
-        )
-
-    new_str     = fmt_news(news["new_products"],    "신규 상품 기사")
-    general_str = fmt_news(news["general_finance"], "예적금 일반 기사")
-    bg_str      = fmt_news(news["background"][:4],  "글로벌 금리 배경")
-    verify_str  = "\n".join(f"  - {n}: {u}" for n, u in VERIFY_URLS)
-
-    # 참고 기사 전체 (하단 출처용)
-    all_refs = news["new_products"] + news["general_finance"]
-    refs_str = "\n".join(
-        f"  [{n['source']}] {n['title']} → {n['link']}"
-        for n in all_refs
+    news_brief = "\n".join(
+        f'[{n["source"]}] {n["title"]} — {n["desc"][:100]}'
+        for n in (news["new_products"] + news["general_finance"])[:10]
     )
 
-    new_cnt   = len(news["new_products"])
-    gen_cnt   = len(news["general_finance"])
+    prompt = f"""당신은 친절한 금융 블로거 "비서 윈터"입니다. 오늘은 {report_date}입니다.
+
+아래 데이터를 바탕으로 HTML 조각(fragment) 3개를 작성하세요.
+반드시 JSON 형식 {{ "intro": "...", "news_analysis": "...", "curation": "..." }} 으로만 출력하세요.
+(마크다운 코드블록 없이, 순수 JSON만)
+
+━━━━━ 금리 데이터 (출처: 전국은행연합회 공시 {kfb["scraped_at"]} 기준) ━━━━━
+◆ 정기예금 상위 8개 (12개월 기준금리순):
+{dep_summary}
+
+◆ 최고우대금리 상위 5개 (12개월):
+{max_summary}
+
+◆ 장기예금 상위 4개 (24개월 기준):
+{long_summary}
+
+◆ 단기예금 상위 4개 (6개월 기준, 파킹용):
+{park_summary}
+
+◆ 적금 상위 5개 (12개월):
+{sav_summary}
+
+◆ 카카오뱅크:
+{kakao_rates}
+
+━━━━━ 이번 주 뉴스 ━━━━━
+{news_brief}
+
+━━━━━ 작성 지침 ━━━━━
+팩트 규칙: 위 데이터에 없는 금리 수치 절대 금지. 금리 사용 시 "(출처: 전국은행연합회 공시, {kfb["scraped_at"]} 기준)" 표기.
+
+[intro] — 이번 주 금리 시장 서론 HTML 3~4문단
+  • 다크 테마 스타일 (<p style="...">)
+  • 뉴스와 글로벌 배경을 자연스럽게 연결
+  • 친근한 블로그 말투
+
+[news_analysis] — 시중은행 동향 HTML
+  • 뉴스 기사에서 언급된 은행·금리·상품 동향 분석 2~3문단
+  • 기사 출처 언급 시 텍스트로만 (링크 버튼은 Python이 별도 추가)
+
+[curation] — 주제별 추천 상품 큐레이션 HTML
+  • 제목: <h2 style="color:#f0883e;border-top:3px solid #f0883e;padding-top:18px;">💡 윈터의 이번 주 상품 추천</h2>
+  • 부제: <p style="color:#8b949e;font-size:0.9rem;">은행연합회 공시 데이터 기반 팩트 큐레이션 | 출처: 전국은행연합회 공시, {kfb["scraped_at"]} 기준</p>
+  • 2×2 그리드: <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    모바일 대응: style 속성에 직접 작성하되 @media는 생략 (모바일은 단순 세로 배열도 OK)
+  • 카드 4개 각각 <div style="background:#1a1f2e;border:1px solid #f0883e44;border-radius:12px;padding:20px;">:
+    카드①: 🏧 단기/파킹 — 6개월 금리 높은 상품 1~2개 추천, 블로그 말투 2~3줄
+    카드②: 🏆 최고금리 예금 TOP3 — 12개월 최고우대금리 상위 3개, 기본→최고 금리 표기, 우대조건 주의
+    카드③: 📈 목돈 장기 굴리기 — 24개월 높은 상품 2개, 1000만원×2년 세전이자 계산 포함
+    카드④: 🌱 첫 적금 추천 — 12개월 금리 높은 적금 2개, 월10만원×12개월 예상 수령액 계산
+  • 금리: <span style="color:#3fb950;font-weight:700;">연 X.XX%</span>
+  • 강조: <span style="color:#f0883e;font-weight:600;">키워드</span>
+  • 각 카드 하단: <small style="color:#8b949e;">(출처: 전국은행연합회 공시, {kfb["scraped_at"]} 기준)</small>"""
+
+    resp = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=4000,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    raw = resp.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1]
+        if "```" in raw:
+            raw = raw.rsplit("```", 1)[0]
+    try:
+        return __import__("json").loads(raw)
+    except Exception:
+        # JSON 파싱 실패 시 그냥 curation에 원본 삽입
+        return {"intro": "", "news_analysis": "", "curation": raw}
+
+
+# ──────────────────────────────────────────────
+# 4. HTML 보고서 생성 (하이브리드: Python 템플릿 + Claude 편집)
+# ──────────────────────────────────────────────
+def generate_html(kfb: dict, kakao: dict, news: dict, report_date: str, week_str: str) -> str:
     kfb_cnt   = len(kfb["deposits"]) + len(kfb["savings"])
     kakao_cnt = len(kakao["products"])
 
-    prompt = f"""당신은 친절하고 상냥한 은행원입니다. 오늘은 {report_date}입니다.
+    # ── Step 1: Python이 테이블·구조 빌드
+    dep_table   = _build_deposit_table(kfb["deposits"])
+    sav_table   = _build_savings_table(kfb["savings"])
+    news_cards  = _build_news_section(news)
+    refs_html   = _build_refs_section(news)
 
-아래 ① 공식 기관 데이터와 ② 뉴스 기사를 모두 활용하여
-이번 주({week_str}) 예금·적금 블로그 포스팅 HTML을 작성하세요.
+    # ── Step 2: Claude가 서론·뉴스분석·큐레이션만 생성
+    editorial = _claude_editorial(kfb, kakao, news, report_date, week_str)
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-① 전국은행연합회 공식 금리공시 ({kfb_cnt}개 상품)
-   [공시 기준일: 2026-02-20 / 19개 시중은행 전체]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{kfb_str}
+    intro_html       = editorial.get("intro", "<p>이번 주 금리 현황을 확인하세요.</p>")
+    news_analysis    = editorial.get("news_analysis", "")
+    curation_html    = editorial.get("curation", "")
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-② 카카오뱅크 공식 홈페이지 실시간 금리 ({kakao_cnt}개 상품)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{kakao_str}
+    # ── Step 3: 카카오뱅크 섹션
+    kakao_html = ""
+    for p in kakao["products"]:
+        rates_txt = " | ".join(p["rates"][:6]) if p["rates"] else (p["rate_table"][:300] if p["rate_table"] else "금리 정보 없음")
+        kakao_html += (
+            f'<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 16px;margin-bottom:12px;">'
+            f'<strong style="color:#3fb950;">{p["name"]}</strong><br>'
+            f'<span style="font-size:0.85rem;color:#c9d1d9;">{rates_txt}</span><br>'
+            f'<a href="{p["url"]}" style="display:inline-block;background:#21262d;color:#58a6ff;font-size:0.78rem;padding:4px 10px;border-radius:6px;text-decoration:none;margin-top:8px;" target="_blank">[공식 홈페이지 바로가기]</a>'
+            f'</div>\n'
+        )
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-③ 이번 주 신규/특판 상품 기사 ({new_cnt}건)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{new_str}
+    # ── Step 4: 전체 HTML 조립
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>예금·적금 비교 보고서 — {report_date}</title>
+<style>
+body{{font-family:'Noto Sans KR',Arial,sans-serif;background:#0d1117;color:#c9d1d9;margin:0;padding:0;}}
+.wrap{{max-width:900px;margin:0 auto;padding:24px 16px;}}
+h1{{color:#c9d1d9;font-size:1.5rem;line-height:1.4;margin-bottom:6px;}}
+h2{{color:#58a6ff;font-size:1.1rem;margin:32px 0 12px;}}
+p{{line-height:1.8;margin-bottom:12px;}}
+.banner{{background:#1a2744;border:1px solid #58a6ff44;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:0.85rem;color:#8b949e;}}
+.banner strong{{color:#58a6ff;}}
+.sec{{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px 22px;margin-bottom:24px;}}
+.sec.blue{{border-top:3px solid #58a6ff;}}
+.sec.yellow{{border-top:3px solid #e3b341;}}
+.sec.green{{border-top:3px solid #3fb950;}}
+.sec.orange{{border-top:3px solid #f0883e;}}
+.sec h2{{margin-top:0;}}
+.tbl-wrap{{overflow-x:auto;margin-top:12px;}}
+.src-note{{font-size:0.78rem;color:#8b949e;margin-top:10px;display:block;}}
+a.btn{{display:inline-block;background:#21262d;color:#58a6ff;font-size:0.78rem;padding:5px 12px;border-radius:6px;text-decoration:none;margin-top:10px;border:1px solid #30363d;}}
+a.btn:hover{{background:#30363d;}}
+.author{{font-size:0.85rem;color:#8b949e;margin-bottom:24px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-④ 예금·적금 일반 뉴스 ({gen_cnt}건)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{general_str}
+  <!-- 배너 -->
+  <div class="banner">
+    📊 <strong>은행연합회 공시 {kfb_cnt}개 상품</strong> |
+    <strong>카카오뱅크 {kakao_cnt}개</strong> |
+    뉴스 {news['total_valid']}건 | 링크 검증 완료<br>
+    <span>수집 시각: {kfb['scraped_at']} (전국은행연합회) / {kakao['scraped_at']} (카카오뱅크)</span>
+  </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⑤ 글로벌 금리 환경 (배경)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{bg_str}
+  <!-- 헤더 -->
+  <h1>🏦 이번 주 예금·적금 금리 완전 비교<br>
+  <small style="font-size:0.65em;color:#8b949e;">{week_str} · 은행연합회 공시 {kfb_cnt}개 상품 기준</small></h1>
+  <div class="author">✍️ <strong>비서 윈터</strong> · {report_date} 작성</div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⑥ 공식 검증 사이트
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{verify_str}
+  <!-- 서론 -->
+  <div class="sec">
+    <h2>📌 이번 주 금리 시장 동향</h2>
+    {intro_html}
+  </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⑦ 참고 기사 링크 전체 (하단 출처 섹션용)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{refs_str}
+  <!-- 신규/특판 상품 소식 -->
+  <div class="sec yellow">
+    <h2>⭐ 이번 주 신규·특판 상품 소식</h2>
+    {news_cards}
+  </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-팩트체크 절대 규칙
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. ①의 금리 수치 사용 시 → "(출처: 전국은행연합회 공시, 2026-02-20 기준)" 표기
-2. ②의 금리 수치 사용 시 → "(출처: 카카오뱅크 공식, {kakao['scraped_at']} 기준)" 표기
-3. ③④의 기사 내용 사용 시 → 해당 기사 URL을 [출처] 버튼으로 표기
-4. 위 데이터에 없는 구체적 금리 수치 작성 절대 금지
+  <!-- 은행연합회 비교표 -->
+  <div class="sec blue">
+    <h2>🏛️ 전국은행연합회 공식 금리공시 비교표</h2>
+    <p style="font-size:0.85rem;color:#8b949e;">공시 기준일: {kfb['scraped_at']} · 19개 시중은행 전체 · 단리 기준</p>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-HTML 구성 (이 순서 필수)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    <strong style="color:#c9d1d9;">📋 정기예금 ({len(kfb['deposits'])}개 상품 — 12개월 기준금리 높은 순)</strong>
+    <div class="tbl-wrap">{dep_table}</div>
+    <span class="src-note">※ 최고금리는 우대조건 충족 시 적용. (출처: 전국은행연합회 소비자포털, {kfb['scraped_at']} 공시 기준)</span>
 
-① 최상단 데이터 현황 배너
-   • 배경 #1a2744, 파란 테두리, 아이콘 📊
-   • "은행연합회 공시 {kfb_cnt}개 상품 | 카카오뱅크 {kakao_cnt}개 | 뉴스 {news['total_valid']}건 | 링크 검증 완료"
-   • 수집 시각 표시
+    <br><br>
+    <strong style="color:#c9d1d9;">📋 정액적립식 적금 ({len(kfb['savings'])}개 상품 — 12개월 기준금리 높은 순)</strong>
+    <div class="tbl-wrap">{sav_table}</div>
+    <span class="src-note">※ 최고금리는 우대조건 충족 시 적용. (출처: 전국은행연합회 소비자포털, {kfb['scraped_at']} 공시 기준)</span>
 
-② 제목 + 헤더 (비서 윈터 작성)
+    <br>
+    <a href="https://portal.kfb.or.kr/compare/receiving_deposit_3.php" class="btn" target="_blank">[은행연합회 전체 공시 확인]</a>
+  </div>
 
-③ 서론 — 이번 주 금리·예적금 시장 동향
-   (④⑤ 기사 + 글로벌 배경 기반, 3~4문단)
+  <!-- 카카오뱅크 -->
+  <div class="sec green">
+    <h2>🐱 카카오뱅크 실시간 금리</h2>
+    <p style="font-size:0.85rem;color:#8b949e;">수집 시각: {kakao['scraped_at']} · 공식 홈페이지 기준</p>
+    {kakao_html}
+  </div>
 
-④ ★ 이번 주 신규 상품 소식 ★ (별도 강조 섹션)
-   스타일: border-top 3px solid #e3b341 (노란 강조선)
-   • 신규 기사가 있으면 → 각 기사 카드 + [기사 원문 보기] 버튼
-   • 없으면 → "이번 주 수집된 신규 상품 기사가 없습니다" + 공식 사이트 링크
+  <!-- 시중은행 동향 -->
+  <div class="sec">
+    <h2>📰 이번 주 시중은행 동향</h2>
+    {news_analysis}
+  </div>
 
-⑤ 은행연합회 공식 금리공시 비교표 (①번 데이터 사용) ← 핵심 섹션
-   스타일: border-top 3px solid #58a6ff
-   • 정기예금 비교표: HTML <table>로 시각화
-     - 열: 은행명 | 상품명 | 6개월 | 12개월 | 24개월 | 최고금리(12개월) | 전월평균
-     - 행: 상위 10~15개 상품 (12개월 기준금리 높은 순 정렬)
-     - 최고금리 셀: #3fb950 굵게 강조, 최고값 배경 #1f6feb
-   • 적금 비교표: 마찬가지로 상위 8~10개 상품
-   • 표 아래: "(출처: 전국은행연합회 소비자포털, 2026-02-20 공시 기준)"
-   • [은행연합회 전체 공시 확인] 버튼
+  <!-- 주제별 추천 큐레이션 -->
+  <div class="sec orange">
+    {curation_html}
+  </div>
 
-⑥ 카카오뱅크 실시간 금리 (②번 데이터 사용)
-   • 정기예금 기간별 금리 테이블
-   • 각 상품 [공식 홈페이지 바로가기] 버튼
+  <!-- 하단 출처 -->
+  <div class="sec" style="margin-top:32px;">
+    <h2>📎 참고 출처 · 공식 링크</h2>
+    <div style="line-height:2.2;">
+    {refs_html}
+    </div>
+  </div>
 
-⑦ 시중은행 동향 (④번 기사 기반)
-   • 기사에 언급된 은행·상품 정리 + [기사 출처] 버튼
+  <p style="text-align:center;color:#8b949e;font-size:0.78rem;margin-top:32px;">
+    ⚠️ 본 보고서는 참고용이며 실제 가입 전 각 금융기관 공식 홈페이지에서 최신 금리를 확인하세요.<br>
+    자동 생성: 비서 윈터 (GitHub Actions) · {report_date}
+  </p>
 
-⑧ ★★ 이번 주 주제별 추천 상품 큐레이션 ★★ (블로그 포스트 스타일)
-   스타일: border-top 3px solid #f0883e (오렌지 강조선), 배경 그라데이션
-   섹션 제목: "💡 윈터의 이번 주 상품 추천"
-   부제: "은행연합회 공시 데이터 기반 팩트 큐레이션"
+</div>
+</body>
+</html>"""
 
-   카드 4개를 2×2 그리드 레이아웃으로 배치 (모바일은 1열):
-
-   카드①  🏧 파킹통장 / 입출금자유 상품 추천
-          - 수시 입출금 가능하면서 높은 금리를 주는 상품 포커스
-          - ①번 데이터에서 만기 1개월 또는 6개월 금리가 높은 상품 발굴
-          - "잠깐 맡겨두기 좋은 이유" 설명 2~3줄 (블로그 말투)
-          - 추천 상품 1~2개: 은행명, 상품명, 금리 (공시 수치 근거)
-
-   카드②  🏆 이번 주 최고금리 예금 TOP 3
-          - ①번 정기예금 데이터에서 12개월 최고우대금리 상위 3개
-          - 각 상품: 은행명 | 상품명 | 기본금리 → 최고금리 표기
-          - "(우대 조건 충족 시)" 주의사항 포함
-          - "이런 분께 추천" 1줄 설명
-
-   카드③  📈 목돈 굴리기 장기 예금 추천
-          - ①번 데이터에서 24개월 기준금리가 높은 상품 2~3개
-          - 1000만원 / 2년 예치 시 예상 이자 수령액 계산해서 표기
-            (세전 단순계산: 원금 × 금리 × 기간)
-          - "장기 예치의 장단점" 간단 설명 (블로그 말투)
-
-   카드④  🌱 첫 적금 추천 (사회초년생 / MZ세대)
-          - ①번 적금 데이터에서 12개월 금리 높은 상품 2~3개
-          - 월 10만원씩 12개월 저축 시 예상 수령액 계산
-          - "첫 적금을 시작해야 하는 이유" 동기부여 문구 (친근한 말투)
-          - 우대금리 적용 팁 간단히 안내
-
-   카드 공통 디자인:
-   - 배경 #1a1f2e, 테두리 #f0883e 0.5px, radius 12px, 패딩 20px
-   - 카드 상단: 이모지 + 제목 (굵게, 폰트 크기 1.1rem)
-   - 카드 중간: 추천 내용 (블로그 글 말투, 친근하고 실용적)
-   - 카드 하단: "(출처: 전국은행연합회 공시, 2026-02-20 기준)" 소형 텍스트
-   - 금리 수치: #3fb950 굵게
-   - 중요 강조어: #f0883e 색상
-
-⑨ 유형별 추천 (간략히)
-   직장인 / 사회초년생 / 시니어 — 각 1줄 + 추천 상품 링크 (⑧ 큐레이션 섹션과 중복 최소화)
-
-⑩ 하단 출처 섹션 (필수)
-   • 참고 기사 전체 목록 (클릭 가능 링크 버튼)
-   • 공식 검증 사이트 전체 링크
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-디자인
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- 다크 테마 (배경 #0d1117, 텍스트 #c9d1d9), 최대 폭 900px, 모바일 반응형
-- [출처][원문보기][바로가기] 버튼: 배경 #21262d, 텍스트 #58a6ff, radius 6px, 새 탭
-- 공식 금리 수치: #3fb950 굵게 강조
-- 신규 상품 섹션: border-top 3px solid #e3b341
-- 은행연합회 섹션: border-top 3px solid #58a6ff
-- 카카오뱅크 섹션: border-top 3px solid #3fb950
-- 비교표 헤더: 배경 #1f6feb, 홀짝 행 교대 (#161b22/#1a2744)
-- 섹션 카드: 배경 #161b22, 테두리 #30363d, radius 10px
-- 충분한 정보량 (비교표 포함으로 자연스럽게 길어짐)
-
-출력: <!DOCTYPE html> 로 시작하는 완전한 HTML만 (마크다운 코드블록 없이)"""
-
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=16000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    html = response.content[0].text
-    if html.startswith("```"):
-        html = html.split("\n", 1)[1]
-        if html.endswith("```"):
-            html = html.rsplit("```", 1)[0]
-    return html.strip()
+    return html
 
 
 # ──────────────────────────────────────────────
