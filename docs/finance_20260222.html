@@ -3,533 +3,590 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이번 주 예금·적금 특집! 지금 가입하면 이득인 상품은? (2026.02.16~02.20)</title>
+<title>이번 주 예금·적금 상품 가이드 | 2026년 02월 16일~02월 20일</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background-color: #0d1117;
+    background: #0d1117;
     color: #c9d1d9;
-    font-family: 'Malgun Gothic', '맑은 고딕', Apple SD Gothic Neo, sans-serif;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
     font-size: 15px;
     line-height: 1.8;
   }
-  a { color: #58a6ff; text-decoration: none; }
   .container {
-    max-width: 800px;
+    max-width: 820px;
     margin: 0 auto;
-    padding: 20px 16px 60px;
+    padding: 24px 16px 60px;
   }
 
-  /* 헤더 */
-  .blog-header {
-    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
-    border-bottom: 2px solid #1f6feb;
-    padding: 32px 16px 24px;
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .blog-header .author-tag {
-    display: inline-block;
-    background: #1f6feb;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 12px;
-    border-radius: 20px;
-    margin-bottom: 14px;
-    letter-spacing: 0.5px;
-  }
-  .blog-header h1 {
-    font-size: clamp(20px, 4vw, 28px);
-    font-weight: 900;
-    color: #e6edf3;
-    line-height: 1.4;
-    margin-bottom: 10px;
-  }
-  .blog-header .subtitle {
-    color: #8b949e;
-    font-size: 13px;
-  }
-  .blog-header .date {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #6e7681;
-  }
-
-  /* 카드 섹션 */
-  .card {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 12px;
-    padding: 28px 24px;
+  /* 팩트체크 배너 */
+  .factcheck-banner {
+    background: #7d4e00;
+    border: 1.5px solid #f0a500;
+    border-radius: 10px;
+    padding: 18px 22px;
     margin-bottom: 28px;
+    color: #fff;
   }
-  .card-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: #e6edf3;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #21262d;
+  .factcheck-banner h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .card-title .icon {
-    font-size: 20px;
+  .factcheck-banner p {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #ffe8b0;
   }
-  .section-label {
+  .factcheck-banner a {
+    color: #ffd966;
+    text-decoration: underline;
+  }
+
+  /* 헤더 */
+  .header {
+    text-align: center;
+    padding: 36px 20px 28px;
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    margin-bottom: 28px;
+  }
+  .header .badge {
     display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    background: #21262d;
+    background: #1f6feb;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #e6edf3;
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .header .sub {
+    font-size: 13.5px;
     color: #8b949e;
-    padding: 2px 10px;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
+  }
+  .header .writer {
+    display: inline-block;
+    margin-top: 14px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 13px;
+    color: #3fb950;
+    font-weight: 600;
+  }
+
+  /* 섹션 카드 */
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 24px 22px;
+    margin-bottom: 22px;
+  }
+  .card h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #58a6ff;
+    margin: 18px 0 8px;
+  }
+  .card p {
+    color: #c9d1d9;
+    font-size: 14.5px;
+    margin-bottom: 8px;
   }
 
   /* 금리 강조 */
-  .rate { color: #3fb950; font-weight: 700; }
-  .rate-big { color: #3fb950; font-weight: 900; font-size: 22px; }
-  .highlight { color: #f0883e; font-weight: 700; }
-  .blue { color: #58a6ff; font-weight: 700; }
+  .rate {
+    color: #3fb950;
+    font-weight: 700;
+  }
+  .rate-note {
+    color: #f0a500;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
 
-  /* 상품 카드 */
-  .product-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 8px;
+  /* 출처 링크 */
+  a.src-link {
+    color: #3fb950;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px dotted #3fb950;
+    transition: opacity 0.2s;
   }
-  @media (max-width: 560px) {
-    .product-grid { grid-template-columns: 1fr; }
-  }
+  a.src-link:hover { opacity: 0.75; }
+
+  /* 상품 카드 아이템 */
   .product-item {
     background: #0d1117;
-    border: 1px solid #30363d;
+    border: 1px solid #21262d;
     border-radius: 10px;
-    padding: 18px 16px;
-    position: relative;
-    overflow: hidden;
+    padding: 16px 18px;
+    margin-bottom: 14px;
   }
-  .product-item::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 4px; height: 100%;
-    background: #1f6feb;
-    border-radius: 10px 0 0 10px;
-  }
-  .product-item.new::before { background: #3fb950; }
-  .product-item .badge {
-    display: inline-block;
-    font-size: 10px;
+  .product-item .pname {
+    font-size: 15.5px;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-bottom: 8px;
-  }
-  .badge-new { background: #1a4721; color: #3fb950; }
-  .badge-changed { background: #3d2200; color: #f0883e; }
-  .badge-popular { background: #1a2d4f; color: #58a6ff; }
-  .product-item h3 {
-    font-size: 14px;
-    font-weight: 800;
     color: #e6edf3;
     margin-bottom: 6px;
   }
-  .product-item .bank-name {
-    font-size: 11px;
-    color: #8b949e;
+  .product-item .pbank {
+    display: inline-block;
+    background: #1f6feb22;
+    border: 1px solid #1f6feb55;
+    color: #58a6ff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 12px;
     margin-bottom: 10px;
-  }
-  .product-item .rate-display {
-    font-size: 13px;
-    margin-bottom: 4px;
   }
   .product-item ul {
     list-style: none;
-    margin-top: 10px;
-    font-size: 12px;
-    color: #8b949e;
+    padding: 0;
   }
   .product-item ul li {
-    padding: 2px 0;
-    padding-left: 12px;
+    font-size: 14px;
+    color: #c9d1d9;
+    padding: 3px 0;
+    padding-left: 14px;
     position: relative;
   }
   .product-item ul li::before {
-    content: '·';
+    content: '▸';
+    color: #3fb950;
     position: absolute;
     left: 0;
-    color: #3fb950;
   }
 
   /* 비교표 */
-  .table-wrap { overflow-x: auto; margin-top: 12px; }
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #30363d;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
-    min-width: 620px;
+    font-size: 13.5px;
   }
   table thead tr {
     background: #1f6feb;
     color: #fff;
   }
-  table th {
-    padding: 12px 10px;
+  table thead th {
+    padding: 12px 14px;
     text-align: center;
     font-weight: 700;
     letter-spacing: 0.3px;
   }
-  table td {
-    padding: 11px 10px;
-    text-align: center;
+  table tbody tr {
     border-bottom: 1px solid #21262d;
-  }
-  table tbody tr:nth-child(odd) {
-    background: #161b22;
-  }
-  table tbody tr:nth-child(even) {
-    background: #0d1117;
+    transition: background 0.15s;
   }
   table tbody tr:hover {
     background: #1c2128;
-    transition: background 0.2s;
   }
-  table td:first-child {
+  table tbody tr:last-child { border-bottom: none; }
+  table tbody td {
+    padding: 11px 14px;
+    text-align: center;
+    color: #c9d1d9;
+  }
+  table tbody td:first-child {
     text-align: left;
-    font-weight: 700;
+    font-weight: 600;
     color: #e6edf3;
-    padding-left: 14px;
+  }
+  .tag-new {
+    background: #3fb95022;
+    border: 1px solid #3fb95055;
+    color: #3fb950;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 8px;
+    margin-left: 6px;
   }
 
-  /* 추천 유형 */
+  /* 유형별 추천 */
   .recommend-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
-    margin-top: 10px;
+    margin-top: 4px;
   }
-  @media (max-width: 500px) {
+  @media (max-width: 540px) {
     .recommend-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 21px; }
   }
-  .recommend-item {
+  .rec-card {
     background: #0d1117;
-    border: 1px solid #30363d;
+    border: 1px solid #21262d;
     border-radius: 10px;
-    padding: 16px 14px;
+    padding: 16px;
   }
-  .recommend-item .type-tag {
-    font-size: 12px;
-    font-weight: 800;
+  .rec-card .rec-type {
+    font-size: 13px;
+    font-weight: 700;
     color: #fff;
     background: #1f6feb;
-    padding: 3px 10px;
-    border-radius: 20px;
     display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
     margin-bottom: 10px;
   }
-  .recommend-item .type-tag.green { background: #1a4721; color: #3fb950; }
-  .recommend-item .type-tag.orange { background: #3d2200; color: #f0883e; }
-  .recommend-item .type-tag.purple { background: #2d1f6e; color: #a371f7; }
-  .recommend-item h4 {
-    font-size: 13px;
-    font-weight: 700;
-    color: #e6edf3;
-    margin-bottom: 6px;
-  }
-  .recommend-item p {
-    font-size: 12px;
-    color: #8b949e;
+  .rec-card p {
+    font-size: 13.5px;
+    color: #c9d1d9;
     line-height: 1.7;
   }
+  .rec-card strong { color: #3fb950; }
 
-  /* 체크리스트 */
-  .checklist { list-style: none; margin-top: 10px; }
-  .checklist li {
-    padding: 9px 0 9px 32px;
-    border-bottom: 1px solid #21262d;
-    position: relative;
-    font-size: 14px;
-    color: #c9d1d9;
+  /* 출처 섹션 */
+  .source-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 22px;
   }
-  .checklist li:last-child { border-bottom: none; }
-  .checklist li::before {
-    content: '✔';
-    position: absolute;
-    left: 0;
-    color: #3fb950;
+  .source-section h2 {
+    font-size: 17px;
     font-weight: 700;
-    font-size: 16px;
+    color: #e6edf3;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-
-  /* 경고 박스 */
-  .warning-box {
-    background: #2d1700;
-    border: 1px solid #f0883e;
+  .source-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 540px) { .source-list { grid-template-columns: 1fr; } }
+  .source-list li {
+    background: #0d1117;
+    border: 1px solid #21262d;
     border-radius: 8px;
-    padding: 14px 18px;
-    margin-top: 16px;
+    padding: 10px 14px;
     font-size: 13px;
-    color: #f0883e;
+  }
+  .source-list li .src-cat {
+    display: block;
+    color: #8b949e;
+    font-size: 11.5px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
 
-  /* 서론 */
-  .intro-text {
-    font-size: 14px;
-    color: #c9d1d9;
-    line-height: 1.9;
+  /* 뉴스 인용 */
+  .news-cite {
+    background: #0d1117;
+    border-left: 3px solid #1f6feb;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin: 10px 0;
+    font-size: 13.5px;
+    color: #8b949e;
   }
-  .intro-text strong { color: #e6edf3; }
+  .news-cite a { color: #58a6ff; text-decoration: none; }
+  .news-cite a:hover { text-decoration: underline; }
 
-  /* 풋터 */
-  .blog-footer {
+  /* 푸터 */
+  .footer {
     text-align: center;
-    padding: 28px 0 10px;
+    color: #484f58;
+    font-size: 12.5px;
+    padding-top: 16px;
     border-top: 1px solid #21262d;
-    font-size: 12px;
-    color: #6e7681;
-    margin-top: 10px;
+    line-height: 1.8;
   }
-
-  /* 구분선 */
-  hr.divider {
-    border: none;
-    border-top: 1px dashed #30363d;
-    margin: 20px 0;
-  }
-
-  p { margin-bottom: 10px; }
 </style>
 </head>
 <body>
-
-<div class="blog-header">
-  <div class="author-tag">✍️ 비서 윈터 작성</div>
-  <h1>💰 이번 주 예금·적금 특집!<br>지금 가입하면 이득인 상품은?</h1>
-  <div class="subtitle">2026년 2월 16일(월) ~ 2월 20일(금) 주간 금융 상품 총정리</div>
-  <div class="date">📅 발행일: 2026년 02월 22일 | 작성: 비서 윈터</div>
-</div>
-
 <div class="container">
 
-  <!-- 서론 -->
+  <!-- ① 팩트체크 경고 배너 -->
+  <div class="factcheck-banner">
+    <h3>⚠️ 팩트체크 안내 — 반드시 읽어주세요!</h3>
+    <p>
+      본 포스팅에 기재된 <strong>금리 수치는 FSS API 미연동으로 인해 AI가 시장 동향을 기반으로 추정한 값</strong>입니다.
+      실제 금리는 시장 상황에 따라 수시로 변동되므로, 투자·가입 전 반드시 아래 공식 출처에서 직접 확인하시기 바랍니다.<br><br>
+      ✅ 공식 확인처:
+      <a href="https://finlife.fss.or.kr/Main.do" target="_blank">금융감독원 금융상품한눈에</a> ·
+      <a href="https://fine.fss.or.kr/main/fin/finProd/finProdList.do" target="_blank">금융소비자정보포털 파인</a> ·
+      <a href="https://www.kfb.or.kr/info/interestRate.html" target="_blank">은행연합회 금리공시</a>
+    </p>
+  </div>
+
+  <!-- ② 헤더 -->
+  <div class="header">
+    <div class="badge">📅 2026년 02월 16일 ~ 02월 20일 주간 리포트</div>
+    <h1>💰 이번 주 예금·적금<br>상품 완벽 가이드</h1>
+    <p class="sub">고객님의 소중한 자산을 위한 최신 금융 상품 정보를 정리했어요 😊</p>
+    <div class="writer">✍️ 비서 윈터 작성 · 2026.02.22 발행</div>
+  </div>
+
+  <!-- ③ 서론: 이번 주 금리 동향 -->
   <div class="card">
-    <div class="section-label">📢 INTRO</div>
-    <div class="card-title"><span class="icon">🌐</span>이번 주 금리 동향 & 포인트</div>
-    <div class="intro-text">
-      <p>안녕하세요, 고객님! 😊 이번 주도 친절한 비서 윈터가 알짜 금융 정보를 꼼꼼하게 정리해 드리러 왔습니다.</p>
-      <p>이번 주(02/16~02/20)는 글로벌 금융시장이 꽤나 요동쳤죠. 해외 시장에서는 <strong>금(Gold) 가격이 온스당 5,000달러</strong> 선을 꿋꿋이 지켜내며 안전자산 선호 심리가 높아졌고, 미 연준(Fed) 내부의 금리 인하 속도를 두고 의견이 엇갈리면서 불확실성이 이어지고 있습니다. 국내에서도 한국은행이 당분간 기준금리를 <strong class="rate">연 2.75%</strong> 수준에서 유지할 것이란 전망이 우세하여, 예·적금 금리가 소폭 안정되는 흐름을 보였습니다.</p>
-      <p>이런 상황일수록 <strong>예금·적금의 안정적인 이자 수익</strong>이 더욱 빛을 발하는 시기랍니다! 특히 이번 주에는 저축은행 및 인터넷은행을 중심으로 <strong class="highlight">특판 상품과 금리 인상 소식</strong>이 잇따라 들어왔어요. 지금 바로 함께 살펴보실까요? 🔍</p>
+    <h2>📰 이번 주 금융 시장 동향</h2>
+    <p>
+      안녕하세요, 고객님! 😊 이번 주(2/16~2/20)도 예·적금 시장을 꼼꼼하게 살펴봤어요.
+      최근 금융 시장에서는 <strong>주택시장 구조 전환</strong>과 관련된 금융건전성 이슈가 주목받고 있는데요,
+      김용범 부총리가 금융건전성을 지탱하는 방향으로 주택시장 구조를 전환하겠다는 방침을 밝혀
+      부동산·금융 정책 전반에 영향을 줄 것으로 예상됩니다.
+    </p>
+    <div class="news-cite">
+      📌 관련 기사:
+      <a href="https://www.yonhapnewstv.co.kr/news/AKR20260222105727L1X" target="_blank">
+        [연합뉴스] 김용범 "금융건전성 지탱하는 방향으로 주택시장 구조 전환"
+      </a>
+    </div>
+    <p>
+      또한 스테이블코인 규제 논의가 본격화되면서 디지털 자산 시장의 불확실성이 높아지고 있어,
+      안전한 <strong>예금·적금 상품</strong>에 대한 고객님들의 관심이 더욱 높아지고 있답니다.
+      이럴 때일수록 원금이 보장되는 예·적금을 통해 안정적인 자산 관리를 하시는 것이 현명한 선택이에요! 😊
+    </p>
+    <div class="news-cite">
+      📌 관련 기사:
+      <a href="https://www.asiae.co.kr/article/2026022010480833993" target="_blank">
+        [아시아경제] 스테이블코인 감독①산업 육성이냐 금융 규제냐…'소비자 보호'가 가른다
+      </a>
+    </div>
+    <p style="margin-top:10px; font-size:14px; color:#8b949e;">
+      ※ 현재 한국은행 기준금리 동향 및 시중은행 수신금리는
+      <a href="https://www.kfb.or.kr/info/interestRate.html" target="_blank" class="src-link">은행연합회 금리공시</a>에서 실시간으로 확인하실 수 있어요.
+    </p>
+  </div>
+
+  <!-- ④ 본론A: 예금 상품 -->
+  <div class="card">
+    <h2>🏦 이번 주 주목! 예금 상품</h2>
+    <p style="font-size:13.5px; color:#8b949e; margin-bottom:16px;">
+      ⚠️ 아래 금리는 AI 추정 수치입니다. 가입 전 각 은행 공식 페이지에서 반드시 확인해 주세요.
+    </p>
+
+    <!-- 상품 1 -->
+    <div class="product-item">
+      <div class="pname">KB Star 정기예금 <span class="tag-new">추천</span></div>
+      <div class="pbank">KB국민은행</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 3.20%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 1개월 ~ 36개월</li>
+        <li>가입 금액: 100만 원 이상</li>
+        <li>특징: 인터넷/앱 가입 시 우대금리 제공, 자동이체 연계 혜택</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://obank.kbstar.com/quics?page=C017480" target="_blank" class="src-link">KB국민은행 예금 바로가기 ↗</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 상품 2 -->
+    <div class="product-item">
+      <div class="pname">쏠편한 정기예금 <span class="tag-new">인기</span></div>
+      <div class="pbank">신한은행</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 3.15%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 1개월 ~ 36개월</li>
+        <li>가입 금액: 1만 원 이상 (소액 가입 가능)</li>
+        <li>특징: SOL 앱 전용, 일 단위 자유 해지 가능</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.shinhan.com/hpe/index.jsp#050101000000" target="_blank" class="src-link">신한은행 예금 바로가기 ↗</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 상품 3 -->
+    <div class="product-item">
+      <div class="pname">카카오뱅크 정기예금</div>
+      <div class="pbank">카카오뱅크</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 3.30%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 1개월 ~ 36개월</li>
+        <li>가입 금액: 1만 원 이상</li>
+        <li>특징: 100% 비대면, 간편 가입, 최소 금액 제한 없음</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.kakaobank.com/products/deposit" target="_blank" class="src-link">카카오뱅크 예금 바로가기 ↗</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 상품 4 -->
+    <div class="product-item">
+      <div class="pname">하나원큐 정기예금</div>
+      <div class="pbank">하나은행</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 3.10%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 1개월 ~ 36개월</li>
+        <li>가입 금액: 100만 원 이상</li>
+        <li>특징: 하나원큐 앱 전용, 기간별 우대금리 차등 적용</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.kebhana.com/cont/mall/mall08/mall0801/index.jsp" target="_blank" class="src-link">하나은행 예금 바로가기 ↗</a>
+        </li>
+      </ul>
     </div>
   </div>
 
-  <!-- 본론 A: 신규/변경 상품 -->
+  <!-- ⑤ 본론B: 적금 상품 -->
   <div class="card">
-    <div class="section-label">🆕 NEW & CHANGED</div>
-    <div class="card-title"><span class="icon">🏦</span>이번 주 신규·금리 변경 상품 소개</div>
-    <p style="font-size:13px; color:#8b949e; margin-bottom:16px;">이번 주 새롭게 출시되거나 금리가 조정된 상품들을 고객님께 먼저 소개해 드립니다! ✨</p>
+    <h2>🐷 이번 주 주목! 적금 상품</h2>
+    <p style="font-size:13.5px; color:#8b949e; margin-bottom:16px;">
+      ⚠️ 아래 금리는 AI 추정 수치입니다. 가입 전 각 은행 공식 페이지에서 반드시 확인해 주세요.
+    </p>
 
-    <div class="product-grid">
-      <!-- 상품 1 -->
-      <div class="product-item new">
-        <span class="badge badge-new">🆕 신규출시</span>
-        <h3>카카오뱅크 '봄맞이 특판 정기예금'</h3>
-        <div class="bank-name">🌐 카카오뱅크 (인터넷은행)</div>
-        <div class="rate-display">기본금리 <span class="rate">연 3.80%</span></div>
-        <div class="rate-display">우대 시 최대 <span class="rate-big">4.10%</span></div>
-        <ul>
-          <li>가입 기간: 6개월 / 12개월</li>
-          <li>가입 한도: 1인 최대 1억 원</li>
-          <li>우대: 카카오페이 연동 시 +0.20%<br>첫 거래 고객 +0.10%</li>
-          <li>중도해지 시 기본금리의 50% 적용</li>
-        </ul>
-      </div>
+    <!-- 적금 1 -->
+    <div class="product-item">
+      <div class="pname">NH올원e적금 <span class="tag-new">추천</span></div>
+      <div class="pbank">NH농협은행</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 4.00%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 6개월 ~ 12개월</li>
+        <li>월 납입액: 최소 1만 원 ~ 최대 50만 원</li>
+        <li>특징: 앱 전용, 자동이체 우대금리, 농협카드 실적 우대 가능</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.nonghyup.com/personal/savings/depositProduct.do" target="_blank" class="src-link">NH농협은행 적금 바로가기 ↗</a>
+        </li>
+      </ul>
+    </div>
 
-      <!-- 상품 2 -->
-      <div class="product-item new">
-        <span class="badge badge-new">🆕 신규출시</span>
-        <h3>SBI저축은행 '파워업 자유적금'</h3>
-        <div class="bank-name">🏢 SBI저축은행 (저축은행)</div>
-        <div class="rate-display">기본금리 <span class="rate">연 4.20%</span></div>
-        <div class="rate-display">우대 시 최대 <span class="rate-big">4.60%</span></div>
-        <ul>
-          <li>가입 기간: 12개월 / 24개월</li>
-          <li>월 납입: 1만 원 ~ 50만 원</li>
-          <li>우대: 자동이체 등록 +0.20%<br>타행 대비 우대 +0.20%</li>
-          <li>예금자보호법 적용 (5천만 원 한도)</li>
-        </ul>
-      </div>
+    <!-- 적금 2 -->
+    <div class="product-item">
+      <div class="pname">IBK 중기 사랑 적금</div>
+      <div class="pbank">IBK기업은행</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 3.80%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 12개월 ~ 36개월</li>
+        <li>월 납입액: 최소 1만 원 ~ 최대 100만 원</li>
+        <li>특징: 중소기업 재직자 우대금리 별도 제공</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.ibk.co.kr/ibk.ibk?cmd=PBSNV0001M" target="_blank" class="src-link">IBK기업은행 적금 바로가기 ↗</a>
+        </li>
+      </ul>
+    </div>
 
-      <!-- 상품 3 -->
-      <div class="product-item">
-        <span class="badge badge-changed">🔄 금리변경</span>
-        <h3>토스뱅크 '먹이는 통장 플러스'</h3>
-        <div class="bank-name">🌐 토스뱅크 (인터넷은행)</div>
-        <div class="rate-display">변경 후 기본금리 <span class="rate">연 3.50%</span></div>
-        <div class="rate-display"><span style="color:#8b949e; font-size:12px;">변경 전: 연 3.20%</span> <span class="highlight">▲ 0.30%p↑</span></div>
-        <ul>
-          <li>수시입출금형 파킹통장</li>
-          <li>한도: 1억 원까지 이율 적용</li>
-          <li>조건 없는 기본금리 제공</li>
-          <li>별도 해지 패널티 없음</li>
-        </ul>
-      </div>
-
-      <!-- 상품 4 -->
-      <div class="product-item">
-        <span class="badge badge-changed">🔄 금리변경</span>
-        <h3>NH농협은행 'NH왈츠회전예금 Ⅱ'</h3>
-        <div class="bank-name">🏦 NH농협은행 (시중은행)</div>
-        <div class="rate-display">변경 후 기본금리 <span class="rate">연 3.30%</span></div>
-        <div class="rate-display">우대 시 최대 <span class="rate-big">3.65%</span></div>
-        <ul>
-          <li>가입 기간: 1개월 단위 자동 회전</li>
-          <li>한도: 최소 100만 원 이상</li>
-          <li>우대: NH멤버스 포인트 보유 시 +0.20%<br>급여이체 연동 +0.15%</li>
-          <li>회전 방식으로 유연한 운용 가능</li>
-        </ul>
-      </div>
+    <!-- 적금 3 -->
+    <div class="product-item">
+      <div class="pname">케이뱅크 코드K 자유적금</div>
+      <div class="pbank">케이뱅크</div>
+      <ul>
+        <li>최고 금리: <span class="rate">연 4.20%</span> <span class="rate-note">(AI 추정, 실제 금리는 공식 사이트 확인 필수)</span></li>
+        <li>가입 기간: 6개월 ~ 12개월</li>
+        <li>월 납입액: 최소 1만 원 ~ 최대 300만 원</li>
+        <li>특징: 자유 납입 방식, 우대 조건 충족 시 추가 금리</li>
+        <li>
+          공식 상품 페이지:
+          <a href="https://www.kbanknow.com/ib20/mnu/FPMFSA020010" target="_blank" class="src-link">케이뱅크 적금 바로가기 ↗</a>
+        </li>
+      </ul>
     </div>
   </div>
 
-  <!-- 본론 B: 비교표 -->
+  <!-- ⑥ 비교표 -->
   <div class="card">
-    <div class="section-label">📊 COMPARISON</div>
-    <div class="card-title"><span class="icon">📋</span>인기 주요 상품 상세 비교</div>
-    <p style="font-size:13px; color:#8b949e; margin-bottom:16px;">고객님께서 가장 많이 문의 주시는 인기 상품들을 한눈에 비교해 드릴게요! 꼼꼼히 살펴보세요 🔎</p>
-
+    <h2>📊 예금·적금 상품 금리 비교표</h2>
+    <p style="font-size:13px; color:#f0a500; margin-bottom:14px;">
+      ⚠️ 모든 금리는 AI 추정치입니다. 실제 적용 금리는
+      <a href="https://finlife.fss.or.kr/Main.do" target="_blank" class="src-link">금감원 금융상품한눈에</a> 및 각 은행 공식 사이트에서 확인하세요.
+    </p>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>비교 항목</th>
-            <th>카카오뱅크<br>봄맞이 특판</th>
-            <th>SBI저축은행<br>파워업 자유적금</th>
-            <th>케이뱅크<br>코드K 정기예금</th>
+            <th>상품명</th>
+            <th>은행</th>
+            <th>구분</th>
+            <th>최고 금리</th>
+            <th>기간</th>
+            <th>공식 링크</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>상품 유형</td>
-            <td>정기예금</td>
-            <td>자유적금</td>
-            <td>정기예금</td>
+            <td>KB Star 정기예금</td>
+            <td>KB국민</td>
+            <td>예금</td>
+            <td><span class="rate">3.20%</span></td>
+            <td>1~36개월</td>
+            <td><a href="https://obank.kbstar.com/quics?page=C017480" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>기본금리</td>
-            <td><span class="rate">연 3.80%</span></td>
-            <td><span class="rate">연 4.20%</span></td>
-            <td><span class="rate">연 3.70%</span></td>
+            <td>쏠편한 정기예금</td>
+            <td>신한</td>
+            <td>예금</td>
+            <td><span class="rate">3.15%</span></td>
+            <td>1~36개월</td>
+            <td><a href="https://www.shinhan.com/hpe/index.jsp#050101000000" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>최대 우대금리</td>
-            <td><span class="rate">연 4.10%</span></td>
-            <td><span class="rate">연 4.60%</span></td>
-            <td><span class="rate">연 4.00%</span></td>
+            <td>카카오뱅크 정기예금</td>
+            <td>카카오뱅크</td>
+            <td>예금</td>
+            <td><span class="rate">3.30%</span></td>
+            <td>1~36개월</td>
+            <td><a href="https://www.kakaobank.com/products/deposit" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>우대 조건</td>
-            <td>카카오페이 연동<br>첫 거래 고객</td>
-            <td>자동이체 등록<br>타행 대비 우대</td>
-            <td>케이뱅크 계좌 보유<br>첫 예금 가입</td>
+            <td>하나원큐 정기예금</td>
+            <td>하나</td>
+            <td>예금</td>
+            <td><span class="rate">3.10%</span></td>
+            <td>1~36개월</td>
+            <td><a href="https://www.kebhana.com/cont/mall/mall08/mall0801/index.jsp" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>가입 대상</td>
-            <td>만 17세 이상<br>개인 고객</td>
-            <td>만 18세 이상<br>개인 고객</td>
-            <td>만 17세 이상<br>개인 고객</td>
+            <td>우리 WON 정기예금</td>
+            <td>우리</td>
+            <td>예금</td>
+            <td><span class="rate">3.05%</span></td>
+            <td>1~36개월</td>
+            <td><a href="https://www.wooribank.com/wb/html/savings/deposit.do" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>예치·납입 한도</td>
-            <td>최대 1억 원</td>
-            <td>월 1만~50만 원</td>
-            <td>최대 5억 원</td>
+            <td>NH올원e적금</td>
+            <td>NH농협</td>
+            <td>적금</td>
+            <td><span class="rate">4.00%</span></td>
+            <td>6~12개월</td>
+            <td><a href="https://www.nonghyup.com/personal/savings/depositProduct.do" target="_blank" class="src-link">바로가기</a></td>
           </tr>
           <tr>
-            <td>예치 기간</td>
-            <td>6개월 / 12개월</td>
-            <td>12개월 / 24개월</td>
-            <td>3·6·12·24개월</td>
-          </tr>
-          <tr>
-            <td>중도 해지 시</td>
-            <td>기본금리 50% 적용</td>
-            <td>약정금리의 30~50%</td>
-            <td>기본금리 60% 적용</td>
-          </tr>
-          <tr>
-            <td>예금자 보호</td>
-            <td>✅ (5천만 원)</td>
-            <td>✅ (5천만 원)</td>
-            <td>✅ (5천만 원)</td>
-          </tr>
-          <tr>
-            <td>특장점</td>
-            <td>앱 접근성 우수<br>간편 가입</td>
-            <td>높은 금리<br>소액 분할 납입 가능</td>
-            <td>다양한 기간 선택<br>높은 한도</td>
-          </tr>
-          <tr>
-            <td>단점</td>
-            <td>우대 조건 충족 필요<br>한도 제한</td>
-            <td>저축은행 특성상<br>신뢰도 우려</td>
-            <td>기본금리 상대적 낮음<br>우대 조건 까다로움</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="warning-box" style="background:#0d2d13; border-color:#3fb950; color:#c9d1d9; margin-top:18px;">
-      <strong style="color:#3fb950;">💡 비교 TIP</strong><br>
-      저축은행 상품은 시중·인터넷은행 대비 금리가 높지만, 예금자 보호 한도(5천만 원)를 꼭 확인하시고, 한도 초과분은 별도 기관에 분산 예치하시는 것을 권장합니다!
-    </div>
-  </div>
-
-  <!-- 결론: 유형별 추천 -->
-  <div class="card">
-    <div class="section-label">🎯 RECOMMENDATION</div>
-    <div class="card-title"><span class="icon">👤</span>고객님 유형별 맞춤 추천</div>
-
-    <div class="recommend-grid">
-      <div class="recommend-item">
-        <span class="type-tag">💼 직장인</span>
-        <h4>카카오뱅크 봄맞이 특판 정기예금</h4>
-        <p>급여 계좌 연동이 간편하고, 앱 하나로 빠르게 가입 가능! 목돈을 안정적으로 12개월 굴리기에 딱 좋아요. 우대금리 조건도 직장인이 충족하기 쉬운 편입니다. 최대 <span class="rate">4.10%</span> 노려보세요!</p>
-      </div>
-      <div class="recommend-item">
-        <span class="type-tag orange">🏪 자영업자</span>
-        <h4>NH농협은행 NH왈츠회전예금 Ⅱ</h4>
-        <p>수시로 자금 흐름이 변하는 자영업자 고객님께는 1개월 단위 자동 회전 예금이 안성맞춤! 필요 시 유연하게 자금을 활용하면서도 <span class="rate">최대 3.65%</span>의 안정적 이자를 챙길 수 있어요.</p>
-      </div>
-      <div class="recommend-item">
-        <span class="type-tag green">🎓 학생·사회초년생</span>
-        <h4>SBI저축은행 파워업 자유적금</h4>
-        <p>월 1만 원부터 시작할 수 있어 부담이 없어요! 사회초년생 고객님이 매달 소액씩 꾸준히 모으며 저축 습관을 기르기에 최적이랍니다. 자동이체 설정만 해도 <span class="rate">최대 4.60%</span> 혜택!</p>
-      </div>
-      <div class="recommend-item">
-        <span class="type-tag purple">🌸 시니어</span>
-        <h4>케이뱅크 코드K 정기예금</h4>
-        <p>높은 한도(최대 5억 원)와 다양한 기간 선택(3·6·12·24개월)으로 은퇴 후 목돈 운용에 적합해요. 예금자 보호도 확실하고, 안전하게 <span class="rate">최대 4.00%</span>로 노후 자금을 불려보세요!</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 주의사항 & 체크리스트 -->
-  <div class="card">
-    <div class="section-label">⚠️ CHECKLIST</div>
-    <div class="card-title"><span class="icon">📝</span>가입 전 필수 체크리스트</div>
-    <p style="font-size:13px; color:#8b949e; margin-bottom:14px;">고객님, 예금·적금 가입 전에 아래 항목을 꼭 확인하시고 후회 없는 선택을 하세요! 😊</p>
-
-    <ul class="checklist">
-      <li><strong>예금자 보호 여부 확인:</strong> 시중·인터넷은행, 저축은행 모두 1인당 5천만 원까지만 보호됩니다. 금액이 크다면 여러 기관에 분산하세요.</li>
-      <li><strong>우대금리 조건 꼼꼼히 체크:</strong> 광고에 나온 최대 금리는 모든 우대 조건을 충족해야 받을 수 있어요. 본인이 실제 충족 가능한지 반드시 확인하세요!</li>
-      <li><strong>중도 해지 패널티 인지:</strong> 급하게 돈이 필요해질 경우 중도 해지 시 금리 손실이 크니, 자금 계획을 먼저 세우고 가입하세요.</li>
-      <li><strong>세금 공제 후 실질금리 계산:</strong> 이자소득세 15.4%가 원천징수됩니다. 세후 실수령 이자를 미리 계산해 보시는 것이 좋아요.</li>
-      <li><strong>자동 만기 연장 조건 확인:</strong> 만기 후 자동 연장 여부와 연장 시 적용 금리가 달라질 수 있으니 약관을 꼭 읽어보세요.</li>
-      <li><strong>저축은행 재무 건전성 점검:</strong> 저축은행 이용 시 금융감독원
+            <td>IBK 중기사랑 적금</td>
+            <td>IBK기업</td>
+            <td>적금</td
