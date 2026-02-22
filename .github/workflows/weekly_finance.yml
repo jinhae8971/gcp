@@ -1,0 +1,40 @@
+name: 🏦 Weekly Savings & Deposit Report
+
+on:
+  schedule:
+    - cron: '0 20 * * 5'   # 금요일 20:00 UTC = 토요일 05:00 KST
+  workflow_dispatch:         # 수동 실행 가능
+
+permissions:
+  contents: write
+
+jobs:
+  generate-finance-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: pip install anthropic requests beautifulsoup4 lxml
+
+      - name: 🏦 Generate finance report
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python generate_finance_report.py
+
+      - name: 💾 Commit & push report to docs/
+        run: |
+          git config user.name  "Winter Bot"
+          git config user.email "winter-bot@github-actions"
+          git add docs/
+          git diff --staged --quiet || git commit -m "🏦 Add finance report $(date +'%Y-%m-%d')"
+          git push
