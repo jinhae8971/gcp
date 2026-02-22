@@ -13,13 +13,30 @@ Author: Winter AI Assistant
 import os
 import glob
 import re
+import ssl
 import time
+import warnings
 import requests
 import anthropic
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from requests.adapters import HTTPAdapter
+from urllib3.util.ssl_ import create_urllib3_context
+
+# 구형 SSL 서버(은행연합회 등) 접속을 위한 어댑터
+class LegacySSLAdapter(HTTPAdapter):
+    """TLSv1.2 이하 구형 서버와의 호환성 어댑터"""
+    def init_poolmanager(self, *args, **kwargs):
+        ctx = create_urllib3_context()
+        ctx.set_ciphers("DEFAULT@SECLEVEL=1")
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        kwargs["ssl_context"] = ctx
+        super().init_poolmanager(*args, **kwargs)
+
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 
 KST = timezone(timedelta(hours=9))
 HEADERS = {
@@ -62,11 +79,12 @@ def scrape_kfb() -> dict:
         "savings": [],
     }
     session = requests.Session()
+    session.mount("https://portal.kfb.or.kr", LegacySSLAdapter())
 
     # ── 정기예금 ──
     try:
         session.get("https://portal.kfb.or.kr/compare/receiving_deposit_3.php",
-                    headers=HEADERS, timeout=10)
+                    headers=HEADERS, timeout=10, verify=False)
         ph = dict(HEADERS)
         ph["Referer"] = "https://portal.kfb.or.kr/compare/receiving_deposit_3.php"
         ph["Content-Type"] = "application/x-www-form-urlencoded"
@@ -75,7 +93,7 @@ def scrape_kfb() -> dict:
             data={"InterestType": "Simple", "BankValue": ALL_BANKS,
                   "InterestMonth": "BANK_ORDER", "OrderByType": "ASC",
                   "JOIN_METHOD": "", "SortType": ""},
-            headers=ph, timeout=15,
+            headers=ph, timeout=15, verify=False,
         )
         resp.encoding = "euc-kr"
         soup = BeautifulSoup(resp.text, "html.parser")
@@ -107,8 +125,9 @@ def scrape_kfb() -> dict:
     # ── 정액적립식 적금 ──
     try:
         session2 = requests.Session()
+        session2.mount("https://portal.kfb.or.kr", LegacySSLAdapter())
         session2.get("https://portal.kfb.or.kr/compare/receiving_neosave.php",
-                     headers=HEADERS, timeout=10)
+                     headers=HEADERS, timeout=10, verify=False)
         ph2 = dict(HEADERS)
         ph2["Referer"] = "https://portal.kfb.or.kr/compare/receiving_neosave.php"
         ph2["Content-Type"] = "application/x-www-form-urlencoded"
@@ -117,7 +136,7 @@ def scrape_kfb() -> dict:
             data={"InterestType1": "1", "InterestType2": "Simple",
                   "BankValue": ALL_BANKS, "InterestMonth": "BANK_ORDER",
                   "OrderByType": "ASC", "JOIN_METHOD": "", "SortType": ""},
-            headers=ph2, timeout=15,
+            headers=ph2, timeout=15, verify=False,
         )
         resp2.encoding = "euc-kr"
         soup2 = BeautifulSoup(resp2.text, "html.parser")
