@@ -211,6 +211,12 @@
     <div class="loading">⏳ 보고서 목록 불러오는 중...</div>
   </div>
 
+  <!-- 생성된 보고서: 코스닥 분석 -->
+  <div class="section-title">📉➡️📈 코스닥 하락추세 돌파 + 강한 거래량 분석</div>
+  <div class="workflow-card" id="kosdaq-reports-container">
+    <div class="loading">⏳ 보고서 목록 불러오는 중...</div>
+  </div>
+
   <!-- 하단 -->
   <div style="text-align:center; margin-top:40px; color:#484f58; font-size:0.78rem;">
     🤖 비서 윈터 · 매주 일요일 07:00 KST 자동 생성 ·
@@ -418,10 +424,30 @@ async function render() {
         </div>`;
       }).join('');
     }
+
+    // 코스닥 분석 보고서
+    const kosdaqReports = files
+      .filter(f => f.name.startsWith('kosdaq_') && f.name.endsWith('.html'))
+      .sort((a,b) => b.name.localeCompare(a.name));
+    if (kosdaqReports.length === 0) {
+      document.getElementById('kosdaq-reports-container').innerHTML =
+        '<div style="color:#8b949e;font-size:.9rem;">아직 생성된 보고서가 없습니다. 매주 월요일 오전 8시에 자동 생성됩니다.</div>';
+    } else {
+      document.getElementById('kosdaq-reports-container').innerHTML = kosdaqReports.slice(0,10).map(f => {
+        const ds = f.name.replace('kosdaq_','').replace('.html','');
+        const y=ds.slice(0,4), m=ds.slice(4,6), d=ds.slice(6,8);
+        return `<div class="report-item">
+          <a href="${f.name}" target="_blank">📉➡️📈 ${y}년 ${m}월 ${d}일 코스닥 하락추세 돌파 분석</a>
+          <span class="report-date">${y}-${m}-${d}</span>
+        </div>`;
+      }).join('');
+    }
   } catch(e) {
     document.getElementById('reports-container').innerHTML =
       `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
     document.getElementById('finance-reports-container').innerHTML =
+      `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
+    document.getElementById('kosdaq-reports-container').innerHTML =
       `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
   }
 }

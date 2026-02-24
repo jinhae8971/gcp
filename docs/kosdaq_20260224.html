@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코스닥 하락추세 돌파 + 강한 거래량 | 2026년 02월 24일</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Noto Sans KR', Arial, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .header {
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 18px; margin-bottom: 24px;
+    }
+    .header h1 { font-size: 1.4rem; color: #58a6ff; }
+    .header p { font-size: 0.85rem; color: #8b949e; margin-top: 6px; }
+    .meta { font-size: 0.78rem; color: #484f58; margin-top: 4px; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .summary-card {
+      background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+      padding: 16px; text-align: center;
+    }
+    .summary-card .value { font-size: 1.8rem; font-weight: 700; }
+    .summary-card .label { font-size: 0.78rem; color: #8b949e; margin-top: 6px; }
+    .val-blue { color: #58a6ff; }
+    .val-green { color: #3fb950; }
+    .val-yellow { color: #e3b341; }
+
+    .condition-box {
+      background: #161b22; border: 1px solid #388bfd44; border-radius: 10px;
+      padding: 16px; margin-bottom: 24px;
+    }
+    .condition-box h3 { font-size: 0.9rem; color: #58a6ff; margin-bottom: 10px; }
+    .condition-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.82rem; color: #c9d1d9; padding: 4px 0;
+    }
+    .condition-item .dot { color: #3fb950; font-weight: bold; flex-shrink: 0; }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      background: #161b22; border-radius: 10px; overflow: hidden;
+      border: 1px solid #30363d;
+    }
+    thead { background: #21262d; }
+    th {
+      padding: 12px 10px; font-size: 0.78rem; color: #8b949e;
+      text-align: center; font-weight: 600; white-space: nowrap;
+      border-bottom: 1px solid #30363d;
+    }
+    td {
+      padding: 11px 10px; font-size: 0.85rem;
+      border-bottom: 1px solid #21262d; text-align: center;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1c2128; }
+
+    .rank { color: #8b949e; font-size: 0.9rem; font-weight: 700; }
+    .name-cell { text-align: left; }
+    .stock-name { font-weight: 600; color: #c9d1d9; }
+    .stock-code { font-size: 0.72rem; color: #8b949e; margin-top: 2px; }
+    .price { font-family: monospace; color: #c9d1d9; }
+    .change { font-weight: 700; font-family: monospace; }
+    .volume { font-size: 0.8rem; color: #8b949e; font-family: monospace; }
+    .vol-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      font-size: 0.78rem; font-weight: 700;
+    }
+    .sector {
+      font-size: 0.78rem; color: #8b949e;
+      max-width: 120px; white-space: normal;
+    }
+    .peaks { font-size: 0.78rem; color: #484f58; }
+
+    .disclaimer {
+      background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+      padding: 14px; margin-top: 24px;
+      font-size: 0.78rem; color: #8b949e; line-height: 1.6;
+    }
+    .footer {
+      text-align: center; margin-top: 24px;
+      color: #484f58; font-size: 0.75rem;
+    }
+    .footer a { color: #58a6ff; text-decoration: none; }
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.1rem; }
+      th, td { padding: 8px 6px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📉➡️📈 코스닥 하락추세 돌파 종목 (강한 거래량 동반)</h1>
+  <p>6개월 이상 하락 추세선을 돌파하고, 평균 거래량의 2배 이상 거래된 종목</p>
+  <div class="meta">기준일: 2026년 02월 24일 | 분석 종목: 600개 | 최종 선별: 14개</div>
+</div>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="value val-blue">600</div>
+    <div class="label">📋 분석 대상</div>
+  </div>
+  <div class="summary-card">
+    <div class="value val-green">14</div>
+    <div class="label">✅ 최종 선별</div>
+  </div>
+  <div class="summary-card">
+    <div class="value val-yellow">+30.0%</div>
+    <div class="label">🏆 최고 등락률</div>
+  </div>
+  <div class="summary-card">
+    <div class="value val-yellow">3.8x</div>
+    <div class="label">📊 최고 거래량배율</div>
+  </div>
+</div>
+
+<div class="condition-box">
+  <h3>🔍 선별 조건</h3>
+  <div class="condition-item">
+    <span class="dot">①</span>
+    <span><b>하락추세 돌파</b>: 최근 4개월(~80거래일) 고점을 연결한 추세선이 하향(-3% 이상 하락)이며, 오늘 종가가 추세선을 0.5% 이상 상향 돌파</span>
+  </div>
+  <div class="condition-item">
+    <span class="dot">②</span>
+    <span><b>강한 거래량 동반</b>: 오늘 거래량이 20일 평균 거래량의 2배 이상 (돌파 신뢰도 확인)</span>
+  </div>
+  <div class="condition-item">
+    <span class="dot">③</span>
+    <span><b>상승 마감</b>: 전일 대비 등락률 양수 + 최소 거래량 10,000주 이상</span>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>순위</th>
+      <th>종목명 / 코드</th>
+      <th>종가</th>
+      <th>등락률</th>
+      <th>거래량</th>
+      <th>거래량 배율</th>
+      <th>섹터 / 업종</th>
+      <th>피크수</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+        <tr>
+          <td class="rank">1</td>
+          <td class="name-cell">
+            <div class="stock-name">예선테크</div>
+            <div class="stock-code">250930</div>
+          </td>
+          <td class="price">577원</td>
+          <td class="change" style="color:#3fb950;">+29.95%</td>
+          <td class="volume">1,766,168</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              3.8배
+            </span>
+          </td>
+          <td class="sector">화학</td>
+          <td class="peaks">8개</td>
+        </tr>
+        <tr>
+          <td class="rank">2</td>
+          <td class="name-cell">
+            <div class="stock-name">넥사다이내믹스</div>
+            <div class="stock-code">351320</div>
+          </td>
+          <td class="price">1,365원</td>
+          <td class="change" style="color:#3fb950;">+19.32%</td>
+          <td class="volume">1,065,191</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              5.1배
+            </span>
+          </td>
+          <td class="sector">기계·장비</td>
+          <td class="peaks">10개</td>
+        </tr>
+        <tr>
+          <td class="rank">3</td>
+          <td class="name-cell">
+            <div class="stock-name">에어레인</div>
+            <div class="stock-code">163280</div>
+          </td>
+          <td class="price">15,260원</td>
+          <td class="change" style="color:#3fb950;">+15.43%</td>
+          <td class="volume">713,674</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              7.5배
+            </span>
+          </td>
+          <td class="sector">기계·장비</td>
+          <td class="peaks">9개</td>
+        </tr>
+        <tr>
+          <td class="rank">4</td>
+          <td class="name-cell">
+            <div class="stock-name">토탈소프트</div>
+            <div class="stock-code">045340</div>
+          </td>
+          <td class="price">7,960원</td>
+          <td class="change" style="color:#3fb950;">+13.71%</td>
+          <td class="volume">489,905</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              5.1배
+            </span>
+          </td>
+          <td class="sector">IT 서비스</td>
+          <td class="peaks">8개</td>
+        </tr>
+        <tr>
+          <td class="rank">5</td>
+          <td class="name-cell">
+            <div class="stock-name">플라즈맵</div>
+            <div class="stock-code">405000</div>
+          </td>
+          <td class="price">6,300원</td>
+          <td class="change" style="color:#3fb950;">+12.50%</td>
+          <td class="volume">50,025</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              3.1배
+            </span>
+          </td>
+          <td class="sector">의료·정밀기기</td>
+          <td class="peaks">12개</td>
+        </tr>
+        <tr>
+          <td class="rank">6</td>
+          <td class="name-cell">
+            <div class="stock-name">하이퍼코퍼레이션</div>
+            <div class="stock-code">065650</div>
+          </td>
+          <td class="price">1,839원</td>
+          <td class="change" style="color:#3fb950;">+10.12%</td>
+          <td class="volume">125,796</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              3.5배
+            </span>
+          </td>
+          <td class="sector">유통</td>
+          <td class="peaks">11개</td>
+        </tr>
+        <tr>
+          <td class="rank">7</td>
+          <td class="name-cell">
+            <div class="stock-name">세화피앤씨</div>
+            <div class="stock-code">252500</div>
+          </td>
+          <td class="price">830원</td>
+          <td class="change" style="color:#3fb950;">+8.36%</td>
+          <td class="volume">1,349,168</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#2a3a1a;color:#e3b341;border:1px solid #e3b341;">
+              9.7배
+            </span>
+          </td>
+          <td class="sector">화학</td>
+          <td class="peaks">6개</td>
+        </tr>
+        <tr>
+          <td class="rank">8</td>
+          <td class="name-cell">
+            <div class="stock-name">매커스</div>
+            <div class="stock-code">093520</div>
+          </td>
+          <td class="price">30,550원</td>
+          <td class="change" style="color:#3fb950;">+6.45%</td>
+          <td class="volume">220,459</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#1a2a3a;color:#58a6ff;border:1px solid #58a6ff;">
+              2.1배
+            </span>
+          </td>
+          <td class="sector">유통</td>
+          <td class="peaks">10개</td>
+        </tr>
+        <tr>
+          <td class="rank">9</td>
+          <td class="name-cell">
+            <div class="stock-name">휴럼</div>
+            <div class="stock-code">353190</div>
+          </td>
+          <td class="price">710원</td>
+          <td class="change" style="color:#3fb950;">+6.29%</td>
+          <td class="volume">293,137</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#1a2a3a;color:#58a6ff;border:1px solid #58a6ff;">
+              2.1배
+            </span>
+          </td>
+          <td class="sector">음식료·담배</td>
+          <td class="peaks">6개</td>
+        </tr>
+        <tr>
+          <td class="rank">10</td>
+          <td class="name-cell">
+            <div class="stock-name">신테카바이오</div>
+            <div class="stock-code">226330</div>
+          </td>
+          <td class="price">3,745원</td>
+          <td class="change" style="color:#3fb950;">+5.20%</td>
+          <td class="volume">908,154</td>
+          <td class="vol-ratio">
+            <span class="vol-badge" style="background:#1a2a3a;color:#58a6ff;border:1px solid #58a6ff;">
+              2.0배
+            </span>
+          </td>
+          <td class="sector">IT 서비스</td>
+          <td class="peaks">11개</td>
+        </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="disclaimer">
+  ⚠️ <b>투자 유의사항</b>: 본 분석은 기술적 지표를 기반으로 자동 생성된 정보이며, 투자 권유가 아닙니다.
+  주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.
+  추세선 돌파가 반드시 상승을 보장하지 않으며, 시장 환경에 따라 다를 수 있습니다.
+</div>
+
+<div class="footer">
+  🤖 비서 윈터 자동 분석 · 2026년 02월 24일 ·
+  <a href="dashboard.html">대시보드</a> ·
+  <a href="index.html">보고서 목록</a>
+</div>
+
+</body>
+</html>
