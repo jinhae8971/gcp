@@ -1,4 +1,4 @@
-name: 📉 Weekly KOSDAQ Trend Breakout Analysis
+name: 📉 Weekly Market Trend Breakout Analysis
 
 on:
   schedule:
@@ -9,9 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  kosdaq-analysis:
+  market-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: 📥 Checkout repository
@@ -25,16 +25,16 @@ jobs:
       - name: 📦 Install dependencies
         run: pip install pykrx scipy numpy
 
-      - name: 📉 Run KOSDAQ analysis
+      - name: 📉 Run KOSPI+KOSDAQ combined analysis
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python3 kosdaq_analysis.py
+        run: python3 market_analysis.py
 
       - name: 💾 Commit & push report to docs/
         run: |
           git config user.name  "Winter Bot"
           git config user.email "winter-bot@github-actions"
           git add docs/
-          git diff --staged --quiet || git commit -m "📉 Add KOSDAQ analysis $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "📉 Add market trend analysis $(date +'%Y-%m-%d')"
           git push

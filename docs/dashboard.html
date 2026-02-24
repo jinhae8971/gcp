@@ -211,8 +211,14 @@
     <div class="loading">⏳ 보고서 목록 불러오는 중...</div>
   </div>
 
-  <!-- 생성된 보고서: 코스닥 분석 -->
-  <div class="section-title">📉➡️📈 코스닥 하락추세 돌파 + 강한 거래량 분석</div>
+  <!-- 생성된 보고서: 코스피+코스닥 통합 분석 -->
+  <div class="section-title">📉➡️📈 코스피·코스닥 통합 하락추세 돌파 분석</div>
+  <div class="workflow-card" id="market-trend-container">
+    <div class="loading">⏳ 보고서 목록 불러오는 중...</div>
+  </div>
+
+  <!-- 생성된 보고서: 코스닥 단독 분석 -->
+  <div class="section-title">📈 코스닥 하락추세 돌파 분석 (구버전)</div>
   <div class="workflow-card" id="kosdaq-reports-container">
     <div class="loading">⏳ 보고서 목록 불러오는 중...</div>
   </div>
@@ -425,19 +431,37 @@ async function render() {
       }).join('');
     }
 
-    // 코스닥 분석 보고서
+    // 코스피+코스닥 통합 분석 보고서
+    const marketTrendReports = files
+      .filter(f => f.name.startsWith('market_trend_') && f.name.endsWith('.html'))
+      .sort((a,b) => b.name.localeCompare(a.name));
+    if (marketTrendReports.length === 0) {
+      document.getElementById('market-trend-container').innerHTML =
+        '<div style="color:#8b949e;font-size:.9rem;">아직 생성된 보고서가 없습니다. 매주 월요일 오전 8시에 자동 생성됩니다.</div>';
+    } else {
+      document.getElementById('market-trend-container').innerHTML = marketTrendReports.slice(0,10).map(f => {
+        const ds = f.name.replace('market_trend_','').replace('.html','');
+        const y=ds.slice(0,4), m=ds.slice(4,6), d=ds.slice(6,8);
+        return `<div class="report-item">
+          <a href="${f.name}" target="_blank">📉➡️📈 ${y}년 ${m}월 ${d}일 코스피·코스닥 통합 하락추세 돌파 분석</a>
+          <span class="report-date">${y}-${m}-${d}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // 코스닥 단독 분석 보고서 (구버전)
     const kosdaqReports = files
       .filter(f => f.name.startsWith('kosdaq_') && f.name.endsWith('.html'))
       .sort((a,b) => b.name.localeCompare(a.name));
     if (kosdaqReports.length === 0) {
       document.getElementById('kosdaq-reports-container').innerHTML =
-        '<div style="color:#8b949e;font-size:.9rem;">아직 생성된 보고서가 없습니다. 매주 월요일 오전 8시에 자동 생성됩니다.</div>';
+        '<div style="color:#8b949e;font-size:.9rem;">생성된 보고서 없음</div>';
     } else {
-      document.getElementById('kosdaq-reports-container').innerHTML = kosdaqReports.slice(0,10).map(f => {
+      document.getElementById('kosdaq-reports-container').innerHTML = kosdaqReports.slice(0,5).map(f => {
         const ds = f.name.replace('kosdaq_','').replace('.html','');
         const y=ds.slice(0,4), m=ds.slice(4,6), d=ds.slice(6,8);
         return `<div class="report-item">
-          <a href="${f.name}" target="_blank">📉➡️📈 ${y}년 ${m}월 ${d}일 코스닥 하락추세 돌파 분석</a>
+          <a href="${f.name}" target="_blank">📈 ${y}년 ${m}월 ${d}일 코스닥 하락추세 돌파 분석</a>
           <span class="report-date">${y}-${m}-${d}</span>
         </div>`;
       }).join('');
@@ -446,6 +470,8 @@ async function render() {
     document.getElementById('reports-container').innerHTML =
       `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
     document.getElementById('finance-reports-container').innerHTML =
+      `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
+    document.getElementById('market-trend-container').innerHTML =
       `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
     document.getElementById('kosdaq-reports-container').innerHTML =
       `<div class="error-msg">⚠️ 보고서 목록 로드 실패: ${e.message}</div>`;
