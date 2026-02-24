@@ -237,7 +237,7 @@ def get_news() -> list:
 # ──────────────────────────────────────────────
 # 4. Claude AI로 HTML 보고서 생성
 # ──────────────────────────────────────────────
-def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: str) -> str:
+def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: str, today_name: str = "평일") -> str:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     # ── 시장 지표 섹션별 분류
@@ -271,12 +271,12 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
         [f"  [{n['source']}] {n['title']}" for n in news[:15]]
     ) if news else "  - 뉴스 수집 불가"
 
-    prompt = f"""당신은 한국 증시 전문 애널리스트입니다. 오늘은 {report_date} (일요일)입니다.
-아래 데이터를 분석하여 내일(월요일) 한국 증시 전망 보고서를 작성하세요.
+    prompt = f"""당신은 한국 증시 전문 애널리스트입니다. 오늘은 {report_date} ({today_name})입니다.
+아래 데이터를 분석하여 오늘 장중·금일 한국 증시 전망 보고서를 작성하세요.
 
 ━━━ 한국 증시 직전 거래일 마감 (가장 중요) ━━━
 {fmt_section(korea)}
-※ 위 코스피·코스닥 종가를 기준으로 월요일 예상 범위를 산출하세요.
+※ 위 코스피·코스닥 종가를 기준으로 금일({today_name}) 예상 범위를 산출하세요.
 
 ━━━ 미국 주요 지수 (주간 마감) ━━━
 {fmt_section(us_indices)}
@@ -315,20 +315,20 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
 1. 헤더 (제목, 날짜, "비서 윈터 작성" 표시)
 
 2. ★ 한국 증시 전망 하이라이트 (헤더 바로 아래, 가장 눈에 띄게 배치)
-   - 월요일 코스피 예상 범위: 반드시 위 "한국 증시 직전 거래일 마감" 데이터의 실제 종가를 기준으로 산출 (고정 예시 숫자 절대 금지, 대형 숫자로 표시)
+   - 금일({today_name}) 코스피 예상 범위: 반드시 위 "한국 증시 직전 거래일 마감" 데이터의 실제 종가를 기준으로 산출 (고정 예시 숫자 절대 금지, 대형 숫자로 표시)
    - 전반적 전망 신호: 🟢강세 / 🟡중립 / 🔴약세 중 하나를 크게 표시
    - 핵심 포인트 3줄 (불릿) — 가장 중요한 시장 동인 요약
    - 주목 업종 TOP 3 (칩/태그 형태로 표시)
    이 섹션은 보고서를 열자마자 한눈에 파악할 수 있도록 시각적으로 강조할 것
 
-3. 미국 증시 주간 마감 요약 (지수별 컬러 테이블)
+3. 미국 증시 최근 마감 요약 (지수별 컬러 테이블)
 4. 글로벌 시장 현황 (환율, 금리, 원자재[금·은·구리·WTI], 아시아)
 5. 반도체 섹터 심층 분석 (필라델피아 반도체 + NVDA/TSMC 동향)
-6. 주요 주말 이슈 Top 5 (뉴스 기반 한국어 요약)
-7. 월요일 코스피/코스닥 시나리오 (A강세/B중립/C약세, 예상 지수 범위 포함)
+6. 주요 이슈 Top 5 (뉴스 기반 한국어 요약)
+7. 금일({today_name}) 코스피/코스닥 시나리오 (A강세/B중립/C약세, 예상 지수 범위 포함)
 8. 업종별 전망 (반도체, 자동차, 금융, 조선·방산, 바이오)
 9. 핵심 투자 포인트 3가지
-10. 이번 주 주요 일정 (날짜·이벤트·영향도 표)
+10. 금주 주요 일정 (날짜·이벤트·영향도 표)
 11. 면책 고지 푸터
 
 출력: <!DOCTYPE html> 로 시작하는 완전한 HTML만 출력 (마크다운 코드블록 없이)"""
@@ -384,7 +384,7 @@ def update_index():
 </head>
 <body>
   <h1>📊 한국 증시 월요일 전망 보고서</h1>
-  <p class="sub">매주 일요일 오전 7시 자동 생성 | 비서 윈터</p>
+  <p class="sub">평일 매일 오전 8시 자동 생성 | 비서 윈터</p>
   <table>
     {rows if rows else '<tr><td>아직 생성된 보고서가 없습니다.</td></tr>'}
   </table>
@@ -452,6 +452,8 @@ def main():
     now         = datetime.now(KST)
     report_date = now.strftime("%Y년 %m월 %d일")
     filename    = f"report_{now.strftime('%Y%m%d')}.html"
+    day_names   = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+    today_name  = day_names[now.weekday()]  # 0=월, 6=일
 
     print("=" * 55)
     print(f"  📊 보고서 생성 시작: {report_date}")
@@ -470,7 +472,7 @@ def main():
     print(f"  → {len(news)}개 뉴스 수집 완료")
 
     print("\n[4/5] Claude AI 분석 및 HTML 생성 중...")
-    html_content = generate_html(market_data, key_stocks, news, report_date)
+    html_content = generate_html(market_data, key_stocks, news, report_date, today_name)
     os.makedirs("docs", exist_ok=True)
     with open(f"docs/{filename}", "w", encoding="utf-8") as f:
         f.write(html_content)

@@ -1,9 +1,14 @@
-name: 📊 Weekly Monday Korea Market Report
+name: 📊 Daily Korea Market Report (Weekdays 08:00 KST)
 
 on:
   schedule:
-    # 매주 일요일 오전 7시 KST = 토요일 22:00 UTC
-    - cron: '0 22 * * 6'
+    # 평일(월~금) 08:00 KST = 전날 UTC 23:00 (KST = UTC+9)
+    # Sun 23:00 UTC → Mon 08:00 KST
+    # Mon 23:00 UTC → Tue 08:00 KST
+    # Tue 23:00 UTC → Wed 08:00 KST
+    # Wed 23:00 UTC → Thu 08:00 KST
+    # Thu 23:00 UTC → Fri 08:00 KST
+    - cron: '0 23 * * 0-4'
   workflow_dispatch:
     # 수동 실행 (테스트용)
 
@@ -40,5 +45,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
-          git diff --staged --quiet || git commit -m "📊 Add weekly report $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "📊 Daily report $(date +'%Y-%m-%d') 08:00 KST"
           git push

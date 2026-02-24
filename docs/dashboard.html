@@ -158,7 +158,7 @@
     <div class="next-run-card" style="margin-bottom:0;">
       <div class="next-run-icon">⏰</div>
       <div class="next-run-info">
-        <div class="title">📊 다음 한국 증시 보고서까지</div>
+        <div class="title">📊 다음 증시 보고서까지 (평일 08:00)</div>
         <div class="countdown" id="countdown">계산 중...</div>
         <div class="datetime" id="next-run-time"></div>
       </div>
@@ -233,7 +233,7 @@
 
   <!-- 하단 -->
   <div style="text-align:center; margin-top:40px; color:#484f58; font-size:0.78rem;">
-    🤖 비서 윈터 · 매주 일요일 07:00 KST 자동 생성 ·
+    🤖 비서 윈터 · 평일 매일 08:00 KST 자동 생성 ·
     <a href="index.html" style="color:#58a6ff; text-decoration:none;">보고서 목록</a>
   </div>
 
@@ -308,13 +308,48 @@ function getNextTrendRun() {
   return new Date(target.getTime() - kstOffset * 60000);
 }
 
+/* ── 다음 평일 증시보고서 실행 시간 계산 (08:00 KST 매 평일) ── */
+function getNextMarketReport() {
+  const kstOffset = 9 * 60;
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const kst = new Date(utc + kstOffset * 60000);
+
+  const day  = kst.getDay();   // 0=일, 6=토
+  const hour = kst.getHours();
+
+  const isWeekday = day >= 1 && day <= 5;
+
+  // 평일이고 아직 08시 이전이면 오늘 08시
+  if (isWeekday && hour < 8) {
+    const next = new Date(kst);
+    next.setHours(8, 0, 0, 0);
+    return new Date(next.getTime() - kstOffset * 60000);
+  }
+
+  // 그 외(평일 08시 이후, 주말) → 다음 평일 08시
+  let daysAhead = 1;
+  if (day === 5 && hour >= 8) daysAhead = 3;  // 금→월
+  else if (day === 6) daysAhead = 2;           // 토→월
+  else if (day === 0) daysAhead = 1;           // 일→월
+
+  let target = new Date(kst);
+  target.setDate(kst.getDate() + daysAhead);
+  // 혹시 주말로 밀리면 추가 보정
+  if (target.getDay() === 0) target.setDate(target.getDate() + 1);
+  if (target.getDay() === 6) target.setDate(target.getDate() + 2);
+  target.setHours(8, 0, 0, 0);
+  return new Date(target.getTime() - kstOffset * 60000);
+}
+
 function updateCountdown() {
-  // 증시: 일요일 07:00 KST
-  const nextMarket = getNextWeekdayKST(0, 7);
+  // 증시: 평일 매일 08:00 KST
+  const nextMarket = getNextMarketReport();
   document.getElementById('countdown').textContent = fmtCountdown(nextMarket - new Date());
   const kstM = new Date(nextMarket.getTime() + 9*3600000);
+  const mDay = DAY_NAMES[kstM.getDay()];
   document.getElementById('next-run-time').textContent =
-    kstM.toISOString().replace('T',' ').slice(0,16) + ` KST (일요일)`;
+    kstM.toISOString().replace('T',' ').slice(0,16) + ` KST (${mDay}요일)`;
 
   // 예적금: 토요일 05:00 KST
   const nextFinance = getNextWeekdayKST(6, 5);
