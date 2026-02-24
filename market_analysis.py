@@ -145,11 +145,12 @@ def _rows_html(items: list, max_rows: int = 10) -> str:
         vhigh = r["vol_ratio"] >= 5
         vc    = "#e3b341" if vhigh else "#58a6ff"
         vbg   = "#2a2a1a" if vhigh else "#1a2233"
+        naver_url = f"https://finance.naver.com/item/main.naver?code={r['ticker']}"
         html += f"""
         <tr>
           <td class="td-rank">{r['rank']}</td>
           <td class="td-name">
-            <div class="sname">{r['name']}</div>
+            <a class="sname" href="{naver_url}" target="_blank" rel="noopener">{r['name']}</a>
             <div class="scode">{r['ticker']}</div>
           </td>
           <td class="td-price">{r['close']:,}원</td>
@@ -290,7 +291,8 @@ def generate_html(kospi: list, kospi_n: int, kosdaq: list, kosdaq_n: int) -> str
 
     .td-rank{{color:#8b949e;font-weight:700;font-size:0.85rem;}}
     .td-name{{text-align:left;}}
-    .sname{{font-weight:600;color:#c9d1d9;}}
+    .sname{{font-weight:600;color:#c9d1d9;text-decoration:none;display:block;}}
+    .sname:hover{{color:#58a6ff;text-decoration:underline;}}
     .scode{{font-size:0.69rem;color:#8b949e;margin-top:2px;}}
     .td-price{{font-family:monospace;white-space:nowrap;}}
     .td-change{{font-weight:700;font-family:monospace;white-space:nowrap;}}
