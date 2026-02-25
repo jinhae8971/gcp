@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📉➡️📈 코스피·코스닥 하락추세 돌파 | 2026년 02월 25일</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Segoe UI','Noto Sans KR',Arial,sans-serif;
+      background:#0d1117;color:#c9d1d9;min-height:100vh;padding:24px 16px;
+    }
+
+    /* ── 헤더 ── */
+    .header{border-bottom:1px solid #30363d;padding-bottom:18px;margin-bottom:22px;}
+    .header h1{font-size:1.4rem;color:#58a6ff;}
+    .header p{font-size:0.84rem;color:#8b949e;margin-top:6px;line-height:1.5;}
+    .header-meta{font-size:0.76rem;color:#484f58;margin-top:5px;}
+
+    /* ── 요약 배너 ── */
+    .summary-row{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+      gap:10px;margin-bottom:22px;
+    }
+    .scard{
+      background:#161b22;border:1px solid #30363d;border-radius:9px;
+      padding:14px;text-align:center;
+    }
+    .scard .val{font-size:1.7rem;font-weight:700;}
+    .scard .lbl{font-size:0.74rem;color:#8b949e;margin-top:5px;}
+    .c-blue{color:#58a6ff;} .c-yellow{color:#e3b341;}
+    .c-green{color:#3fb950;} .c-red{color:#f85149;}
+
+    /* ── 조건 박스 ── */
+    .cond-box{
+      background:#161b22;border:1px solid #388bfd33;border-radius:9px;
+      padding:14px;margin-bottom:22px;
+    }
+    .cond-box h3{font-size:0.88rem;color:#58a6ff;margin-bottom:8px;}
+    .cond-item{display:flex;gap:8px;font-size:0.8rem;color:#c9d1d9;padding:3px 0;}
+    .cond-item .dot{color:#3fb950;flex-shrink:0;font-weight:700;}
+
+    /* ── 시장 카드 ── */
+    .markets-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+      gap:16px;
+    }
+    .market-card{
+      background:#161b22;border:1px solid #30363d;border-radius:10px;
+      overflow:hidden;
+    }
+    .mcard-header{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      flex-wrap:wrap;gap:12px;padding:16px 18px;
+      border-bottom:1px solid #21262d;
+    }
+    .mcard-title{font-size:1.05rem;font-weight:700;color:#c9d1d9;}
+    .mcard-sub{font-size:0.78rem;color:#8b949e;margin-top:4px;}
+    .mcard-stats{display:flex;gap:16px;flex-wrap:wrap;}
+    .mstat{text-align:center;}
+    .mstat-val{font-size:1.2rem;font-weight:700;}
+    .mstat-lbl{font-size:0.7rem;color:#8b949e;margin-top:2px;}
+
+    /* ── 테이블 ── */
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    thead{background:#0d1117;}
+    th{
+      padding:9px 8px;font-size:0.74rem;color:#8b949e;
+      text-align:center;font-weight:600;white-space:nowrap;
+      border-bottom:1px solid #21262d;
+    }
+    td{
+      padding:9px 8px;font-size:0.82rem;
+      border-bottom:1px solid #161b22;text-align:center;vertical-align:middle;
+    }
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#1c2128;}
+
+    .td-rank{color:#8b949e;font-weight:700;font-size:0.85rem;}
+    .td-name{text-align:left;}
+    .sname{font-weight:600;color:#c9d1d9;text-decoration:none;display:block;}
+    .sname:hover{color:#58a6ff;text-decoration:underline;}
+    .scode{font-size:0.69rem;color:#8b949e;margin-top:2px;}
+    .td-price{font-family:monospace;white-space:nowrap;}
+    .td-change{font-weight:700;font-family:monospace;white-space:nowrap;}
+    .td-vol{font-size:0.76rem;color:#8b949e;font-family:monospace;white-space:nowrap;}
+    .vbadge{
+      display:inline-block;padding:2px 7px;border-radius:10px;
+      font-size:0.75rem;font-weight:700;white-space:nowrap;
+    }
+    .td-sector{font-size:0.74rem;color:#8b949e;}
+
+    /* ── 공통 탭 UI ── */
+    .tab-bar{
+      display:flex;gap:4px;padding:10px 14px 0;
+      border-bottom:1px solid #21262d;
+    }
+    .tab-btn{
+      padding:6px 14px;font-size:0.8rem;border:none;cursor:pointer;
+      border-radius:6px 6px 0 0;background:transparent;color:#8b949e;
+      font-weight:600;transition:all .15s;
+    }
+    .tab-btn.active{background:#21262d;color:#c9d1d9;}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;}
+
+    /* ── 면책 & 푸터 ── */
+    .disclaimer{
+      background:#161b22;border:1px solid #30363d;border-radius:8px;
+      padding:12px;margin-top:22px;font-size:0.75rem;color:#8b949e;line-height:1.6;
+    }
+    .footer{text-align:center;margin-top:18px;color:#484f58;font-size:0.73rem;}
+    .footer a{color:#58a6ff;text-decoration:none;}
+
+    @media(max-width:600px){
+      .header h1{font-size:1.1rem;}
+      .mcard-header{flex-direction:column;}
+      .mstat-val{font-size:1rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <h1>📉➡️📈 코스피·코스닥 하락추세 돌파 종목</h1>
+  <p>6개월 이상 지속된 하락 추세선을 <b>강한 거래량</b>과 함께 돌파한 종목 분석</p>
+  <div class="header-meta">기준일: 2026년 02월 25일 | 코스피 400개 + 코스닥 600개 분석</div>
+</div>
+
+<!-- 요약 -->
+<div class="summary-row">
+  <div class="scard"><div class="val c-yellow">4</div><div class="lbl">🏛️ 코스피 선별</div></div>
+  <div class="scard"><div class="val c-blue">6</div><div class="lbl">📈 코스닥 선별</div></div>
+  <div class="scard"><div class="val c-green">10</div><div class="lbl">✅ 전체 합산</div></div>
+  <div class="scard"><div class="val c-yellow">2.5×</div><div class="lbl">🏛️ 코스피 최고배율</div></div>
+  <div class="scard"><div class="val c-blue">10.5×</div><div class="lbl">📈 코스닥 최고배율</div></div>
+</div>
+
+<!-- 조건 -->
+<div class="cond-box">
+  <h3>🔍 선별 조건 (코스피·코스닥 공통)</h3>
+  <div class="cond-item"><span class="dot">①</span><span><b>하락추세 돌파</b>: 최근 4개월(~80거래일) 고점 추세선이 하향(-3% 이상) 이며, 오늘 종가가 추세선 대비 0.5% 이상 상향 돌파</span></div>
+  <div class="cond-item"><span class="dot">②</span><span><b>강한 거래량 동반</b>: 오늘 거래량 ≥ 20일 평균 거래량 × 2배 (돌파 신뢰도 확인)</span></div>
+  <div class="cond-item"><span class="dot">③</span><span><b>당일 상승 마감</b>: 등락률 > 0 &amp; 최소 거래량 5,000주 이상</span></div>
+</div>
+
+<!-- 시장 카드 -->
+<div class="markets-grid">
+  
+<div class="market-card" style="border-top:3px solid #e3b341;">
+  <div class="mcard-header">
+    <div>
+      <div class="mcard-title">🏛️ 코스피</div>
+      <div class="mcard-sub">분석 400개 → 선별 <b style="color:#e3b341;">4개</b></div>
+    </div>
+    <div class="mcard-stats">
+      <div class="mstat"><div class="mstat-val" style="color:#e3b341;">4</div><div class="mstat-lbl">선별 종목</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:#3fb950;">+12.9%</div><div class="mstat-lbl">최고 등락률</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:#e3b341;">2.5×</div><div class="mstat-lbl">최고 거래량배율</div></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>종목명</th><th>종가</th><th>등락률</th>
+          <th>거래량</th><th>배율</th><th>섹터/업종</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-rank">1</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=108320" target="_blank" rel="noopener">LX세미콘</a>
+            <div class="scode">108320</div>
+          </td>
+          <td class="td-price">63,000원</td>
+          <td class="td-change" style="color:#3fb950;">+12.90%</td>
+          <td class="td-vol">257,799</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              2.5×
+            </span>
+          </td>
+          <td class="td-sector">전기·전자</td>
+        </tr>
+        <tr>
+          <td class="td-rank">2</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=271940" target="_blank" rel="noopener">일진하이솔루스</a>
+            <div class="scode">271940</div>
+          </td>
+          <td class="td-price">16,270원</td>
+          <td class="td-change" style="color:#3fb950;">+11.36%</td>
+          <td class="td-vol">299,001</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              4.8×
+            </span>
+          </td>
+          <td class="td-sector">운송장비·부품</td>
+        </tr>
+        <tr>
+          <td class="td-rank">3</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=016450" target="_blank" rel="noopener">한세예스24홀딩스</a>
+            <div class="scode">016450</div>
+          </td>
+          <td class="td-price">4,740원</td>
+          <td class="td-change" style="color:#3fb950;">+7.97%</td>
+          <td class="td-vol">271,942</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#2a2a1a;color:#e3b341;border:1px solid #e3b34140;">
+              8.6×
+            </span>
+          </td>
+          <td class="td-sector">섬유·의류</td>
+        </tr>
+        <tr>
+          <td class="td-rank">4</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=001020" target="_blank" rel="noopener">페이퍼코리아</a>
+            <div class="scode">001020</div>
+          </td>
+          <td class="td-price">720원</td>
+          <td class="td-change" style="color:#3fb950;">+6.82%</td>
+          <td class="td-vol">622,884</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              4.0×
+            </span>
+          </td>
+          <td class="td-sector">종이·목재</td>
+        </tr></tbody>
+    </table>
+  </div>
+</div>
+  
+<div class="market-card" style="border-top:3px solid #58a6ff;">
+  <div class="mcard-header">
+    <div>
+      <div class="mcard-title">📈 코스닥</div>
+      <div class="mcard-sub">분석 600개 → 선별 <b style="color:#58a6ff;">6개</b></div>
+    </div>
+    <div class="mcard-stats">
+      <div class="mstat"><div class="mstat-val" style="color:#58a6ff;">6</div><div class="mstat-lbl">선별 종목</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:#3fb950;">+30.0%</div><div class="mstat-lbl">최고 등락률</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:#e3b341;">10.5×</div><div class="mstat-lbl">최고 거래량배율</div></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>종목명</th><th>종가</th><th>등락률</th>
+          <th>거래량</th><th>배율</th><th>섹터/업종</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-rank">1</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=053950" target="_blank" rel="noopener">경남제약</a>
+            <div class="scode">053950</div>
+          </td>
+          <td class="td-price">819원</td>
+          <td class="td-change" style="color:#3fb950;">+30.00%</td>
+          <td class="td-vol">10,672,613</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#2a2a1a;color:#e3b341;border:1px solid #e3b34140;">
+              10.5×
+            </span>
+          </td>
+          <td class="td-sector">제약</td>
+        </tr>
+        <tr>
+          <td class="td-rank">2</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=113810" target="_blank" rel="noopener">디젠스</a>
+            <div class="scode">113810</div>
+          </td>
+          <td class="td-price">867원</td>
+          <td class="td-change" style="color:#3fb950;">+15.45%</td>
+          <td class="td-vol">3,367,434</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#2a2a1a;color:#e3b341;border:1px solid #e3b34140;">
+              13.6×
+            </span>
+          </td>
+          <td class="td-sector">운송장비·부품</td>
+        </tr>
+        <tr>
+          <td class="td-rank">3</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=405000" target="_blank" rel="noopener">플라즈맵</a>
+            <div class="scode">405000</div>
+          </td>
+          <td class="td-price">8,000원</td>
+          <td class="td-change" style="color:#3fb950;">+9.89%</td>
+          <td class="td-vol">204,236</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#2a2a1a;color:#e3b341;border:1px solid #e3b34140;">
+              9.1×
+            </span>
+          </td>
+          <td class="td-sector">의료·정밀기기</td>
+        </tr>
+        <tr>
+          <td class="td-rank">4</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=086820" target="_blank" rel="noopener">바이오솔루션</a>
+            <div class="scode">086820</div>
+          </td>
+          <td class="td-price">9,400원</td>
+          <td class="td-change" style="color:#3fb950;">+6.70%</td>
+          <td class="td-vol">359,902</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              2.1×
+            </span>
+          </td>
+          <td class="td-sector">제약</td>
+        </tr>
+        <tr>
+          <td class="td-rank">5</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=291810" target="_blank" rel="noopener">핀텔</a>
+            <div class="scode">291810</div>
+          </td>
+          <td class="td-price">2,540원</td>
+          <td class="td-change" style="color:#3fb950;">+5.61%</td>
+          <td class="td-vol">333,923</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              2.9×
+            </span>
+          </td>
+          <td class="td-sector">IT 서비스</td>
+        </tr>
+        <tr>
+          <td class="td-rank">6</td>
+          <td class="td-name">
+            <a class="sname" href="https://finance.naver.com/item/main.naver?code=017510" target="_blank" rel="noopener">세명전기</a>
+            <div class="scode">017510</div>
+          </td>
+          <td class="td-price">11,800원</td>
+          <td class="td-change" style="color:#3fb950;">+2.16%</td>
+          <td class="td-vol">2,629,580</td>
+          <td class="td-ratio">
+            <span class="vbadge" style="background:#1a2233;color:#58a6ff;border:1px solid #58a6ff40;">
+              2.4×
+            </span>
+          </td>
+          <td class="td-sector">금속</td>
+        </tr></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ <b>투자 유의사항</b>: 본 분석은 기술적 지표 기반 자동 생성 정보이며, 투자 권유가 아닙니다.
+  주식 투자에는 원금 손실 위험이 있으며, 모든 투자 결정은 본인 판단과 책임 하에 이루어져야 합니다.
+  추세 돌파는 상승을 보장하지 않으며 시장 상황에 따라 다를 수 있습니다.
+</div>
+
+<div class="footer">
+  🤖 비서 윈터 자동 분석 · 2026년 02월 25일 ·
+  <a href="dashboard.html">대시보드</a> ·
+  <a href="index.html">보고서 목록</a>
+</div>
+
+</body>
+</html>
