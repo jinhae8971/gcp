@@ -13,12 +13,17 @@ from pykrx import stock
 from scipy.signal import find_peaks
 from scipy.stats import linregress
 
-TODAY     = datetime.date.today().strftime("%Y%m%d")
-TODAY_KR  = datetime.date.today().strftime("%Y년 %m월 %d일")
-START_6M  = (datetime.date.today() - datetime.timedelta(days=183)).strftime("%Y%m%d")
-START_30D = (datetime.date.today() - datetime.timedelta(days=40)).strftime("%Y%m%d")
-DOCS_DIR  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
-HTML_OUT  = os.path.join(DOCS_DIR, f"market_trend_{TODAY}.html")
+KST        = datetime.timezone(datetime.timedelta(hours=9))
+_NOW_KST   = datetime.datetime.now(KST)
+TODAY      = _NOW_KST.strftime("%Y%m%d")
+TODAY_KR   = _NOW_KST.strftime("%Y년 %m월 %d일")
+GEN_TIME   = _NOW_KST.strftime("%H:%M KST")  # 데이터 생성 시각 (장중/장마감 확인용)
+_HOUR_KST  = _NOW_KST.hour
+DATA_LABEL = "📌 장마감 확정가" if _HOUR_KST >= 16 else f"⚡ 장중 실시간 ({GEN_TIME})"
+START_6M   = (_NOW_KST.date() - datetime.timedelta(days=183)).strftime("%Y%m%d")
+START_30D  = (_NOW_KST.date() - datetime.timedelta(days=40)).strftime("%Y%m%d")
+DOCS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
+HTML_OUT   = os.path.join(DOCS_DIR, f"market_trend_{TODAY}.html")
 
 
 # ──────────────────────────────────────────────
@@ -338,7 +343,7 @@ def generate_html(kospi: list, kospi_n: int, kosdaq: list, kosdaq_n: int) -> str
 <div class="header">
   <h1>📉➡️📈 코스피·코스닥 하락추세 돌파 종목</h1>
   <p>6개월 이상 지속된 하락 추세선을 <b>강한 거래량</b>과 함께 돌파한 종목 분석</p>
-  <div class="header-meta">기준일: {TODAY_KR} | 코스피 {kospi_n:,}개 + 코스닥 {kosdaq_n:,}개 분석</div>
+  <div class="header-meta">기준일: {TODAY_KR} | 코스피 {kospi_n:,}개 + 코스닥 {kosdaq_n:,}개 분석 | <span style="color:#{'3fb950' if _HOUR_KST >= 16 else 'e3b341'};">{DATA_LABEL}</span></div>
 </div>
 
 <!-- 요약 -->
