@@ -425,6 +425,12 @@ def main():
         f.write(html)
     print(f"  → 완료 ({len(html):,} bytes)")
 
+    # 항상 최신 파일로 덮어쓰기 (고정 URL: market_trend_latest.html)
+    LATEST_OUT = os.path.join(DOCS_DIR, "market_trend_latest.html")
+    with open(LATEST_OUT, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"  → 최신 고정 URL 업데이트: market_trend_latest.html")
+
 
 if __name__ == "__main__":
     main()
