@@ -235,7 +235,54 @@ def get_news() -> list:
 
 
 # ──────────────────────────────────────────────
-# 4. Claude AI로 HTML 보고서 생성
+# 4. 원자재 카드 HTML 직접 생성 (Claude 누락 방지)
+# ──────────────────────────────────────────────
+def build_commodity_html(market_data: dict) -> str:
+    """원자재 / 암호화폐 카드 HTML 직접 생성 — Claude 누락 방지용"""
+    items = [
+        ("금 (Gold)",     "🥇"),
+        ("은 (Silver)",   "🥈"),
+        ("구리 (Copper)", "🔶"),
+        ("WTI 원유",      "🛢️"),
+        ("BTC/USD",       "₿"),
+    ]
+    cards = []
+    for name, icon in items:
+        d = market_data.get(name, {})
+        pct = d.get("pct", None)
+        if pct is not None:
+            color    = "#3fb950" if pct >= 0 else "#f85149"
+            arrow    = "▲" if pct >= 0 else "▼"
+            price_str = f"{d['price']:,}"
+            pct_html  = f'<div style="color:{color};font-size:.9rem;margin-top:4px;">{arrow}{abs(pct):.2f}%</div>'
+            date_html  = f'<div style="color:#6e7681;font-size:.7rem;margin-top:2px;">{d.get("date","")}</div>'
+        else:
+            price_str = "N/A"
+            pct_html  = ""
+            date_html  = ""
+        cards.append(
+            f'<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;'
+            f'padding:14px 10px;text-align:center;">'
+            f'<div style="font-size:1.4rem;">{icon}</div>'
+            f'<div style="font-size:.78rem;color:#8b949e;margin:4px 0;">{name}</div>'
+            f'<div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">{price_str}</div>'
+            f'{pct_html}{date_html}</div>'
+        )
+    cards_html = "\n".join(cards)
+    return (
+        '\n<section style="max-width:960px;margin:24px auto;padding:0 16px 32px;">\n'
+        '  <h2 style="color:#58a6ff;font-size:1.15rem;border-bottom:1px solid #30363d;'
+        'padding-bottom:8px;margin-bottom:16px;">🛢️ 원자재 / 암호화폐</h2>\n'
+        '  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;'
+        'max-width:100%;">\n'
+        f'{cards_html}\n'
+        '  </div>\n'
+        '</section>\n'
+    )
+
+
+# ──────────────────────────────────────────────
+# 5. Claude AI로 HTML 보고서 생성
 # ──────────────────────────────────────────────
 def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: str, today_name: str = "평일") -> str:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
@@ -322,7 +369,7 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
    이 섹션은 보고서를 열자마자 한눈에 파악할 수 있도록 시각적으로 강조할 것
 
 3. 미국 증시 최근 마감 요약 (지수별 컬러 테이블)
-4. 글로벌 시장 현황 (환율, 금리, 원자재[금·은·구리·WTI], 아시아)
+4. 글로벌 시장 현황 (환율, 금리, 아시아) ※ 원자재·암호화폐 카드는 자동 삽입되므로 이 섹션에서는 제외
 5. 반도체 섹터 심층 분석 (필라델피아 반도체 + NVDA/TSMC 동향)
 6. 주요 이슈 Top 5 (뉴스 기반 한국어 요약)
 7. 금일({today_name}) 코스피/코스닥 시나리오 (A강세/B중립/C약세, 예상 지수 범위 포함)
@@ -345,7 +392,22 @@ def generate_html(market_data: dict, key_stocks: dict, news: list, report_date: 
         html = html.split("\n", 1)[1]
         if html.endswith("```"):
             html = html.rsplit("```", 1)[0]
-    return html.strip()
+    html = html.strip()
+
+    # ── 원자재 섹션 자동 주입 (Claude 누락 방지)
+    commodity_keywords = ["WTI", "구리 (Copper)", "BTC/USD", "Gold"]
+    has_commodity = any(kw in html for kw in commodity_keywords)
+    if not has_commodity:
+        print("  [WARN] 원자재 섹션 누락 감지 → Python 직접 주입")
+        commodity_block = build_commodity_html(market_data)
+        if "</body>" in html:
+            html = html.replace("</body>", commodity_block + "</body>", 1)
+        else:
+            html += commodity_block
+    else:
+        print("  [INFO] 원자재 섹션 정상 포함됨")
+
+    return html
 
 
 # ──────────────────────────────────────────────
