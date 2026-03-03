@@ -55,6 +55,20 @@ def check_breakout(ticker: str, today_close: float):
         if df is None or len(df) < 30:
             return False, 0, 0, 0, 0, 0
 
+        # 컬럼명 호환 처리
+        if "고가" not in df.columns:
+            rename = {}
+            for c in df.columns:
+                cl = c.lower().strip()
+                if cl in ("high", "고가"):
+                    rename[c] = "고가"
+                elif cl in ("volume", "vol", "거래량"):
+                    rename[c] = "거래량"
+            if rename:
+                df = df.rename(columns=rename)
+        if "고가" not in df.columns or "거래량" not in df.columns:
+            return False, 0, 0, 0, 0, 0
+
         highs = df["고가"].values
         vols  = df["거래량"].values
         n     = len(highs)
@@ -91,8 +105,33 @@ def run_market(market: str, label: str, top_n: int = 600):
     print(f"  [{label}] 분석 시작")
     print(f"{'─'*50}")
 
-    mkt_df    = stock.get_market_ohlcv_by_ticker(TODAY, market=market)
-    up_df     = mkt_df[(mkt_df["등락률"] > 0) & (mkt_df["거래량"] > 5000)]
+    mkt_df = stock.get_market_ohlcv_by_ticker(TODAY, market=market)
+
+    # pykrx 컬럼 구조 변경 대응: 한글/영문 컬럼 모두 처리
+    col_map = {}
+    for c in mkt_df.columns:
+        cl = c.lower().strip()
+        if cl in ("등락률", "change", "chg"):
+            col_map["등락률"] = c
+        elif cl in ("거래량", "volume", "vol"):
+            col_map["거래량"] = c
+        elif cl in ("종가", "close"):
+            col_map["종가"] = c
+        elif cl in ("고가", "high"):
+            col_map["고가"] = c
+        elif cl in ("시가", "open"):
+            col_map["시가"] = c
+        elif cl in ("저가", "low"):
+            col_map["저가"] = c
+
+    # 기존 컬럼명이 없으면 매핑 적용
+    if "등락률" not in mkt_df.columns and col_map:
+        mkt_df = mkt_df.rename(columns={v: k for k, v in col_map.items()})
+
+    if "등락률" not in mkt_df.columns or "거래량" not in mkt_df.columns:
+        raise KeyError(f"필수 컬럼 누락: {list(mkt_df.columns)}")
+
+    up_df = mkt_df[(mkt_df["등락률"] > 0) & (mkt_df["거래량"] > 5000)]
     sector_map = get_sector_map(TODAY, market)
     print(f"  전체 {len(mkt_df)}종목 → 상승 필터 {len(up_df)}종목 → 상위 {top_n}개 분석")
 
@@ -389,14 +428,46 @@ def generate_html(kospi: list, kospi_n: int, kosdaq: list, kosdaq_n: int) -> str
 # 메인
 # ──────────────────────────────────────────────
 
+def send_error_telegram(error_msg: str):
+    """pykrx 장애 시 텔레그램 알림"""
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id   = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if not bot_token or not chat_id:
+        return
+    text = (
+        f"⚠️ 코스피·코스닥 추세 돌파 분석 실패\n\n"
+        f"📅 {TODAY_KR} {GEN_TIME}\n"
+        f"원인: {error_msg}\n\n"
+        f"KRX 데이터 API 장애로 분석이 불가합니다.\n"
+        f"API 정상화 시 자동 재개됩니다."
+    )
+    try:
+        import requests as _req
+        _req.post(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            json={"chat_id": chat_id, "text": text},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
 def main():
     print(f"\n{'='*60}")
     print(f"  📉➡️📈 코스피·코스닥 하락추세 돌파 + 강한 거래량 분석")
     print(f"  기준일: {TODAY}")
     print(f"{'='*60}")
 
-    kospi_results  = run_market("KOSPI",  "코스피", top_n=400)
-    kosdaq_results = run_market("KOSDAQ", "코스닥", top_n=600)
+    try:
+        kospi_results  = run_market("KOSPI",  "코스피", top_n=400)
+        kosdaq_results = run_market("KOSDAQ", "코스닥", top_n=600)
+    except (KeyError, ValueError, TypeError) as e:
+        error_msg = f"pykrx 데이터 수집 실패: {e}"
+        print(f"\n  ❌ {error_msg}")
+        print("  → KRX API 장애 또는 컬럼 구조 변경 감지")
+        send_error_telegram(error_msg)
+        print("  → 텔레그램 장애 알림 전송 완료")
+        return
 
     kospi_n  = 400
     kosdaq_n = 600
