@@ -7,7 +7,9 @@
 """
 
 import os
+import time
 import datetime
+import requests
 import numpy as np
 from pykrx import stock
 from scipy.signal import find_peaks
@@ -31,17 +33,18 @@ HTML_OUT   = os.path.join(DOCS_DIR, f"market_trend_{TODAY}.html")
 # ──────────────────────────────────────────────
 
 def get_sector_map(today: str, market: str) -> dict:
-    """업종 맵 {ticker: sector_name}"""
+    """업종 맵 {ticker: sector_name} — KRX 장애 시 빈 dict 반환"""
     try:
         df = stock.get_market_sector_classifications(today, market=market)
+        if df.empty:
+            return {}
         if "업종명" in df.columns:
             return {str(idx): str(row["업종명"]) for idx, row in df.iterrows()}
         str_cols = [c for c in df.columns if df[c].dtype == object and c != "종목명"]
         if str_cols:
             return {str(idx): str(row[str_cols[0]]) for idx, row in df.iterrows()}
         return {}
-    except Exception as e:
-        print(f"  ⚠️ 섹터 조회 실패 ({market}): {e}")
+    except Exception:
         return {}
 
 
@@ -100,73 +103,122 @@ def check_breakout(ticker: str, today_close: float):
         return False, 0, 0, 0, 0, 0
 
 
+def _naver_rising_stocks(market: str) -> list:
+    """Naver Finance API로 상승 종목 수집 (KRX API 장애 대비)"""
+    mkt = "KOSPI" if market == "KOSPI" else "KOSDAQ"
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 Chrome/124.0.0.0"
+        ),
+    }
+    all_stocks = []
+    for page in range(1, 20):
+        url = f"https://m.stock.naver.com/api/stocks/up/{mkt}?page={page}&pageSize=100"
+        try:
+            resp = requests.get(url, headers=headers, timeout=10)
+            if resp.status_code != 200 or not resp.text.strip():
+                break
+            data = resp.json()
+            stocks = data.get("stocks", [])
+            if not stocks:
+                break
+            all_stocks.extend(stocks)
+            time.sleep(0.2)
+        except Exception:
+            break
+    return all_stocks
+
+
+def _parse_naver_int(s):
+    """'27,450' → 27450"""
+    if isinstance(s, (int, float)):
+        return int(s)
+    return int(str(s).replace(",", "").strip()) if s else 0
+
+
 def run_market(market: str, label: str, top_n: int = 600):
     print(f"\n{'─'*50}")
     print(f"  [{label}] 분석 시작")
     print(f"{'─'*50}")
 
-    mkt_df = stock.get_market_ohlcv_by_ticker(TODAY, market=market)
+    # ── 1단계: KRX API 시도 → 실패 시 Naver API로 자동 전환
+    use_naver = False
+    try:
+        mkt_df = stock.get_market_ohlcv_by_ticker(TODAY, market=market)
+        if mkt_df.empty or "등락률" not in mkt_df.columns:
+            raise KeyError("빈 데이터 또는 컬럼 누락")
+        up_df = mkt_df[(mkt_df["등락률"] > 0) & (mkt_df["거래량"] > 5000)]
+        total_count = len(mkt_df)
+        print(f"  [KRX] 전체 {total_count}종목 → 상승 필터 {len(up_df)}종목")
+    except Exception as e:
+        print(f"  [KRX] 실패: {e}")
+        print(f"  [Naver] 대체 데이터 수집 중...")
+        use_naver = True
+        naver_stocks = _naver_rising_stocks(market)
+        total_count = len(naver_stocks)
+        print(f"  [Naver] 상승 종목 {total_count}개 수집 완료")
 
-    # pykrx 컬럼 구조 변경 대응: 한글/영문 컬럼 모두 처리
-    col_map = {}
-    for c in mkt_df.columns:
-        cl = c.lower().strip()
-        if cl in ("등락률", "change", "chg"):
-            col_map["등락률"] = c
-        elif cl in ("거래량", "volume", "vol"):
-            col_map["거래량"] = c
-        elif cl in ("종가", "close"):
-            col_map["종가"] = c
-        elif cl in ("고가", "high"):
-            col_map["고가"] = c
-        elif cl in ("시가", "open"):
-            col_map["시가"] = c
-        elif cl in ("저가", "low"):
-            col_map["저가"] = c
-
-    # 기존 컬럼명이 없으면 매핑 적용
-    if "등락률" not in mkt_df.columns and col_map:
-        mkt_df = mkt_df.rename(columns={v: k for k, v in col_map.items()})
-
-    if "등락률" not in mkt_df.columns or "거래량" not in mkt_df.columns:
-        raise KeyError(f"필수 컬럼 누락: {list(mkt_df.columns)}")
-
-    up_df = mkt_df[(mkt_df["등락률"] > 0) & (mkt_df["거래량"] > 5000)]
     sector_map = get_sector_map(TODAY, market)
-    print(f"  전체 {len(mkt_df)}종목 → 상승 필터 {len(up_df)}종목 → 상위 {top_n}개 분석")
 
-    top_df  = up_df.nlargest(top_n, "등락률")
+    # ── 2단계: 상위 종목 추출
+    if use_naver:
+        # Naver 데이터를 정렬 (등락률 기준 내림차순, 이미 정렬됨)
+        candidates = []
+        for s in naver_stocks[:top_n]:
+            vol = _parse_naver_int(s.get("accumulatedTradingVolume", "0"))
+            pct = float(s.get("fluctuationsRatio", "0"))
+            if vol < 5000 or pct <= 0:
+                continue
+            candidates.append({
+                "ticker":    s["itemCode"],
+                "name":      s["stockName"],
+                "close":     _parse_naver_int(s.get("closePrice", "0")),
+                "change_pct": pct,
+                "volume_raw": vol,
+            })
+        print(f"  필터 후 {len(candidates)}종목 → 상위 {top_n}개 분석")
+    else:
+        top_df = up_df.nlargest(top_n, "등락률")
+        candidates = []
+        for ticker, row in top_df.iterrows():
+            candidates.append({
+                "ticker":    ticker,
+                "name":      "",
+                "close":     int(row["종가"]),
+                "change_pct": row["등락률"],
+                "volume_raw": int(row["거래량"]),
+            })
+
+    # ── 3단계: 추세 돌파 분석 (pykrx Naver 백엔드 - 정상 작동)
     results = []
-
-    for i, (ticker, row) in enumerate(top_df.iterrows(), 1):
+    for i, c in enumerate(candidates, 1):
         if i % 100 == 0:
-            print(f"  ... {i}/{len(top_df)} 처리 중")
+            print(f"  ... {i}/{len(candidates)} 처리 중")
 
-        close      = row["종가"]
-        change_pct = row["등락률"]
-
-        ok, trendline, slope, peak_cnt, tv, avg_vol = check_breakout(ticker, close)
+        ok, trendline, slope, peak_cnt, tv, avg_vol = check_breakout(
+            c["ticker"], c["close"]
+        )
         if not ok:
             continue
 
-        # 강한 거래량 조건
         vol_ratio = tv / avg_vol if avg_vol > 0 else 1.0
         if vol_ratio < 2.0:
             continue
 
-        name   = stock.get_market_ticker_name(ticker)
-        sector = sector_map.get(ticker, "기타")
+        name = c["name"] or stock.get_market_ticker_name(c["ticker"])
+        sector = sector_map.get(c["ticker"], "기타")
 
         results.append({
-            "ticker":    ticker,
-            "name":      name,
-            "close":     int(close),
-            "change_pct": change_pct,
-            "volume":    tv,
-            "avg_vol":   avg_vol,
-            "vol_ratio": vol_ratio,
-            "peak_cnt":  peak_cnt,
-            "sector":    sector,
+            "ticker":     c["ticker"],
+            "name":       name,
+            "close":      c["close"],
+            "change_pct": c["change_pct"],
+            "volume":     tv,
+            "avg_vol":    avg_vol,
+            "vol_ratio":  vol_ratio,
+            "peak_cnt":   peak_cnt,
+            "sector":     sector,
         })
 
     results.sort(key=lambda x: x["change_pct"], reverse=True)
