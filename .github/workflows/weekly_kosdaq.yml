@@ -32,7 +32,7 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Install dependencies
-        run: pip install pykrx scipy numpy
+        run: pip install pykrx scipy numpy requests
 
       - name: 📉 Run KOSPI+KOSDAQ combined analysis
         env:
