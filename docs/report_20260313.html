@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 증시 전망 보고서 | 2026-03-13</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+
+  /* ─── 레이아웃 ─── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+  /* ─── 헤더 ─── */
+  .site-header {
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 2px solid #30363d;
+    padding: 20px 0 16px;
+    text-align: center;
+  }
+  .site-header .badge {
+    display: inline-block;
+    background: #1f6feb;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .site-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #e6edf3;
+    letter-spacing: -0.5px;
+  }
+  .site-header .meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #8b949e;
+  }
+  .site-header .meta span { margin: 0 8px; }
+
+  /* ─── 카드 공통 ─── */
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon { font-size: 18px; }
+
+  /* ─── 하이라이트 섹션 ─── */
+  .highlight-card {
+    background: linear-gradient(135deg, #0e1923 0%, #0d1f2d 50%, #111823 100%);
+    border: 1.5px solid #1f6feb;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(31,111,235,0.15);
+  }
+  .highlight-card .hl-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #58a6ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .signal-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(248,81,73,0.12);
+    border: 1.5px solid #f85149;
+    border-radius: 50px;
+    padding: 10px 22px;
+  }
+  .signal-badge .signal-emoji { font-size: 28px; }
+  .signal-badge .signal-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: #f85149;
+  }
+  .kospi-range-box {
+    flex: 1;
+    min-width: 240px;
+  }
+  .kospi-range-box .label {
+    font-size: 11px;
+    color: #8b949e;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .kospi-range-box .range-nums {
+    font-size: 32px;
+    font-weight: 900;
+    color: #e6edf3;
+    letter-spacing: -1px;
+  }
+  .kospi-range-box .range-nums .sep { color: #8b949e; margin: 0 8px; }
+  .kospi-range-box .base-info {
+    font-size: 11px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+  .bullet-list { margin-bottom: 20px; }
+  .bullet-list li {
+    list-style: none;
+    padding: 7px 0;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+    font-size: 13.5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #58a6ff;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .tags-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag {
+    background: rgba(31,111,235,0.18);
+    border: 1px solid #1f6feb;
+    color: #58a6ff;
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .tag.warn {
+    background: rgba(248,81,73,0.14);
+    border-color: #f85149;
+    color: #f85149;
+  }
+  .tag.neutral {
+    background: rgba(210,153,34,0.14);
+    border-color: #d2991f;
+    color: #e3b341;
+  }
+
+  /* ─── 수치 색상 ─── */
+  .up { color: #3fb950; font-weight: 700; }
+  .dn { color: #f85149; font-weight: 700; }
+  .neu { color: #e3b341; font-weight: 700; }
+
+  /* ─── 테이블 ─── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #21262d;
+    color: #8b949e;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid #30363d;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  /* ─── 그리드 ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .signal-row { flex-direction: column; align-items: flex-start; }
+    .kospi-range-box .range-nums { font-size: 24px; }
+    .site-header h1 { font-size: 20px; }
+  }
+
+  /* ─── 시나리오 카드 ─── */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-item {
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid;
+  }
+  .scenario-item.bull {
+    background: rgba(63,185,80,0.08);
+    border-color: #3fb950;
+  }
+  .scenario-item.neut {
+    background: rgba(227,179,65,0.08);
+    border-color: #e3b341;
+  }
+  .scenario-item.bear {
+    background: rgba(248,81,73,0.08);
+    border-color: #f85149;
+  }
+  .scenario-item .sc-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .scenario-item.bull .sc-label { color: #3fb950; }
+  .scenario-item.neut .sc-label { color: #e3b341; }
+  .scenario-item.bear .sc-label { color: #f85149; }
+  .scenario-item .sc-range {
+    font-size: 18px;
+    font-weight: 900;
+    color: #e6edf3;
+    margin-bottom: 8px;
+  }
+  .scenario-item .sc-desc {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+  .prob-bar-wrap { margin-top: 10px; }
+  .prob-label { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .prob-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: #21262d;
+    overflow: hidden;
+  }
+  .prob-bar-fill { height: 100%; border-radius: 3px; }
+
+  /* ─── 업종 카드 ─── */
+  .sector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .sector-grid { grid-template-columns: 1fr; } }
+  .sector-item {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .sector-item .sec-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sector-item .sec-outlook {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+  }
+  .sec-outlook.pos { background: rgba(63,185,80,0.18); color: #3fb950; }
+  .sec-outlook.neg { background: rgba(248,81,73,0.18); color: #f85149; }
+  .sec-outlook.neu { background: rgba(227,179,65,0.18); color: #e3b341; }
+  .sector-item .sec-desc { font-size: 12px; color: #8b949e; line-height: 1.5; }
+
+  /* ─── 이슈 카드 ─── */
+  .issue-item {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-left: 3px solid #1f6feb;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .issue-item .issue-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: #1f6feb;
+    margin-bottom: 4px;
+  }
+  .issue-item .issue-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 6px;
+  }
+  .issue-item .issue-body { font-size: 12.5px; color: #8b949e; line-height: 1.55; }
+  .issue-item .impact {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .impact.neg { background: rgba(248,81,73,0.18); color: #f85149; }
+  .impact.pos { background: rgba(63,185,80,0.18); color: #3fb950; }
+  .impact.mix { background: rgba(227,179,65,0.18); color: #e3b341; }
+
+  /* ─── 투자 포인트 ─── */
+  .invest-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .invest-grid { grid-template-columns: 1fr; } }
+  .invest-item {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .invest-item .inv-icon { font-size: 28px; margin-bottom: 10px; }
+  .invest-item .inv-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 8px;
+  }
+  .invest-item .inv-desc { font-size: 12px; color: #8b949e; line-height: 1.55; }
+
+  /* ─── 일정 표 ─── */
+  .schedule-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 8px;
+  }
+  .sch-high { background: rgba(248,81,73,0.18); color: #f85149; }
+  .sch-mid { background: rgba(227,179,65,0.18); color: #e3b341; }
+  .sch-low { background: rgba(63,185,80,0.18); color: #3fb950; }
+
+  /* ─── 미니 스탯 카드 ─── */
+  .mini-stat {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .mini-stat .ms-label { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .mini-stat .ms-val { font-size: 18px; font-weight: 800; color: #e6edf3; }
+  .mini-stat .ms-chg { font-size: 12px; margin-top: 2px; }
+
+  /* ─── 원자재/코인 행 ─── */
+  .asset-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 720px) { .asset-row { grid-template-columns: 1fr 1fr; } }
+
+  /* ─── 분리선 ─── */
+  .divider { border: none; border-top: 1px solid #21262d; margin: 8px 0 16px; }
+
+  /* ─── 푸터 ─── */
+  .footer {
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    padding: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #6e7681;
+    line-height: 1.7;
+    margin-top: 10px;
+  }
+  .footer strong { color: #8b949e; }
+
+  /* ─── 진행 바 ─── */
+  .index-bar-wrap { margin-top: 6px; }
+  .index-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: #21262d;
+    overflow: hidden;
+    margin-top: 3px;
+  }
+  .index-bar-fill { height: 100%; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ─── 헤더 ─── -->
+<header class="site-header">
+  <div class="badge">KOREA MARKET REPORT</div>
+  <h1>🇰🇷 한국 증시 장중 전망 보고서</h1>
+  <div class="meta">
+    <span>📅 2026년 03월 13일 (금요일)</span>
+    <span>|</span>
+    <span>✍️ 비서 윈터 작성</span>
+    <span>|</span>
+    <span>⏰ 장 개시 전 발행</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ─── ★ 한국 증시 전망 하이라이트 ─── -->
+  <div class="highlight-card">
+    <div class="hl-title">
+      <span>⭐</span> 한국 증시 전망 하이라이트 — 금일(2026-03-13 금요일)
+    </div>
+
+    <div class="signal-row">
+      <!-- 전망 신호 -->
+      <div class="signal-badge">
+        <span class="signal-emoji">🔴</span>
+        <span class="signal-text">약세 전망</span>
+      </div>
+
+      <!-- 코스피 예상 범위 -->
+      <div class="kospi-range-box">
+        <div class="label">▶ 코스피 금일 예상 범위 (기준 종가 5,583.25)</div>
+        <div class="range-nums">
+          <span class="dn">5,490</span>
+          <span class="sep">~</span>
+          <span class="neu">5,560</span>
+        </div>
+        <div class="base-info">직전 종가 5,583.25 대비 ▼약 −0.4% ~ −1.7% 하단 압력 예상</div>
+      </div>
+
+      <!-- 코스닥 예상 범위 -->
+      <div class="kospi-range-box">
+        <div class="label">▶ 코스닥 금일 예상 범위 (기준 종가 1,148.4)</div>
+        <div class="range-nums">
+          <span class="dn">1,118</span>
+          <span class="sep">~</span>
+          <span class="neu">1,145</span>
+        </div>
+        <div class="base-info">직전 종가 1,148.4 대비 ▼약 −0.3% ~ −2.6% 약세 구간</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- 핵심 포인트 3줄 -->
+    <ul class="bullet-list">
+      <li>
+        <span class="dot"></span>
+        <span>미국 S&P500·나스닥·다우 3대 지수 동반 급락(−1.5~−2.1%)과 VIX 공포지수 급등(+12.63% → 27.29)으로 위험 회피 심리가 전면 확산 — 국내 증시 갭 하락 출발 불가피</span>
+      </li>
+      <li>
+        <span class="dot"></span>
+        <span>필라델피아 반도체지수 −3.43% 급락, TSMC −5.03%·인텔 −5.69% 등 반도체 전방위 급락 → 삼성전자·SK하이닉스 중심 IT 섹터 하방 압력 집중 예상</span>
+      </li>
+      <li>
+        <span class="dot"></span>
+        <span>원유(WTI) +10.57% 폭등·달러 강세(DXY +0.52%)·원/달러 1,488.78원 급등 → 에너지·방산 수혜 vs. 외국인 자금 이탈·수입물가 상승 이중 압박 경계</span>
+      </li>
+    </ul>
+
+    <!-- 주목 업종 TOP 3 -->
+    <div style="margin-bottom: 6px; font-size: 12px; color: #8b949e;">📌 금일 주목 업종 TOP 3</div>
+    <div class="tags-row">
+      <span class="tag warn">⚠️ 반도체 — 최대 위험</span>
+      <span class="tag">🛢️ 정유·에너지 — 상대 수혜</span>
+      <span class="tag">🛡️ 조선·방산 — 방어적 강세</span>
+    </div>
+  </div>
+
+  <!-- ─── 미국 증시 최근 마감 요약 ─── -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🇺🇸</span> 미국 증시 최근 마감 요약 (2026-03-12)</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>지수</th>
+          <th>종가</th>
+          <th>등락</th>
+          <th>상태</th>
+          <th>코스피 영향도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>S&P 500</strong></td>
+          <td>6,672.62</td>
+          <td class="dn">▼ 1.52%</td>
+          <td><span style="color:#f85149;">📉 급락</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:80%;background:#f85149;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>NASDAQ</strong></td>
+          <td>22,311.98</td>
+          <td class="dn">▼ 1.78%</td>
+          <td><span style="color:#f85149;">📉 급락</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:88%;background:#f85149;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>다우존스</strong></td>
+          <td>46,677.85</td>
+          <td class="dn">▼ 1.56%</td>
+          <td><span style="color:#f85149;">📉 급락</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:70%;background:#f85149;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Russell 2000</strong></td>
+          <td>2,488.99</td>
+          <td class="dn">▼ 2.12%</td>
+          <td><span style="color:#f85149;">📉 최대폭</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:60%;background:#f85149;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>S&P 선물</strong></td>
+          <td>6,694.0</td>
+          <td class="dn">▼ 1.26%</td>
+          <td><span style="color:#e3b341;">⚠️ 약세 지속</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:72%;background:#e3b341;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>나스닥 선물</strong></td>
+          <td>24,601.75</td>
+          <td class="dn">▼ 1.53%</td>
+          <td><span style="color:#e3b341;">⚠️ 약세 지속</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:78%;background:#e3b341;"></div></div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>VIX 공포지수</strong></td>
+          <td>27.29</td>
+          <td class="dn">▲ 12.63%</td>
+          <td><span style="color:#f85149;">🚨 공포 구간</span></td>
+          <td>
+            <div class="index-bar"><div class="index-bar-fill" style="width:95%;background:#f85149;"></div></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px; padding:10px 14px; background:#1c2128; border-radius:8px; font-size:12.5px; color:#8b949e; border-left: 3px solid #f85149;">
+      ⚡ <strong style="color:#f85149;">종합 평가:</strong> 미국 3대 지수 동반 급락에 소형주(러셀)까지 −2.12% 하락. VIX 27 돌파는 본격적 공포 구간 진입 신호. 선물도 약세를 유지해 국내 증시의 하방 압력이 상당히 높은 상황.
+    </div>
+  </div>
+
+  <!-- ─── 글로벌 시장 현황 ─── -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🌐</span> 글로벌 시장 현황 (환율 / 금리 / 아시아)</div>
+    <div class="grid-2">
+      <!-- 환율 / 금리 -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#8b949e;margin-bottom:10px;letter-spacing:1px;">💱 환율 & 금리</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>항목</th><th>현재</th><th>등락</th><th>영향</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>USD/KRW</td>
+              <td><strong>1,488.78</strong></td>
+              <td class="dn">▲ 1.09%</td>
+              <td class="dn">외국인 이탈↑</td>
+            </tr>
+            <tr>
+              <td>달러인덱스(DXY)</td>
+              <td><strong>99.74</strong></td>
+              <td class="dn">▲ 0.52%</td>
+              <td class="dn">달러 강세</td>
+            </tr>
+            <tr>
+              <td>미 10Y 국채</td>
+              <td><strong>4.27%</strong></td>
+              <td class="dn">▲ 1.54%</td>
+              <td class="dn">성장주 부담</td>
+            </tr>
+            <tr>
+              <td>USD/JPY</td>
+              <td><strong>159.32</strong></td>
+              <td class="dn">▲ 0.76%</td>
+              <td class="neu">엔화 약세</td>
+            </tr>
+            <tr>
+              <td>USD/CNY</td>
+              <td><strong>6.87</strong></td>
+              <td class="up">▼ 0.12%</td>
+              <td class="up">위안 소폭↑</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- 아시아 증시 -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#8b949e;margin-bottom:10px;letter-spacing:1px;">🌏 아시아 증시</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>지수</th><th>종가</th><th>등락</th><th>상태</th></tr>
