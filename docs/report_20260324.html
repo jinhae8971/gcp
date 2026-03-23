@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 증시 전망 보고서 | 2026.03.24</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+
+  /* 레이아웃 */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px 40px; }
+
+  /* 헤더 */
+  .header {
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 1px solid #30363d;
+    padding: 28px 0 20px;
+    margin-bottom: 24px;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #e6edf3;
+    letter-spacing: -0.5px;
+  }
+  .header-title span {
+    color: #58a6ff;
+  }
+  .header-meta {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+  .header-badge {
+    background: linear-gradient(90deg, #238636, #2ea043);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* 카드 공통 */
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon { font-size: 18px; }
+
+  /* 하이라이트 섹션 */
+  .highlight-section {
+    background: linear-gradient(135deg, #0d2137 0%, #0d1a2e 50%, #161b22 100%);
+    border: 1px solid #1f6feb;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .highlight-section::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(31,111,235,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .highlight-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .highlight-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #58a6ff;
+    text-transform: uppercase;
+  }
+  .signal-badge {
+    font-size: 18px;
+    font-weight: 800;
+    padding: 8px 20px;
+    border-radius: 30px;
+    letter-spacing: 0.5px;
+  }
+  .signal-neutral {
+    background: rgba(210,153,34,0.18);
+    color: #e3b341;
+    border: 1px solid rgba(210,153,34,0.35);
+  }
+  .signal-bullish {
+    background: rgba(63,185,80,0.18);
+    color: #3fb950;
+    border: 1px solid rgba(63,185,80,0.35);
+  }
+  .signal-bearish {
+    background: rgba(248,81,73,0.18);
+    color: #f85149;
+    border: 1px solid rgba(248,81,73,0.35);
+  }
+
+  /* 지수 범위 */
+  .range-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .range-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .range-label {
+    font-size: 11px;
+    color: #8b949e;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .range-base {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 4px;
+  }
+  .range-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #e6edf3;
+    line-height: 1.1;
+  }
+  .range-sub {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 4px;
+  }
+  .range-bar {
+    margin-top: 10px;
+    height: 6px;
+    background: #21262d;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .range-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1f6feb, #58a6ff);
+  }
+
+  /* 핵심 포인트 */
+  .key-points {
+    margin-bottom: 20px;
+  }
+  .key-point-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #21262d;
+    font-size: 13.5px;
+    color: #c9d1d9;
+  }
+  .key-point-item:last-child { border-bottom: none; }
+  .key-point-item .dot {
+    width: 6px; height: 6px;
+    background: #58a6ff;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  /* 주목 업종 태그 */
+  .sector-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sector-tag {
+    background: rgba(31,111,235,0.15);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: #58a6ff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+  .sector-tag.green {
+    background: rgba(63,185,80,0.12);
+    border-color: rgba(63,185,80,0.3);
+    color: #3fb950;
+  }
+  .sector-tag.yellow {
+    background: rgba(227,179,65,0.12);
+    border-color: rgba(227,179,65,0.3);
+    color: #e3b341;
+  }
+
+  /* 색상 */
+  .up { color: #3fb950; }
+  .down { color: #f85149; }
+  .neutral { color: #e3b341; }
+
+  /* 테이블 */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table thead tr {
+    background: #21262d;
+  }
+  .data-table th {
+    padding: 10px 12px;
+    text-align: left;
+    color: #8b949e;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .data-table .index-name { font-weight: 600; color: #e6edf3; }
+
+  /* 그리드 레이아웃 */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* 미니 스탯 카드 */
+  .stat-item {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: #8b949e;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e6edf3;
+  }
+  .stat-change {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* 시나리오 */
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .scenario-card {
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid;
+  }
+  .scenario-a {
+    background: rgba(63,185,80,0.06);
+    border-color: rgba(63,185,80,0.25);
+  }
+  .scenario-b {
+    background: rgba(227,179,65,0.06);
+    border-color: rgba(227,179,65,0.25);
+  }
+  .scenario-c {
+    background: rgba(248,81,73,0.06);
+    border-color: rgba(248,81,73,0.25);
+  }
+  .scenario-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .scenario-range {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .scenario-prob {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  .prob-a { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .prob-b { background: rgba(227,179,65,0.15); color: #e3b341; }
+  .prob-c { background: rgba(248,81,73,0.15); color: #f85149; }
+  .scenario-desc {
+    font-size: 11.5px;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+
+  /* 뉴스 리스트 */
+  .news-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #21262d;
+    align-items: flex-start;
+  }
+  .news-item:last-child { border-bottom: none; }
+  .news-num {
+    width: 26px; height: 26px;
+    background: #1f6feb;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .news-content { flex: 1; }
+  .news-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 4px;
+  }
+  .news-desc {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+  .news-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+  .tag-positive { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .tag-negative { background: rgba(248,81,73,0.15); color: #f85149; }
+  .tag-neutral { background: rgba(139,148,158,0.15); color: #8b949e; }
+
+  /* 업종 카드 */
+  .sector-card {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .sector-card:last-child { margin-bottom: 0; }
+  .sector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .sector-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e6edf3;
+  }
+  .sector-outlook {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 10px;
+  }
+  .out-positive { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .out-neutral { background: rgba(227,179,65,0.15); color: #e3b341; }
+  .out-negative { background: rgba(248,81,73,0.15); color: #f85149; }
+  .sector-desc {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+
+  /* 투자 포인트 */
+  .invest-point {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .invest-point:last-child { margin-bottom: 0; }
+  .invest-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: #1f6feb;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+  .invest-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e6edf3;
+    margin-bottom: 4px;
+  }
+  .invest-desc {
+    font-size: 12.5px;
+    color: #8b949e;
+    line-height: 1.6;
+  }
+
+  /* 일정 테이블 */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .schedule-table th {
+    padding: 10px 12px;
+    text-align: left;
+    background: #21262d;
+    color: #8b949e;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .schedule-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #21262d;
+    vertical-align: top;
+  }
+  .schedule-table tr:last-child td { border-bottom: none; }
+  .impact-high { color: #f85149; font-weight: 700; }
+  .impact-mid { color: #e3b341; font-weight: 700; }
+  .impact-low { color: #3fb950; font-weight: 700; }
+
+  /* 반도체 스탯 */
+  .semi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* 푸터 */
+  .footer {
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    padding: 20px 0;
+    margin-top: 32px;
+  }
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+    font-size: 11px;
+    color: #8b949e;
+    line-height: 1.7;
+  }
+  .footer-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c9d1d9;
+    margin-bottom: 6px;
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .range-grid { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .scenario-grid { grid-template-columns: 1fr; }
+    .semi-grid { grid-template-columns: 1fr 1fr; }
+    .header-title { font-size: 18px; }
+    .range-value { font-size: 20px; }
+  }
+  @media (max-width: 480px) {
+    .range-grid { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .semi-grid { grid-template-columns: 1fr 1fr; }
+    .highlight-section { padding: 18px; }
+  }
+
+  /* 구분선 */
+  .divider {
+    height: 1px;
+    background: #21262d;
+    margin: 16px 0;
+  }
+
+  /* 원자재 그리드 */
+  .commodity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 768px) {
+    .commodity-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .update-time {
+    font-size: 11px;
+    color: #8b949e;
+    background: #21262d;
+    padding: 3px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 헤더 ===== -->
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">🇰🇷 <span>한국 증시</span> 전망 보고서</div>
+      <div class="header-meta">2026년 03월 24일 (화요일) · 장 시작 전 분석 리포트</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span class="update-time">📅 기준: 2026-03-23 마감</span>
+      <span class="header-badge">✍️ 비서 윈터 작성</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== ★ 한국 증시 전망 하이라이트 ===== -->
+  <div class="highlight-section">
+    <div class="highlight-header">
+      <div>
+        <div class="highlight-label">⭐ Korea Market Outlook Highlight</div>
+        <div style="font-size:20px; font-weight:800; color:#e6edf3; margin-top:4px;">금일 한국 증시 전망</div>
+      </div>
+      <div class="signal-badge signal-neutral">🟡 중립 · 반등 모색</div>
+    </div>
+
+    <!-- 예상 범위 -->
+    <div class="range-grid">
+      <div class="range-card">
+        <div class="range-label">📊 코스피 예상 범위</div>
+        <div class="range-base">직전 종가 5,405.75 기준</div>
+        <div class="range-value" style="color:#58a6ff;">5,270 ~ 5,540</div>
+        <div class="range-sub">
+          하단 <span class="down">▼2.5%</span> &nbsp;|&nbsp; 상단 <span class="up">▲2.5%</span>
+        </div>
+        <div class="range-bar" style="margin-top:10px;">
+          <div class="range-bar-fill" style="width:52%;"></div>
+        </div>
+        <div style="font-size:11px; color:#8b949e; margin-top:5px;">중심선 약 5,400~5,420 예상</div>
+      </div>
+      <div class="range-card">
+        <div class="range-label">📊 코스닥 예상 범위</div>
+        <div class="range-base">직전 종가 1,096.89 기준</div>
+        <div class="range-value" style="color:#58a6ff;">1,069 ~ 1,124</div>
+        <div class="range-sub">
+          하단 <span class="down">▼2.5%</span> &nbsp;|&nbsp; 상단 <span class="up">▲2.5%</span>
+        </div>
+        <div class="range-bar" style="margin-top:10px;">
+          <div class="range-bar-fill" style="width:50%;"></div>
+        </div>
+        <div style="font-size:11px; color:#8b949e; margin-top:5px;">중심선 약 1,090~1,105 예상</div>
+      </div>
+    </div>
+
+    <!-- 핵심 포인트 -->
+    <div class="key-points">
+      <div style="font-size:12px; font-weight:700; color:#8b949e; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">📌 핵심 포인트</div>
+      <div class="key-point-item">
+        <div class="dot"></div>
+        <div><strong style="color:#3fb950;">미국 증시 강세 & 달러 약세</strong>가 한국 증시 하방 지지 요인으로 작용. 전일 코스피 ▼6.49%, 코스닥 ▼5.56%의 대낙폭 이후 기술적 반등 시도 예상. 단, 과매도 구간 진입으로 쇼트커버링 유입 가능성 있음.</div>
+      </div>
+      <div class="key-point-item">
+        <div class="dot"></div>
+        <div><strong style="color:#e3b341;">이란 공습 지연 & 유가 급락(WTI ▼9.19%)</strong>으로 중동 지정학 리스크 일시 완화. 원유 의존도 높은 수출 중심 한국 기업에 단기 비용 완화 호재. 단, 호르무즈 해협 폐쇄 지속 여부가 핵심 변수.</div>
+      </div>
+      <div class="key-point-item">
+        <div class="dot"></div>
+        <div><strong style="color:#f85149;">아시아 증시 동반 급락(닛케이 ▼3.48%, 항셍 ▼3.54%)</strong>이 전일 마감 반영되었고, 원/달러 1,486원으로 하락(달러 약세)은 외국인 매수 유인으로 작용 가능. 필라델피아 반도체 +1.34% 및 NVDA +1.70% 상승은 국내 반도체 섹터 반등 기대 제공.</div>
+      </div>
+    </div>
+
+    <!-- 주목 업종 -->
+    <div>
+      <div style="font-size:12px; font-weight:700; color:#8b949e; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">🎯 주목 업종 TOP 3</div>
+      <div class="sector-tags">
+        <span class="sector-tag green">🔬 반도체·AI (NVDA +1.70%, TSMC +2.80%)</span>
+        <span class="sector-tag yellow">⚓ 조선·방산 (지정학 수혜 지속)</span>
+        <span class="sector-tag">🏦 금융·은행 (금리 하락 수혜)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 미국 증시 최근 마감 요약 ===== -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🇺🇸</span> 미국 증시 최근 마감 요약 (2026-03-23)</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>지수</th>
+            <th>종가</th>
+            <th>등락</th>
+            <th>특이사항</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="index-name">S&P 500</td>
+            <td>6,581.00</td>
+            <td class="up">▲ +1.15%</td>
+            <td>이란 공습 지연 소식에 위험선호 회복</td>
+          </tr>
+          <tr>
+            <td class="index-name">나스닥 컴포짓</td>
+            <td>21,946.76</td>
+            <td class="up">▲ +1.38%</td>
+            <td>빅테크 전반 매수세 유입, AI 섹터 반등</td>
+          </tr>
+          <tr>
+            <td class="index-name">다우존스</td>
+            <td>46,208.47</td>
+            <td class="up">▲ +1.38%</td>
+            <td>경기민감주 동반 상승</td>
+          </tr>
+          <tr>
+            <td class="index-name">러셀 2000</td>
+            <td>2,494.23</td>
+            <td class="up">▲ +2.29%</td>
+            <td>소형주 강세, 위험선호 확대 신호</td>
+          </tr>
+          <tr>
+            <td class="index-name" style="color:#8b949e;">S&P 선물 (마감後)</td>
+            <td style="color:#8b949e;">6,645.75</td>
+            <td class="up">▲ +0.78%</td>
+            <td style="color:#8b949e;">마감 후에도 추가 상승 모멘텀 유지</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px; padding:10px 14px; background:#0d1117; border-radius:8px; border-left:3px solid #3fb950; font-size:12.5px; color:#c9d1d9;">
+      💡 <strong>분석:</strong> 미 증시 전 지수 상승 마감. 러셀 2000 +2.29%로 소형주 강세가 두드러지며 광범위한 위험선호 심리 회복 확인. S&P·나스닥 선물 모두 마감 후에도 추가 상승하여 아시아 시장 개장 전 우호적 환경 조성.
+    </div>
+  </div>
+
+  <!-- ===== 글로벌 시장 현황 ===== -->
