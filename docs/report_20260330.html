@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 증시 전망 보고서 | 2026.03.30</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+
+  /* 레이아웃 */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px 40px; }
+
+  /* 헤더 */
+  .main-header {
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 60%, #1a1f2e 100%);
+    border-bottom: 1px solid #30363d;
+    padding: 28px 0 20px;
+    text-align: center;
+    position: relative;
+  }
+  .main-header .badge {
+    display: inline-block;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    color: #8b949e;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .main-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #e6edf3;
+    letter-spacing: -0.5px;
+  }
+  .main-header h1 span { color: #58a6ff; }
+  .header-meta {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #8b949e;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 4px; }
+  .author-tag {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+
+  /* 카드 공통 */
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: #58a6ff;
+    border-radius: 2px;
+  }
+
+  /* ★ 하이라이트 섹션 */
+  .highlight-section {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1a1f2e 100%);
+    border: 2px solid #1f6feb;
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin: 24px 0 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .highlight-section::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(31,111,235,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .highlight-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #58a6ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .highlight-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #1f6feb44, transparent);
+  }
+  .highlight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .highlight-grid { grid-template-columns: 1fr; } }
+  .range-box {
+    background: rgba(31,111,235,0.08);
+    border: 1px solid #1f6feb44;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+  .range-box .range-label { font-size: 11px; color: #8b949e; margin-bottom: 6px; letter-spacing: 0.5px; }
+  .range-box .range-index { font-size: 13px; font-weight: 600; color: #8b949e; margin-bottom: 4px; }
+  .range-box .range-numbers { font-size: 30px; font-weight: 800; color: #e6edf3; letter-spacing: -1px; line-height: 1.1; }
+  .range-box .range-sub { font-size: 12px; color: #8b949e; margin-top: 6px; }
+  .signal-box {
+    background: rgba(248,81,73,0.08);
+    border: 1px solid #f8514944;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .signal-emoji { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+  .signal-text { font-size: 22px; font-weight: 800; color: #f85149; }
+  .signal-sub { font-size: 11px; color: #8b949e; margin-top: 4px; }
+  .key-points { margin-bottom: 18px; }
+  .key-points h3 { font-size: 12px; color: #8b949e; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .key-point-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid #1f6feb;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: #c9d1d9;
+    line-height: 1.5;
+  }
+  .key-point-item .dot { color: #58a6ff; font-weight: 700; flex-shrink: 0; }
+  .top-sectors h3 { font-size: 12px; color: #8b949e; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .sector-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sector-tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .tag-red { background: rgba(248,81,73,0.15); border: 1px solid #f8514966; color: #f85149; }
+  .tag-yellow { background: rgba(210,153,34,0.15); border: 1px solid #d2991966; color: #d29919; }
+  .tag-blue { background: rgba(88,166,255,0.15); border: 1px solid #58a6ff66; color: #58a6ff; }
+
+  /* 컬러 수치 */
+  .up { color: #3fb950; font-weight: 600; }
+  .dn { color: #f85149; font-weight: 600; }
+  .neu { color: #8b949e; }
+
+  /* 테이블 */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    background: #21262d;
+    color: #8b949e;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #21262d;
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #21262d44; }
+  .index-name { font-weight: 600; color: #e6edf3; }
+
+  /* 그리드 2열 */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px) { .grid-3 { grid-template-columns: 1fr; } }
+
+  /* 작은 데이터 카드 */
+  .mini-card {
+    background: #21262d;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mini-card .mc-label { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+  .mini-card .mc-value { font-size: 18px; font-weight: 700; color: #e6edf3; }
+  .mini-card .mc-change { font-size: 12px; }
+
+  /* 이슈 */
+  .issue-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #21262d;
+    align-items: flex-start;
+  }
+  .issue-item:last-child { border-bottom: none; }
+  .issue-num {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .issue-content .issue-title { font-size: 13px; font-weight: 600; color: #e6edf3; margin-bottom: 4px; }
+  .issue-content .issue-body { font-size: 12px; color: #8b949e; line-height: 1.5; }
+  .issue-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-danger { background: rgba(248,81,73,0.2); color: #f85149; }
+  .tag-warn { background: rgba(210,153,34,0.2); color: #d29919; }
+  .tag-info { background: rgba(88,166,255,0.2); color: #58a6ff; }
+
+  /* 시나리오 */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-card {
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid;
+  }
+  .scenario-card.bull { background: rgba(63,185,80,0.06); border-color: #3fb95044; }
+  .scenario-card.neut { background: rgba(210,153,34,0.06); border-color: #d2991944; }
+  .scenario-card.bear { background: rgba(248,81,73,0.06); border-color: #f8514944; }
+  .scenario-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .bull .scenario-label { color: #3fb950; }
+  .neut .scenario-label { color: #d29919; }
+  .bear .scenario-label { color: #f85149; }
+  .scenario-range { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #e6edf3; }
+  .scenario-prob {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .bull .scenario-prob { background: rgba(63,185,80,0.2); color: #3fb950; }
+  .neut .scenario-prob { background: rgba(210,153,34,0.2); color: #d29919; }
+  .bear .scenario-prob { background: rgba(248,81,73,0.2); color: #f85149; }
+  .scenario-desc { font-size: 12px; color: #8b949e; line-height: 1.5; }
+
+  /* 업종 카드 */
+  .sector-card {
+    background: #21262d;
+    border-radius: 10px;
+    padding: 14px;
+    border-left: 3px solid;
+  }
+  .sector-card.positive { border-color: #3fb950; }
+  .sector-card.neutral { border-color: #d29919; }
+  .sector-card.negative { border-color: #f85149; }
+  .sector-card .sc-name { font-size: 13px; font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+  .sector-card .sc-outlook {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .positive .sc-outlook { background: rgba(63,185,80,0.2); color: #3fb950; }
+  .neutral .sc-outlook { background: rgba(210,153,34,0.2); color: #d29919; }
+  .negative .sc-outlook { background: rgba(248,81,73,0.2); color: #f85149; }
+  .sector-card .sc-desc { font-size: 12px; color: #8b949e; line-height: 1.5; }
+
+  /* 투자 포인트 */
+  .invest-point {
+    background: #21262d;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .invest-num {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #1f6feb, #388bfd);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff;
+    flex-shrink: 0;
+  }
+  .invest-content .iv-title { font-size: 13px; font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+  .invest-content .iv-desc { font-size: 12px; color: #8b949e; line-height: 1.5; }
+
+  /* 일정 테이블 */
+  .schedule-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .schedule-table th {
+    background: #21262d;
+    color: #8b949e;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid #30363d;
+  }
+  .schedule-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #21262d;
+  }
+  .schedule-table tr:last-child td { border-bottom: none; }
+  .schedule-table tr:hover td { background: #21262d44; }
+  .impact-high { color: #f85149; font-weight: 700; }
+  .impact-mid { color: #d29919; font-weight: 700; }
+  .impact-low { color: #3fb950; font-weight: 600; }
+
+  /* 반도체 특별 */
+  .semi-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 700px) { .semi-grid { grid-template-columns: 1fr 1fr; } }
+  .semi-chip {
+    background: #21262d;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .semi-chip .sc-ticker { font-size: 10px; color: #8b949e; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .semi-chip .sc-price { font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .semi-chip .sc-chg { font-size: 11px; margin-top: 3px; }
+
+  /* 원자재 */
+  .commodity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 700px) { .commodity-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* 푸터 */
+  .footer {
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    padding: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #8b949e;
+    line-height: 1.8;
+    margin-top: 30px;
+  }
+  .footer strong { color: #c9d1d9; }
+
+  /* 구분선 */
+  .section-sep { height: 1px; background: linear-gradient(90deg, transparent, #30363d, transparent); margin: 6px 0 18px; }
+
+  /* 마켓 상태 바 */
+  .market-bar {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 11px;
+    color: #8b949e;
+    letter-spacing: 0.3px;
+  }
+  .market-bar .sep { margin: 0 10px; color: #30363d; }
+</style>
+</head>
+<body>
+
+<!-- 마켓 상태 바 -->
+<div class="market-bar">
+  📅 기준일: 2026.03.30 (월) &nbsp;|&nbsp; 전거래일 코스피 5,438.87 &nbsp;|&nbsp; 전거래일 코스닥 1,141.51 &nbsp;|&nbsp; USD/KRW 1,507.95
+</div>
+
+<!-- 메인 헤더 -->
+<div class="main-header">
+  <div class="author-tag">✍️ 비서 윈터 작성</div>
+  <div class="badge">🇰🇷 KOREA MARKET MORNING REPORT</div>
+  <h1>한국 증시 <span>전망 보고서</span></h1>
+  <div class="header-meta">
+    <span>📅 2026년 03월 30일 월요일</span>
+    <span>🕘 장전 리포트</span>
+    <span>⚠️ 투자 참고용</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ★ 하이라이트 섹션 -->
+  <div class="highlight-section">
+    <div class="highlight-label">⭐ 금일 한국 증시 전망 하이라이트</div>
+
+    <div class="highlight-grid">
+      <!-- 예상 범위 -->
+      <div class="range-box">
+        <div class="range-label">🎯 코스피 금일 예상 범위</div>
+        <div class="range-index">기준: 5,438.87 (전거래일)</div>
+        <div class="range-numbers" style="color:#f85149;">5,330 ~ 5,420</div>
+        <div class="range-sub">중심값 5,375 · 전거래일 대비 최대 ▼2.0%</div>
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #30363d;">
+          <div class="range-label">🎯 코스닥 금일 예상 범위</div>
+          <div class="range-index">기준: 1,141.51 (전거래일)</div>
+          <div style="font-size:22px; font-weight:800; color:#f85149; letter-spacing:-0.5px;">1,110 ~ 1,140</div>
+          <div class="range-sub">중심값 1,125 · 전거래일 대비 최대 ▼2.8%</div>
+        </div>
+      </div>
+
+      <!-- 전망 신호 -->
+      <div class="signal-box">
+        <div class="signal-emoji">🔴</div>
+        <div class="signal-text">약 세</div>
+        <div class="signal-sub" style="margin-top:6px; font-size:13px; color:#f85149; font-weight:600;">BEARISH</div>
+        <div class="signal-sub" style="margin-top:10px; font-size:11px; color:#8b949e; max-width:180px; text-align:center; line-height:1.6;">
+          미 증시 전반적 하락 마감 + 선물 추가 하락 + VIX 급등 + 고환율 지속으로 하방 압력 우세
+        </div>
+      </div>
+    </div>
+
+    <!-- 핵심 포인트 -->
+    <div class="key-points">
+      <h3>📌 핵심 포인트 3가지</h3>
+      <div class="key-point-item">
+        <span class="dot">▶</span>
+        <span>미 증시(S&P -1.67%, 나스닥 -2.15%) 약세 마감 + 선물(S&P -0.58%, 나스닥 -0.64%) 주말 추가 하락으로 국내 장 초반 하방 압력 불가피 · 코스피 갭 하락 출발 전망</span>
+      </div>
+      <div class="key-point-item">
+        <span class="dot">▶</span>
+        <span>VIX 공포지수 31.05(▲13.16%) 급등 · WTI 유가 $102 돌파(이란·예멘 지정학 리스크) · USD/KRW 1,507원대 유지 — 삼중 부담 속 외국인 매도세 확대 우려</span>
+      </div>
+      <div class="key-point-item">
+        <span class="dot">▶</span>
+        <span>DeepSeek 촉발 AI 섹터 충격 지속 + 필라델피아 반도체 ▼1.69% + NVDA ▼2.17% — 국내 반도체(삼성전자·SK하이닉스) 낙폭 확대 가능성 · 에너지·방산 반사 수혜 주목</span>
+      </div>
+    </div>
+
+    <!-- 주목 업종 TOP 3 -->
+    <div class="top-sectors">
+      <h3>🔥 주목 업종 TOP 3</h3>
+      <div class="sector-tags">
+        <span class="sector-tag tag-yellow">⚡ 에너지·정유 (유가 급등 수혜)</span>
+        <span class="sector-tag tag-blue">🛡️ 조선·방산 (지정학 리스크 방어)</span>
+        <span class="sector-tag tag-red">💊 바이오 (낙폭 방어 + 내수 방어주)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 미국 증시 요약 -->
+  <div class="card">
+    <div class="card-title">🇺🇸 미국 증시 최근 마감 요약 (2026.03.27)</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>지수</th>
+          <th>종가</th>
+          <th>등락</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="index-name">🔵 S&amp;P 500</td>
+          <td>6,368.85</td>
+          <td class="dn">▼ 1.67%</td>
+          <td style="font-size:12px; color:#8b949e;">6개월 저점 근방 · 기술주 중심 하락</td>
+        </tr>
+        <tr>
+          <td class="index-name">🟣 NASDAQ</td>
+          <td>20,948.36</td>
+          <td class="dn">▼ 2.15%</td>
+          <td style="font-size:12px; color:#8b949e;">AI 섹터 전반 매도 · DeepSeek 충격 재점화</td>
+        </tr>
+        <tr>
+          <td class="index-name">🔵 다우존스</td>
+          <td>45,166.64</td>
+          <td class="dn">▼ 1.73%</td>
+          <td style="font-size:12px; color:#8b949e;">경기 방어주도 동반 약세</td>
+        </tr>
+        <tr>
+          <td class="index-name">🟠 Russell 2000</td>
+          <td>2,449.7</td>
+          <td class="dn">▼ 1.75%</td>
+          <td style="font-size:12px; color:#8b949e;">소형주 전반 위험회피 심화</td>
+        </tr>
+        <tr>
+          <td class="index-name">🟡 S&amp;P 선물 (3/29)</td>
+          <td>6,375.0</td>
+          <td class="dn">▼ 0.58%</td>
+          <td style="font-size:12px; color:#8b949e;">주말 추가 하락 — 월요일 갭다운 시사</td>
+        </tr>
+        <tr>
+          <td class="index-name">🟡 나스닥 선물 (3/29)</td>
+          <td>23,178.25</td>
+          <td class="dn">▼ 0.64%</td>
+          <td style="font-size:12px; color:#8b949e;">기술주 낙폭 확대 우려 지속</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. 글로벌 시장 현황 -->
+  <div class="card">
+    <div class="card-title">🌏 글로벌 시장 현황 — 환율 · 금리 · 아시아</div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px; color:#8b
