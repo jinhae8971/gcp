@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 증시 전망 보고서 | 2026.04.01</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.6; }
+  a { color: #58a6ff; text-decoration: none; }
+
+  /* 레이아웃 */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* 헤더 */
+  .header { background: linear-gradient(135deg, #161b22 0%, #0d1117 100%); border-bottom: 1px solid #30363d; padding: 28px 0 20px; text-align: center; margin-bottom: 28px; }
+  .header h1 { font-size: 1.7rem; font-weight: 700; color: #e6edf3; letter-spacing: -0.5px; }
+  .header .sub { margin-top: 6px; font-size: 0.82rem; color: #8b949e; }
+  .header .badge { display: inline-block; margin-top: 10px; background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 4px 14px; font-size: 0.78rem; color: #58a6ff; }
+
+  /* 카드 공통 */
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+  .card h2 { font-size: 1rem; font-weight: 700; color: #e6edf3; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card h2 .icon { font-size: 1.1rem; }
+
+  /* 색상 */
+  .up { color: #3fb950; }
+  .down { color: #f85149; }
+  .neutral { color: #d29922; }
+  .gray { color: #8b949e; }
+
+  /* ★ 하이라이트 섹션 */
+  .highlight { background: linear-gradient(135deg, #0f1f2e 0%, #161b22 100%); border: 1.5px solid #1f6feb; border-radius: 16px; padding: 28px 26px; margin-bottom: 24px; }
+  .highlight .hl-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; color: #58a6ff; margin-bottom: 12px; font-weight: 600; }
+  .signal-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 20px; }
+  .signal-badge { font-size: 1.55rem; font-weight: 800; padding: 8px 22px; border-radius: 10px; background: rgba(63,185,80,0.13); border: 2px solid #3fb950; color: #3fb950; letter-spacing: 1px; }
+  .range-box { text-align: center; }
+  .range-label { font-size: 0.72rem; color: #8b949e; margin-bottom: 2px; }
+  .range-value { font-size: 2rem; font-weight: 800; color: #e6edf3; letter-spacing: -1px; }
+  .range-sub { font-size: 0.78rem; color: #8b949e; margin-top: 2px; }
+  .divider-v { width: 1px; height: 56px; background: #30363d; }
+  .bullet-list { list-style: none; margin-bottom: 18px; }
+  .bullet-list li { padding: 5px 0; font-size: 0.9rem; color: #c9d1d9; display: flex; align-items: flex-start; gap: 8px; }
+  .bullet-list li::before { content: "▶"; color: #58a6ff; font-size: 0.7rem; margin-top: 4px; flex-shrink: 0; }
+  .tags { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { background: rgba(31,111,235,0.18); border: 1px solid #1f6feb; border-radius: 20px; padding: 5px 14px; font-size: 0.8rem; color: #58a6ff; font-weight: 600; }
+  .tag.red { background: rgba(248,81,73,0.15); border-color: #f85149; color: #f85149; }
+  .tag.green { background: rgba(63,185,80,0.15); border-color: #3fb950; color: #3fb950; }
+  .tag.gold { background: rgba(210,153,34,0.15); border-color: #d29922; color: #d29922; }
+
+  /* 테이블 */
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #21262d; color: #8b949e; font-size: 0.76rem; font-weight: 600; padding: 9px 10px; text-align: left; border-bottom: 1px solid #30363d; }
+  td { padding: 9px 10px; border-bottom: 1px solid #21262d; font-size: 0.85rem; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1c2128; }
+
+  /* 그리드 */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  @media(max-width: 768px) { .grid2, .grid3 { grid-template-columns: 1fr; } .range-value { font-size: 1.5rem; } .signal-badge { font-size: 1.1rem; } }
+  @media(max-width: 580px) { .signal-row { flex-direction: column; align-items: flex-start; } .divider-v { display: none; } }
+
+  /* 시나리오 카드 */
+  .scenario { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media(max-width: 700px) { .scenario { grid-template-columns: 1fr; } }
+  .s-card { border-radius: 10px; padding: 16px; border: 1px solid; }
+  .s-card.bull { background: rgba(63,185,80,0.07); border-color: #3fb950; }
+  .s-card.neutral-c { background: rgba(210,153,34,0.07); border-color: #d29922; }
+  .s-card.bear { background: rgba(248,81,73,0.07); border-color: #f85149; }
+  .s-card h3 { font-size: 0.9rem; margin-bottom: 8px; }
+  .s-card .prob { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+  .s-card .range { font-size: 0.85rem; margin-bottom: 8px; font-weight: 600; }
+  .s-card p { font-size: 0.78rem; color: #8b949e; line-height: 1.5; }
+
+  /* 업종 */
+  .sector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .sector-card { background: #21262d; border-radius: 10px; padding: 14px 16px; border: 1px solid #30363d; }
+  .sector-card .s-name { font-size: 0.82rem; color: #8b949e; margin-bottom: 6px; }
+  .sector-card .s-signal { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .sector-card .s-desc { font-size: 0.75rem; color: #8b949e; line-height: 1.45; }
+
+  /* 투자 포인트 */
+  .invest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media(max-width: 700px) { .invest-grid { grid-template-columns: 1fr; } }
+  .invest-card { background: #21262d; border-radius: 10px; padding: 18px; border-left: 3px solid #1f6feb; }
+  .invest-card .num { font-size: 2rem; font-weight: 800; color: #1f6feb; opacity: 0.4; line-height: 1; margin-bottom: 8px; }
+  .invest-card h3 { font-size: 0.88rem; font-weight: 700; color: #e6edf3; margin-bottom: 6px; }
+  .invest-card p { font-size: 0.78rem; color: #8b949e; line-height: 1.5; }
+
+  /* 일정 */
+  .schedule-table td:first-child { color: #58a6ff; font-weight: 600; white-space: nowrap; }
+  .imp-high { color: #f85149; font-weight: 700; }
+  .imp-mid { color: #d29922; font-weight: 600; }
+  .imp-low { color: #3fb950; }
+
+  /* 이슈 */
+  .issue-item { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #21262d; }
+  .issue-item:last-child { border-bottom: none; }
+  .issue-num { background: #1f6feb; color: #fff; border-radius: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .issue-content h3 { font-size: 0.88rem; font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+  .issue-content p { font-size: 0.78rem; color: #8b949e; line-height: 1.5; }
+
+  /* 원자재 미니 카드 */
+  .commodity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .commodity-card { background: #21262d; border-radius: 8px; padding: 12px 14px; border: 1px solid #30363d; }
+  .commodity-card .c-name { font-size: 0.74rem; color: #8b949e; margin-bottom: 4px; }
+  .commodity-card .c-value { font-size: 1rem; font-weight: 700; color: #e6edf3; }
+  .commodity-card .c-chg { font-size: 0.8rem; margin-top: 2px; }
+
+  /* 반도체 */
+  .semi-stat { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat-box { background: #21262d; border-radius: 8px; padding: 12px 14px; border: 1px solid #30363d; }
+  .stat-box .s-label { font-size: 0.72rem; color: #8b949e; margin-bottom: 4px; }
+  .stat-box .s-val { font-size: 1.1rem; font-weight: 800; }
+  .stat-box .s-chg { font-size: 0.8rem; margin-top: 2px; }
+
+  /* 푸터 */
+  .footer { background: #161b22; border-top: 1px solid #30363d; padding: 20px; text-align: center; font-size: 0.72rem; color: #484f58; line-height: 1.7; margin-top: 30px; }
+
+  /* 구분선 */
+  .section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #484f58; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+
+  /* 미니 배지 */
+  .mini-badge { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .mini-badge.up { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .mini-badge.down { background: rgba(248,81,73,0.15); color: #f85149; }
+</style>
+</head>
+<body>
+
+<!-- ===== 헤더 ===== -->
+<div class="header">
+  <div class="container">
+    <h1>🇰🇷 한국 증시 일일 전망 보고서</h1>
+    <div class="sub">Korea Stock Market Daily Outlook</div>
+    <div class="badge">📅 2026년 04월 01일 (수요일) &nbsp;|&nbsp; ✍️ 비서 윈터 작성</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ===== ★ 하이라이트 섹션 ===== -->
+  <div class="highlight">
+    <div class="hl-title">★ 금일 한국 증시 핵심 전망</div>
+    <div class="signal-row">
+      <div>
+        <div class="range-label">전반적 시장 신호</div>
+        <div class="signal-badge">🟢 강세</div>
+      </div>
+      <div class="divider-v"></div>
+      <div class="range-box">
+        <div class="range-label">코스피 예상 범위</div>
+        <div class="range-value up">5,330 ~ 5,450</div>
+        <div class="range-sub">전일 종가 5,277.3 기준 (+1.0% ~ +3.3%)</div>
+      </div>
+      <div class="divider-v"></div>
+      <div class="range-box">
+        <div class="range-label">코스닥 예상 범위</div>
+        <div class="range-value up">1,120 ~ 1,155</div>
+        <div class="range-sub">전일 종가 1,107.05 기준 (+1.2% ~ +4.3%)</div>
+      </div>
+    </div>
+
+    <ul class="bullet-list">
+      <li>미국 S&amp;P500 +2.91%, 나스닥 +3.83% 강반등 — 필라델피아 반도체 지수 +6.24% 급등이 삼성전자·SK하이닉스 등 국내 반도체 대형주에 직접 호재로 작용 예상</li>
+      <li>VIX 공포지수 -17.51% 급락(25.25)으로 위험자산 선호 심리 회복, 달러인덱스 99.86 약세 전환 → 외국인 수급 개선 기대</li>
+      <li>단, 직전일 코스피·코스닥 각각 -3% 급락 후 반등 시도 구간으로 매물 부담 상존, 장중 변동성 확대 주의 필요</li>
+    </ul>
+
+    <div style="margin-bottom:12px; font-size:0.82rem; color:#8b949e;">📌 주목 업종 TOP 3</div>
+    <div class="tags">
+      <span class="tag green">🔬 반도체·AI</span>
+      <span class="tag gold">🚢 조선·방산</span>
+      <span class="tag">💻 IT·소프트웨어</span>
+    </div>
+  </div>
+
+  <!-- ===== 미국 증시 요약 ===== -->
+  <div class="card">
+    <h2><span class="icon">🇺🇸</span> 미국 증시 최근 마감 요약 (2026-03-31)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>지수</th>
+          <th>종가</th>
+          <th>변동</th>
+          <th>평가</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>S&amp;P 500</strong></td>
+          <td>6,528.52</td>
+          <td><span class="up">▲ +2.91%</span></td>
+          <td><span class="mini-badge up">강세</span></td>
+        </tr>
+        <tr>
+          <td><strong>NASDAQ</strong></td>
+          <td>21,590.63</td>
+          <td><span class="up">▲ +3.83%</span></td>
+          <td><span class="mini-badge up">강세</span></td>
+        </tr>
+        <tr>
+          <td><strong>다우존스</strong></td>
+          <td>46,341.51</td>
+          <td><span class="up">▲ +2.49%</span></td>
+          <td><span class="mini-badge up">강세</span></td>
+        </tr>
+        <tr>
+          <td><strong>Russell 2000</strong></td>
+          <td>2,496.37</td>
+          <td><span class="up">▲ +3.41%</span></td>
+          <td><span class="mini-badge up">강세</span></td>
+        </tr>
+        <tr>
+          <td><strong>S&amp;P 선물</strong></td>
+          <td>6,570.75</td>
+          <td><span class="up">▲ +2.86%</span></td>
+          <td><span class="mini-badge up">긍정</span></td>
+        </tr>
+        <tr>
+          <td><strong>나스닥 선물</strong></td>
+          <td>23,953.75</td>
+          <td><span class="up">▲ +3.52%</span></td>
+          <td><span class="mini-badge up">긍정</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px; font-size:0.78rem; color:#8b949e;">
+      💡 미국 전 지수 동반 급등 — 선물도 현물 대비 추가 상승 흐름 유지 중. 월말 포지션 정리 후 신규 매수 유입이 강하게 작용한 것으로 분석.
+    </div>
+  </div>
+
+  <!-- ===== 글로벌 시장 ===== -->
+  <div class="grid2">
+    <div class="card">
+      <h2><span class="icon">💱</span> 환율 · 금리</h2>
+      <table>
+        <thead>
+          <tr><th>항목</th><th>수치</th><th>변동</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>미국 10Y 국채금리</td><td>4.31%</td><td><span class="down">▼ -0.71%</span></td></tr>
+          <tr><td>달러인덱스 (DXY)</td><td>99.86</td><td><span class="down">▼ -0.65%</span></td></tr>
+          <tr><td><strong>USD/KRW</strong></td><td><strong>1,516.13</strong></td><td><span class="up">▲ +0.60%</span></td></tr>
+          <tr><td>USD/JPY</td><td>158.66</td><td><span class="down">▼ -0.74%</span></td></tr>
+          <tr><td>USD/CNY</td><td>6.91</td><td><span class="gray">— 0.00%</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px; font-size:0.77rem; color:#8b949e;">
+        ⚠️ 원화는 달러 약세에도 소폭 절하(1,516원대) — 한국 자산 수급 불균형 반영. 장중 1,510원 테스트 여부가 외국인 수급 관건.
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="icon">🌏</span> 아시아 시장</h2>
+      <table>
+        <thead>
+          <tr><th>지수</th><th>종가</th><th>변동</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>닛케이 225</td><td>51,885.85</td><td><span class="down">▼ -2.79%</span></td></tr>
+          <tr><td>항셍 지수</td><td>24,750.79</td><td><span class="down">▼ -0.81%</span></td></tr>
+          <tr><td>상하이 종합</td><td>3,923.29</td><td><span class="up">▲ +0.24%</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px; font-size:0.77rem; color:#8b949e;">
+        📌 전일 아시아 증시 전반 하락(닛케이 -2.79%, 항셍 -0.81%) — 미국 야간 급등을 반영하지 못한 시차 효과. 금일 아시아 시장은 미국 상승분 반영하며 강반등 예상.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 원자재·암호화폐 ===== -->
+  <div class="card">
+    <h2><span class="icon">🪙</span> 원자재 · 암호화폐</h2>
+    <div class="commodity-grid">
+      <div class="commodity-card">
+        <div class="c-name">금 (Gold)</div>
+        <div class="c-value">$4,706.8</div>
+        <div class="c-chg up">▲ +3.99%</div>
+      </div>
+      <div class="commodity-card">
+        <div class="c-name">은 (Silver)</div>
+        <div class="c-value">$75.44</div>
+        <div class="c-chg up">▲ +7.27%</div>
+      </div>
+      <div class="commodity-card">
+        <div class="c-name">구리 (Copper)</div>
+        <div class="c-value">$5.64</div>
+        <div class="c-chg up">▲ +3.09%</div>
+      </div>
+      <div class="commodity-card">
+        <div class="c-name">WTI 원유</div>
+        <div class="c-value">$101.87</div>
+        <div class="c-chg down">▼ -0.98%</div>
+      </div>
+      <div class="commodity-card">
+        <div class="c-name">BTC/USD</div>
+        <div class="c-value">$68,281</div>
+        <div class="c-chg up">▲ +2.38%</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; font-size:0.77rem; color:#8b949e;">
+      💡 금·은 동반 급등은 인플레이션 헤지 및 안전자산 선호 동시 작용 신호. 구리 강세는 경기 회복 기대. WTI $100 상회는 에너지·정유주 실적 수혜 vs. 인플레 압력 이중 효과.
+    </div>
+  </div>
+
+  <!-- ===== 반도체 심층 분석 ===== -->
+  <div class="card">
+    <h2><span class="icon">🔬</span> 반도체 섹터 심층 분석</h2>
+    <div class="semi-stat">
+      <div class="stat-box">
+        <div class="s-label">필라델피아 반도체</div>
+        <div class="s-val up">7,588.2</div>
+        <div class="s-chg up">▲ +6.24%</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-label">NVDA (엔비디아)</div>
+        <div class="s-val up">$174.40</div>
+        <div class="s-chg up">▲ +5.59%</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-label">TSMC</div>
+        <div class="s-val up">$337.95</div>
+        <div class="s-chg up">▲ +6.78%</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-label">AMD</div>
+        <div class="s-val up">$203.43</div>
+        <div class="s-chg up">▲ +3.77%</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-label">인텔 (INTC)</div>
+        <div class="s-val up">$44.13</div>
+        <div class="s-chg up">▲ +7.14%</div>
+      </div>
+      <div class="stat-box">
+        <div class="s-label">삼성전자 ADR</div>
+        <div class="s-val gray">$65.21</div>
+        <div class="s-chg gray">— 0.00%</div>
+      </div>
+    </div>
+    <div style="font-size:0.83rem; color:#c9d1d9; line-height:1.7;">
+      <strong class="up">▶ 핵심 분석:</strong> 필라델피아 반도체 지수가 단일 세션 +6.24% 급등하며 반도체 섹터 전체 재평가 흐름. 특히 TSMC +6.78%, 인텔 +7.14% 강세는 HBM·선단공정 수요 회복 기대 반영. 삼성전자 ADR 변동 없음은 장외 체결 미반영일 가능성 높으며, 금일 본장에서 반도체 대형주 동반 강세 기대.
+      <br><br>
+      <strong>📌 국내 수혜 종목 체크:</strong> 삼성전자(005930), SK하이닉스(000660), 한미반도체, HPSP, 리노공업 등 장비·소재 밸류체인 전반 상승 탄력 예상. Arm 주가 급등(뉴스 확인) 역시 팹리스 생태계 확장 신호로 국내 설계 관련주 우호적.
+    </div>
+  </div>
+
+  <!-- ===== 주요 이슈 Top 5 ===== -->
+  <div class="card">
+    <h2><span class="icon">📰</span> 주요 이슈 Top 5 (뉴스 기반)</h2>
+    <div class="issue-item">
+      <div class="issue-num">1</div>
+      <div class="issue-content">
+        <h3>트럼프, "2~3주 내 이란 전쟁 출구 전략" 시사 → 지정학 리스크 완화</h3>
+        <p>다우존스 선물 급등 배경으로 트럼프 대통령이 이란과의 갈등 완화 가능성을 언급. 중동 긴장 완화 기대가 위험자산 선호 심리를 자극하며 미국 증시 전반에 강한 상승 모멘텀을 제공. 국내 조선·방산주는 단기 차익실현 압력 가능성.
+        </p>
+      </div>
+    </div>
+    <div class="issue-item">
+      <div class="issue-num">2</div>
+      <div class="issue-content">
+        <h3>Arm 주가 급등 — AI 반도체 설계 생태계 재평가 신호</h3>
+        <p>NASDAQ
