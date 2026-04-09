@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국 증시 전망 보고서 | 2026-04-10</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  a { color: #58a6ff; text-decoration: none; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 2px solid #21262d;
+    padding: 28px 20px 22px;
+    text-align: center;
+    position: relative;
+  }
+  .header-badge {
+    display: inline-block;
+    background: #1f6feb22;
+    border: 1px solid #1f6feb;
+    color: #58a6ff;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: clamp(20px, 4vw, 32px);
+    font-weight: 800;
+    color: #e6edf3;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .header-meta {
+    font-size: 13px;
+    color: #8b949e;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 5px; }
+  .author-tag {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #6e40c9, #a371f7);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* CARDS */
+  .card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8b949e;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #21262d;
+  }
+
+  /* HIGHLIGHT SECTION */
+  .highlight-section {
+    background: linear-gradient(135deg, #0d1f0e 0%, #0d1117 40%, #1a0d2e 100%);
+    border: 1px solid #238636;
+    border-radius: 16px;
+    padding: 32px 28px;
+    margin: 24px 0 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .highlight-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #23863620 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .highlight-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #3fb950;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .highlight-label::before { content: '◆'; font-size: 9px; }
+  .signal-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .signal-badge {
+    background: #238636;
+    color: #fff;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 900;
+    padding: 10px 24px;
+    border-radius: 50px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px #23863655;
+  }
+  .signal-desc {
+    font-size: clamp(14px, 2vw, 17px);
+    color: #c9d1d9;
+    font-weight: 600;
+  }
+  .range-box {
+    background: #0d1117;
+    border: 1px solid #238636;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  .range-item { flex: 1; min-width: 200px; }
+  .range-label { font-size: 11px; color: #8b949e; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .range-value {
+    font-size: clamp(22px, 4vw, 34px);
+    font-weight: 900;
+    color: #3fb950;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .range-sub { font-size: 12px; color: #8b949e; margin-top: 3px; }
+  .bullet-list { list-style: none; margin-bottom: 22px; }
+  .bullet-list li {
+    padding: 9px 0 9px 20px;
+    border-bottom: 1px solid #21262d;
+    position: relative;
+    font-size: 14px;
+    color: #c9d1d9;
+  }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: #3fb950;
+    font-size: 10px;
+    top: 11px;
+  }
+  .sector-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sector-tag {
+    background: #1f6feb22;
+    border: 1px solid #1f6feb;
+    color: #58a6ff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sector-tag.gold { background: #c9682022; border-color: #c96820; color: #f0883e; }
+  .sector-tag.green { background: #23863622; border-color: #238636; color: #3fb950; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: #21262d;
+    color: #8b949e;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #21262d; font-size: 14px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1c2128; }
+  .up { color: #3fb950; font-weight: 700; }
+  .down { color: #f85149; font-weight: 700; }
+  .neutral { color: #8b949e; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .author-tag { position: static; margin-bottom: 10px; display: inline-block; }
+    .header { padding: 20px 16px; }
+  }
+  @media (max-width: 480px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .range-box { flex-direction: column; gap: 16px; }
+  }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: #1c2128;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-card .label { font-size: 11px; color: #8b949e; letter-spacing: 1px; margin-bottom: 8px; }
+  .stat-card .value { font-size: 20px; font-weight: 800; }
+  .stat-card .change { font-size: 12px; margin-top: 4px; }
+
+  /* SCENARIO */
+  .scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 640px) { .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-card {
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid;
+  }
+  .scenario-card.bull { background: #0d1f0e; border-color: #238636; }
+  .scenario-card.neutral-s { background: #1a1a0d; border-color: #9e6a03; }
+  .scenario-card.bear { background: #1f0d0d; border-color: #6e1717; }
+  .scenario-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+  .bull .scenario-title { color: #3fb950; }
+  .neutral-s .scenario-title { color: #d29922; }
+  .bear .scenario-title { color: #f85149; }
+  .scenario-range { font-size: 20px; font-weight: 900; margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+  .bull .scenario-range { color: #3fb950; }
+  .neutral-s .scenario-range { color: #d29922; }
+  .bear .scenario-range { color: #f85149; }
+  .scenario-prob {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  .bull .scenario-prob { background: #23863633; color: #3fb950; }
+  .neutral-s .scenario-prob { background: #9e6a0333; color: #d29922; }
+  .bear .scenario-prob { background: #6e171733; color: #f85149; }
+  .scenario-desc { font-size: 12px; color: #8b949e; line-height: 1.7; }
+
+  /* SECTOR */
+  .sector-row { display: flex; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #21262d; gap: 14px; }
+  .sector-row:last-child { border-bottom: none; }
+  .sector-icon { font-size: 22px; width: 40px; text-align: center; flex-shrink: 0; }
+  .sector-name { font-weight: 700; font-size: 14px; color: #e6edf3; margin-bottom: 3px; }
+  .sector-signal { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 5px; }
+  .sector-signal.bull { background: #23863633; color: #3fb950; }
+  .sector-signal.neutral { background: #9e6a0333; color: #d29922; }
+  .sector-signal.bear { background: #6e171733; color: #f85149; }
+  .sector-text { font-size: 12px; color: #8b949e; line-height: 1.6; }
+
+  /* NEWS */
+  .news-item { padding: 14px 0; border-bottom: 1px solid #21262d; display: flex; gap: 12px; }
+  .news-item:last-child { border-bottom: none; }
+  .news-num {
+    background: #1f6feb;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .news-title { font-size: 14px; font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+  .news-body { font-size: 12px; color: #8b949e; line-height: 1.6; }
+  .news-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .tag-positive { background: #23863622; color: #3fb950; border: 1px solid #238636; }
+  .tag-negative { background: #6e171722; color: #f85149; border: 1px solid #6e1717; }
+  .tag-neutral { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+  /* SCHEDULE */
+  .schedule-item { display: flex; align-items: flex-start; gap: 14px; padding: 11px 0; border-bottom: 1px solid #21262d; }
+  .schedule-item:last-child { border-bottom: none; }
+  .schedule-date { font-size: 12px; font-weight: 700; color: #58a6ff; width: 80px; flex-shrink: 0; }
+  .schedule-event { font-size: 13px; color: #c9d1d9; flex: 1; }
+  .impact-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .impact-high { background: #6e171733; color: #f85149; border: 1px solid #6e1717; }
+  .impact-mid { background: #9e6a0333; color: #d29922; border: 1px solid #9e6a03; }
+  .impact-low { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+
+  /* KEY POINTS */
+  .keypoint { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #21262d; }
+  .keypoint:last-child { border-bottom: none; }
+  .keypoint-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: #1f6feb33;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+    padding-top: 2px;
+  }
+  .keypoint-title { font-size: 15px; font-weight: 700; color: #e6edf3; margin-bottom: 5px; }
+  .keypoint-body { font-size: 13px; color: #8b949e; line-height: 1.7; }
+
+  /* SEMI DEEP */
+  .semi-stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .semi-stat {
+    flex: 1;
+    min-width: 140px;
+    background: #1c2128;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .semi-stat .s-label { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .semi-stat .s-val { font-size: 18px; font-weight: 800; }
+  .semi-stock-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .semi-stock {
+    flex: 1;
+    min-width: 120px;
+    background: #1c2128;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    padding: 12px;
+    text-align: center;
+  }
+  .semi-stock .s-name { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .semi-stock .s-price { font-size: 16px; font-weight: 800; color: #e6edf3; }
+  .semi-stock .s-change { font-size: 12px; margin-top: 3px; }
+
+  /* FOOTER */
+  .footer {
+    background: #161b22;
+    border-top: 1px solid #21262d;
+    padding: 24px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #6e7681;
+    line-height: 1.8;
+  }
+  .footer strong { color: #8b949e; }
+
+  /* DIVIDER */
+  .section-divider { height: 1px; background: linear-gradient(90deg, transparent, #21262d, transparent); margin: 8px 0 18px; }
+
+  /* INDEX CHIP */
+  .index-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1c2128;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="author-tag">✦ 비서 윈터 작성</div>
+  <div class="header-badge">Korea Market Intelligence</div>
+  <h1>🇰🇷 한국 증시 장중 전망 보고서</h1>
+  <div class="header-meta">
+    <span>📅 2026년 04월 10일 (금요일)</span>
+    <span>⏰ 장 시작 전 기준</span>
+    <span>📊 전일 코스피 5,872.34 기준</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ★ HIGHLIGHT SECTION -->
+  <div class="highlight-section">
+    <div class="highlight-label">★ 금일 한국 증시 전망 하이라이트</div>
+    <div class="signal-row">
+      <div class="signal-badge">🟢 강세</div>
+      <div class="signal-desc">글로벌 리스크오프 해소 + 반도체 훈풍<br><span style="font-size:13px;color:#8b949e;">전일 코스피 +6.87% 급등 후 단기 숨 고르기 가능성, 그러나 기조는 강세 유지</span></div>
+    </div>
+
+    <div class="range-box">
+      <div class="range-item">
+        <div class="range-label">📈 코스피 예상 범위 (금일)</div>
+        <div class="range-value">5,810 – 5,980</div>
+        <div class="range-sub">전일 종가 5,872.34 기준 | 중립선 5,870</div>
+      </div>
+      <div class="range-item">
+        <div class="range-label">📈 코스닥 예상 범위 (금일)</div>
+        <div class="range-value">1,072 – 1,112</div>
+        <div class="range-sub">전일 종가 1,089.85 기준 | 중립선 1,090</div>
+      </div>
+    </div>
+
+    <ul class="bullet-list">
+      <li>미국 S&P500 소폭 상승(+0.62%), VIX 19.49(▼7.37%)로 공포 지수 안정화 — 전일 코스피 급등 모멘텀의 연속성 기대</li>
+      <li>필라델피아 반도체 +2.10%, 엔비디아 +1.01%, AMD +2.08%, 인텔 +4.70% 동반 강세 — 국내 반도체·HBM 관련주 수혜 지속</li>
+      <li>USD/KRW 1,477.6(▼1.44%) 원화 강세 전환 + DXY 하락(▼0.34%) — 외국인 수급 개선 기대, 단 급등 후 차익실현 매물 경계 필요</li>
+    </ul>
+
+    <div style="margin-bottom:12px;font-size:12px;color:#8b949e;font-weight:600;letter-spacing:1px;">🏷 주목 업종 TOP 3</div>
+    <div class="sector-tags">
+      <div class="sector-tag">🔬 반도체·HBM</div>
+      <div class="sector-tag gold">⚡ 방산·조선</div>
+      <div class="sector-tag green">🛢 에너지·정유</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: 미국 증시 요약 -->
+  <div class="card">
+    <div class="card-title">🇺🇸 미국 증시 최근 마감 요약</div>
+    <table>
+      <thead>
+        <tr>
+          <th>지수</th>
+          <th>종가</th>
+          <th>등락</th>
+          <th>등락률</th>
+          <th>평가</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>S&P 500</strong></td>
+          <td>6,824.66</td>
+          <td class="up">+42.21</td>
+          <td class="up">▲ 0.62%</td>
+          <td><span style="font-size:12px;color:#3fb950;">소폭 반등, 견조</span></td>
+        </tr>
+        <tr>
+          <td><strong>NASDAQ</strong></td>
+          <td>22,822.42</td>
+          <td class="up">+187.91</td>
+          <td class="up">▲ 0.83%</td>
+          <td><span style="font-size:12px;color:#3fb950;">기술주 주도 강세</span></td>
+        </tr>
+        <tr>
+          <td><strong>다우존스</strong></td>
+          <td>48,185.80</td>
+          <td class="up">+279.44</td>
+          <td class="up">▲ 0.58%</td>
+          <td><span style="font-size:12px;color:#3fb950;">경기민감주 회복</span></td>
+        </tr>
+        <tr>
+          <td><strong>Russell 2000</strong></td>
+          <td>2,636.31</td>
+          <td class="up">+15.72</td>
+          <td class="up">▲ 0.60%</td>
+          <td><span style="font-size:12px;color:#3fb950;">중소형주 동반 회복</span></td>
+        </tr>
+        <tr>
+          <td><strong>S&P 선물</strong></td>
+          <td>6,854.50</td>
+          <td class="up">+30.73</td>
+          <td class="up">▲ 0.45%</td>
+          <td><span style="font-size:12px;color:#3fb950;">야간 선물 추가 상승</span></td>
+        </tr>
+        <tr>
+          <td><strong>나스닥 선물</strong></td>
+          <td>25,212.00</td>
+          <td class="up">+138.87</td>
+          <td class="up">▲ 0.55%</td>
+          <td><span style="font-size:12px;color:#3fb950;">기술주 모멘텀 유지</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;font-size:12px;color:#8b949e;padding:10px 14px;background:#1c2128;border-radius:8px;border-left:3px solid #1f6feb;">
+      💡 <strong style="color:#c9d1d9;">총평:</strong> 미국 4대 지수 모두 상승 마감하며 한국 증시의 상승 기조를 지지. 야간 선물도 추가 상승 중으로 금일 코스피 강세 출발 가능성 높음. VIX 19.49 수준은 공포 해소 국면 진입을 시사.
+    </div>
+  </div>
+
+  <!-- SECTION 4: 글로벌 시장 현황 -->
+  <div class="card">
+    <div class="card-title">🌐 글로벌 시장 현황</div>
+    <div class="grid-2">
+      <div>
+        <div style="font-size:12px;color:#8b949e;font-weight:700;letter-spacing:1px;margin-bottom:10px;">💱 환율 / 금리</div>
+        <table>
+          <thead>
+            <tr><th>항목</th><th>현재</th><th>등락률</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>USD/KRW</td>
+              <td>1,477.6</td>
+              <td class="up">▼ 1.44% <span style="font-size:10px;color:#3fb950;">(원화강세)</span></td>
+            </tr>
+            <tr>
+              <td>달러인덱스 DXY</td>
+              <td>98.79</td>
+              <td class="up">▼ 0.34%</td>
+            </tr>
+            <tr>
+              <td>USD/JPY</td>
+              <td>159.08</td>
+              <td class="down">▲ 0.28% <span style="font-size:10px;color:#f85149;">(엔약세)</span></td>
+            </tr>
+            <tr>
+              <td>USD/CNY</td>
+              <td>6.83</td>
+              <td class="up">▼ 0.41% <span style="font-size:10px;color:#3fb950;">(위안강세)</span></td>
+            </tr>
+            <tr>
+              <td>미 10Y 국채금리</td>
+              <td>4.29%</td>
+              <td class="down">▲ 0.05%p <span style="font-size:10px;color:#f85149;">(소폭 상승)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#8b949e;font-weight:700;letter-spacing:1px;margin-bottom:10px;">🌏 아시아 증시</div>
+        <table>
+          <thead>
+            <tr><th>지수</th><th>종가</th><th>등락률</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>닛케이 225 🇯🇵</td>
+              <td>56,308.42</td>
+              <td class="up">▲ 5.39%</td>
+            </tr>
+            <tr>
+              <td>항셍 🇭🇰</td>
+              <td>25,893.02</td>
+              <td class="up">▲ 3.09%</td>
+            </tr>
+            <tr>
+              <td>상하이 종합 🇨🇳</td>
+              <td>3,995.00</td
+<section style="max-width:960px;margin:24px auto;padding:0 16px 32px;">
+  <h2 style="color:#58a6ff;font-size:1.15rem;border-bottom:1px solid #30363d;padding-bottom:8px;margin-bottom:16px;">🛢️ 원자재 / 암호화폐</h2>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;max-width:100%;">
+<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 10px;text-align:center;"><div style="font-size:1.4rem;">🥇</div><div style="font-size:.78rem;color:#8b949e;margin:4px 0;">금 (Gold)</div><div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">4,784.5</div><div style="color:#3fb950;font-size:.9rem;margin-top:4px;">▲0.74%</div><div style="color:#6e7681;font-size:.7rem;margin-top:2px;">2026-04-09</div></div>
+<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 10px;text-align:center;"><div style="font-size:1.4rem;">🥈</div><div style="font-size:.78rem;color:#8b949e;margin:4px 0;">은 (Silver)</div><div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">75.42</div><div style="color:#3fb950;font-size:.9rem;margin-top:4px;">▲0.26%</div><div style="color:#6e7681;font-size:.7rem;margin-top:2px;">2026-04-09</div></div>
+<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 10px;text-align:center;"><div style="font-size:1.4rem;">🔶</div><div style="font-size:.78rem;color:#8b949e;margin:4px 0;">구리 (Copper)</div><div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">5.75</div><div style="color:#f85149;font-size:.9rem;margin-top:4px;">▼0.22%</div><div style="color:#6e7681;font-size:.7rem;margin-top:2px;">2026-04-09</div></div>
+<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 10px;text-align:center;"><div style="font-size:1.4rem;">🛢️</div><div style="font-size:.78rem;color:#8b949e;margin:4px 0;">WTI 원유</div><div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">98.29</div><div style="color:#3fb950;font-size:.9rem;margin-top:4px;">▲4.11%</div><div style="color:#6e7681;font-size:.7rem;margin-top:2px;">2026-04-09</div></div>
+<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px 10px;text-align:center;"><div style="font-size:1.4rem;">₿</div><div style="font-size:.78rem;color:#8b949e;margin:4px 0;">BTC/USD</div><div style="font-weight:bold;color:#c9d1d9;font-size:1.05rem;">71,847.52</div><div style="color:#3fb950;font-size:.9rem;margin-top:4px;">▲1.02%</div><div style="color:#6e7681;font-size:.7rem;margin-top:2px;">2026-04-09</div></div>
+  </div>
+</section>
