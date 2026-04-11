@@ -65,9 +65,12 @@
 
 ### 5. Eval Framework (`eval/`)
 - **EvalRunner**: 모델 × 하네스 조합을 벤치마크 데이터셋으로 평가
-- **Scorers**: exact_match, contains, regex, test_pass + LLM-as-judge (예정)
+- **Scorers**: exact_match, contains, regex, test_pass, code_quality, LLM-as-Judge, Pairwise 비교
 - **CI Gate**: 평균 점수가 임계값 미달 시 PR 머지 차단
-- **Report**: JSON 결과 + PR 코멘트로 자동 리포팅
+- **Report**: JSON + 인터랙티브 HTML 대시보드 (비교 차트, 트렌드 스파크라인)
+- **History**: 파일 기반 결과 히스토리, 회귀 감지 (5% 이상 하락 경고)
+- **A/B Testing**: Welch's t-test 기반 프롬프트/하네스 비교 (95% 신뢰구간)
+- **Eval Worker**: Redis 큐 기반 비동기 평가 작업 처리
 
 ### 6. Prompt Registry (`prompts/`)
 - **Versioning**: 프롬프트를 불변 버전으로 관리

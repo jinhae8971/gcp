@@ -252,7 +252,11 @@ def _welch_t_test(a: list[float], b: list[float]) -> tuple[str, float]:
 
     se = math.sqrt(var_a / n_a + var_b / n_b)
     if se < 1e-10:
-        return "tie", 1.0 if abs(mean_a - mean_b) < 1e-10 else 0.0
+        if abs(mean_a - mean_b) < 1e-10:
+            return "tie", 1.0
+        # Zero variance but different means → deterministic winner
+        winner = "B" if mean_b > mean_a else "A"
+        return winner, 1.0
 
     t_stat = (mean_b - mean_a) / se
 

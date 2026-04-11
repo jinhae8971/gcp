@@ -68,7 +68,7 @@ def _build_score_matrix(results: list[TaskResult]) -> list[dict[str, Any]]:
             buckets[key].append(s)
 
     matrix = []
-    for (model, harness), scores in sorted(buckets.keys()):
+    for (model, harness) in sorted(buckets.keys()):
         vals = buckets[(model, harness)]
         matrix.append({
             "model": model,

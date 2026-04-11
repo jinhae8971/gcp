@@ -30,7 +30,7 @@ class EvalHistory:
 
     def save(self, report: EvalReport) -> str:
         """Save a report to the history directory. Returns the file path."""
-        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
         name = f"{report.config.name}_{ts}.json"
         path = self._dir / name
         data = report.to_dict()
