@@ -1,0 +1,102 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-platform"
+version = "0.1.0"
+description = "In-house Agentic Coding Platform - Multi-model evaluation and orchestration system"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "AI Agent Platform Team" }]
+
+dependencies = [
+    # --- LLM Providers ---
+    "anthropic>=0.49.0",
+    "openai>=1.60.0",
+    "google-genai>=1.0.0",
+    # --- Model Gateway ---
+    "litellm>=1.55.0",
+    # --- API Server ---
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "websockets>=14.0",
+    # --- MCP ---
+    "mcp>=1.0.0",
+    # --- Observability ---
+    "opentelemetry-api>=1.28.0",
+    "opentelemetry-sdk>=1.28.0",
+    "structlog>=24.4.0",
+    # --- Config & Validation ---
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "pyyaml>=6.0.2",
+    # --- Async ---
+    "httpx>=0.28.0",
+    "anyio>=4.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+]
+eval = [
+    "pandas>=2.2.0",
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.0",
+    "jinja2>=3.1.0",
+]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.27.0",
+]
+
+[project.scripts]
+agent-platform = "agent_platform.cli:main"
+ap-eval = "agent_platform.eval.runner:cli_main"
+ap-server = "agent_platform.api.server:cli_main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_platform"]
+
+# --- Ruff (Linter + Formatter) ---
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "B", "A", "C4", "PT"]
+ignore = ["S101"]  # allow assert in tests
+
+[tool.ruff.lint.isort]
+known-first-party = ["agent_platform"]
+
+# --- Pytest ---
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "unit: fast isolated tests",
+    "integration: tests requiring external services",
+    "eval: model evaluation tests (slow, may cost money)",
+]
+
+# --- MyPy ---
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["litellm.*", "mcp.*"]
+ignore_missing_imports = true

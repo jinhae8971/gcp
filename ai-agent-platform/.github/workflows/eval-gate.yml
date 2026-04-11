@@ -1,0 +1,89 @@
+name: Eval Gate - Model Quality Check
+
+on:
+  # Manual trigger for on-demand evaluation
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Comma-separated model IDs to evaluate'
+        required: false
+        default: 'claude-sonnet-4-20250514'
+      harnesses:
+        description: 'Comma-separated harness patterns to test'
+        required: false
+        default: 'react,plan_execute'
+      threshold:
+        description: 'Minimum score threshold (0.0-1.0)'
+        required: false
+        default: '0.7'
+  # Also run on PRs that change eval or harness code
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ai-agent-platform/src/agent_platform/eval/**'
+      - 'ai-agent-platform/src/agent_platform/harness/**'
+      - 'ai-agent-platform/eval/**'
+
+defaults:
+  run:
+    working-directory: ai-agent-platform
+
+jobs:
+  evaluate:
+    name: Run Evaluation Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,eval]"
+
+      - name: Run evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          python -m agent_platform.eval.runner \
+            --config eval/configs/default_eval.yaml \
+            --output eval/results/ci-${{ github.sha }}.json \
+            --ci-gate
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results-${{ github.sha }}
+          path: ai-agent-platform/eval/results/
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsPath = 'ai-agent-platform/eval/results/ci-${{ github.sha }}.json';
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const s = results.summary;
+              const body = `## Eval Results
+            | Metric | Value |
+            |--------|-------|
+            | Average Score | ${s.average_score.toFixed(4)} |
+            | Pass Rate | ${(s.pass_rate * 100).toFixed(1)}% |
+            | Total Cost | $${s.total_cost_usd.toFixed(4)} |
+            | Gate Status | ${s.passes_gate ? 'PASSED' : 'FAILED'} |`;
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            }

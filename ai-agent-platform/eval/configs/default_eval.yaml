@@ -1,0 +1,26 @@
+# Default evaluation configuration
+name: default
+dataset_path: eval/datasets/sample_tasks.jsonl
+
+# Models to evaluate
+models:
+  - claude-sonnet-4-20250514
+  - gpt-4o
+  - gemini-2.5-pro
+
+# Harness patterns to compare
+harnesses:
+  - react
+  - plan_execute
+
+# Scoring methods
+scorers:
+  - exact_match
+  - test_pass
+
+# CI gate: fail if average score drops below this
+min_score_threshold: 0.7
+
+# Concurrency settings
+max_concurrent: 4
+timeout_per_task: 300
