@@ -223,12 +223,44 @@ def cli_main() -> None:
     parser.add_argument("--config", default="eval/configs/default_eval.yaml")
     parser.add_argument("--output", default="eval/results/latest.json")
     parser.add_argument("--ci-gate", action="store_true", help="Exit with code 1 if gate fails")
+    parser.add_argument("--dashboard", action="store_true", help="Generate HTML dashboard")
+    parser.add_argument("--history", action="store_true", help="Save to history for trend tracking")
+    parser.add_argument("--compare", action="store_true", help="Compare with previous run")
     args = parser.parse_args()
 
     config = EvalConfig.from_yaml(args.config)
     runner = EvalRunner()
     report = asyncio.run(runner.run(config))
     report.save(args.output)
+
+    # Save to history
+    if args.history:
+        from agent_platform.eval.history import EvalHistory
+        history = EvalHistory()
+        history.save(report)
+
+    # Generate dashboard
+    if args.dashboard:
+        from agent_platform.eval.history import EvalHistory
+        from agent_platform.eval.reporters import generate_html_dashboard
+        history = EvalHistory()
+        trend = history.get_trend(name_filter=config.name)
+        dash_path = generate_html_dashboard(report, history=trend)
+        print(f"Dashboard: {dash_path}")
+
+    # Compare with previous
+    if args.compare:
+        from agent_platform.eval.history import EvalHistory
+        history = EvalHistory()
+        comparison = history.compare_last_two(name_filter=config.name)
+        if comparison:
+            delta = comparison["score_delta"]
+            direction = "improved" if delta > 0 else "regressed" if delta < 0 else "unchanged"
+            print(f"\nVs previous: {direction} by {abs(delta):.4f}")
+            if comparison["regression"]:
+                print("WARNING: Score regression detected (>5% drop)")
+        else:
+            print("\nNo previous run to compare against.")
 
     print(json.dumps(report.to_dict()["summary"], indent=2))
 
