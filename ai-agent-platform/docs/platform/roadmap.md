@@ -47,16 +47,16 @@
 
 ---
 
-## Phase 3: Advanced Harness Patterns
+## Phase 3: Advanced Harness Patterns ✅
 
 다양한 에이전트 아키텍처 실험
 
-- [ ] Architect harness (설계 전문 에이전트)
-- [ ] Code Review harness (리뷰 특화)
-- [ ] Multi-file harness (대규모 리팩토링)
-- [ ] Debate harness (두 에이전트가 토론하며 해결)
-- [ ] Human-in-the-loop harness (승인 기반 실행)
-- [ ] 하네스 성능 비교 자동 리포트
+- [x] Architect harness (설계 전문 에이전트, read-only 도구)
+- [x] Code Review harness (5차원 루브릭 리뷰)
+- [x] Multi-file harness (manifest 기반 대규모 리팩토링)
+- [x] Debate harness (Proposer/Critic/Judge 3-phase 토론)
+- [x] Human-in-the-loop harness (ask / allow_safe 2모드 승인)
+- [x] 하네스 성능 비교 자동 리포트 (per-category winner, markdown/JSON)
 
 ---
 

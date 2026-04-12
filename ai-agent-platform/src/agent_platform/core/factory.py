@@ -13,7 +13,12 @@ import structlog
 
 from agent_platform.config.settings import Settings, get_settings
 from agent_platform.core.session_store import BaseSessionStore, InMemorySessionStore, RedisSessionStore
+from agent_platform.harness.architect import ArchitectHarness
 from agent_platform.harness.base import BaseHarness
+from agent_platform.harness.code_review import CodeReviewHarness
+from agent_platform.harness.debate import DebateHarness
+from agent_platform.harness.human_in_loop import HumanInLoopHarness
+from agent_platform.harness.multi_file import MultiFileHarness
 from agent_platform.harness.plan_execute import PlanExecuteHarness
 from agent_platform.harness.react import ReactHarness
 from agent_platform.models.gateway import ModelGateway
@@ -96,6 +101,11 @@ def _build_harnesses(tool_registry: ToolRegistry) -> dict[str, BaseHarness]:
     return {
         "react": ReactHarness(tool_definitions=tool_defs),
         "plan_execute": PlanExecuteHarness(tool_definitions=tool_defs),
+        "architect": ArchitectHarness(tool_definitions=tool_defs),
+        "code_review": CodeReviewHarness(tool_definitions=tool_defs),
+        "multi_file": MultiFileHarness(tool_definitions=tool_defs),
+        "debate": DebateHarness(tool_definitions=tool_defs),
+        "human_in_loop": HumanInLoopHarness(tool_definitions=tool_defs),
     }
 
 
