@@ -113,6 +113,52 @@ Response to user (REST or WebSocket stream)
 |-------|-----------|
 | File I/O | 작업 공간 밖 경로 접근 차단 (`_validate_path`) |
 | Shell | 타임아웃 + 출력 크기 제한 |
-| API | Secret key 인증 + CORS |
+| API | HS256 JWT + RBAC (`security/auth.py`) |
 | Container | Non-root 사용자 실행 + isolated workspace volume |
+| Sandbox | Tiered profiles (`security/sandbox_policy.py`: dev → standard → hardened(gVisor) → isolated_vm(Firecracker)) |
+| Rate limit | 티어별 토큰 버킷 (`security/rate_limit.py`) |
+| Budget | 월간 비용 한도 + alert/exceeded 상태 (`security/budget.py`) |
+| Tenancy | `TenantScopedSessionStore`로 cross-tenant 차단 |
 | Network | 프로바이더 API 키 환경변수 분리 |
+
+## Multi-Tenancy & Teams (Phase 5)
+
+```
+Request ──► AuthService.verify_token ──► Principal(tenant_id, roles)
+                                              │
+                                              ▼
+                              TieredRateLimiter.acquire(tier)
+                                              │
+                                              ▼
+                         TenantScopedSessionStore(tenant_id)
+                                              │
+                                              ▼
+                       TeamConfigRegistry.find_by_member(subject)
+                                              │
+                                              ▼
+                     resolve_session_defaults(team, global_defaults)
+                                              │
+                                              ▼
+                                       AgentSession
+```
+
+팀 단위 대규모 리팩토링은 `AgentTeamCoordinator`가 git worktree로 각 에이전트를
+격리하여 병렬 실행한다. 성공한 worktree만 통합 브랜치로 merge-back 되며,
+실패한 worktree는 브랜치 삭제와 함께 폐기된다.
+
+## Observability
+
+- **Tracing**: OpenTelemetry → OTLP endpoint (configurable)
+- **Logging**: structlog JSON → ELK/Loki 수집
+- **Metrics**: Prometheus 텍스트 포맷 (`observability/metrics.py`)
+  - `agent_runs_total{harness,status}`
+  - `agent_iteration_seconds` (histogram)
+  - `llm_cost_usd_total{tenant,model}`
+  - `sessions_active{tenant}`
+- **Notifications**: `NotificationDispatcher` → LogBackend / SlackWebhookBackend
+
+## Self-Hosted Models
+
+`LocalOpenAIProvider`로 OpenAI 호환 엔드포인트(vLLM, Ollama, LM Studio)를 프로바이더로
+등록할 수 있다. `openai` SDK 의존성 없이 stdlib urllib로 통신하므로 minimal
+deploy 환경에서도 동작한다.

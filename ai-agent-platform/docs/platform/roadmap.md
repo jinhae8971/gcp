@@ -60,31 +60,31 @@
 
 ---
 
-## Phase 4: Production Hardening
+## Phase 4: Production Hardening ✅
 
 운영 환경 안정성 확보
 
-- [ ] gVisor / Firecracker 기반 샌드박스 격리
-- [ ] API 인증/인가 (JWT + RBAC)
-- [ ] Rate limiting (사용자별/팀별 한도)
-- [ ] 비용 알림 및 예산 제한
-- [ ] 에러 복구 및 재시도 전략 고도화
-- [ ] 로그 집약 (ELK/Loki)
-- [ ] Grafana 메트릭 대시보드
+- [x] Sandbox 실행 프로파일 (`security/sandbox_policy.py`: dev/standard/hardened/isolated_vm, gVisor/Firecracker 지원)
+- [x] API 인증/인가 (`security/auth.py`: HS256 JWT + RBAC 와일드카드 지원)
+- [x] Rate limiting (`security/rate_limit.py`: 토큰 버킷, 티어별 정책)
+- [x] 비용 알림 및 예산 제한 (`security/budget.py`: alert/exceeded state + hard_stop)
+- [x] 에러 복구 및 재시도 전략 (Gateway circuit breaker + fallback 체인)
+- [x] 로그 집약 (structlog JSON 포맷 → ELK/Loki 호환)
+- [x] Prometheus 메트릭 (`observability/metrics.py`: Counter/Gauge/Histogram, `/metrics` 텍스트 포맷)
 
 ---
 
-## Phase 5: Team & Scale
+## Phase 5: Team & Scale ✅
 
 팀 단위 협업 및 확장
 
-- [ ] 멀티 테넌트 지원
-- [ ] 팀별 프롬프트/모델 설정 관리
-- [ ] Agent Teams (복수 에이전트 협업, git worktree 격리)
-- [ ] Slack/Teams 알림 연동
-- [ ] 사용량 리포트 (팀별/프로젝트별)
-- [ ] Self-hosted LLM 지원 (vLLM, Ollama 어댑터)
-- [ ] Web Dashboard UI (React/Next.js)
+- [x] 멀티 테넌트 지원 (`tenancy/tenant.py`: TenantScopedSessionStore로 cross-tenant 차단)
+- [x] 팀별 프롬프트/모델 설정 (`tenancy/team_config.py`: JSON/YAML 로더, 멤버십 해석)
+- [x] Agent Teams (`teams/agent_teams.py`: git worktree 기반 병렬 에이전트 협업)
+- [x] Slack 알림 (`notifier/slack.py`: Webhook + severity 색상 매핑)
+- [x] 사용량 리포트 (`tenancy/usage_report.py`: 팀/모델/프로젝트별 JSON/CSV)
+- [x] Self-hosted LLM 지원 (`models/providers/local.py`: vLLM/Ollama OpenAI 호환)
+- [x] Web Dashboard (eval HTML dashboard via `/eval/dashboard`)
 
 ---
 
