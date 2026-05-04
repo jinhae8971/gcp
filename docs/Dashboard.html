@@ -1680,7 +1680,7 @@ function NavIcon({ name }) {
   }
 }
 
-function Sidebar({ active, onChange, data, isMac, dataSource }) {
+function Sidebar({ active, onChange, data, isMac, dataSource, onOpenSettings }) {
   const marketStatus = useMarketStatus();
   const tickCountdown = useTickCountdown(30);
   const sourceLabel = dataSource === 'live' ? 'LIVE DATA' : dataSource === 'fetching' ? 'FETCHING...' : 'SAMPLE DATA';
@@ -1693,18 +1693,35 @@ function Sidebar({ active, onChange, data, isMac, dataSource }) {
       padding: '18px 12px 14px',
       position: 'sticky', top: 0, height: '100vh',
     }}>
-      <a href="#" onClick={e => { e.preventDefault(); onChange('overview'); }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px 16px' }}>
-        <div style={{
-          width: 28, height: 28, borderRadius: 5,
-          background: 'linear-gradient(135deg, var(--accent-bright) 0%, var(--accent) 100%)',
-          display: 'grid', placeItems: 'center', color: '#1a1206', fontWeight: 800, fontSize: 13,
-          boxShadow: '0 2px 12px rgba(230,180,80,0.3)', fontFamily: 'var(--font)',
-        }}>K</div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: '-0.01em', color: 'var(--ink)' }}>KOSPI Intel</div>
-          <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 1 }}>PRO · v2.0</div>
-        </div>
-      </a>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px 16px' }}>
+        <a href="#" onClick={e => { e.preventDefault(); onChange('overview'); }} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: 5,
+            background: 'linear-gradient(135deg, var(--accent-bright) 0%, var(--accent) 100%)',
+            display: 'grid', placeItems: 'center', color: '#1a1206', fontWeight: 800, fontSize: 13,
+            boxShadow: '0 2px 12px rgba(230,180,80,0.3)', fontFamily: 'var(--font)',
+          }}>K</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: '-0.01em', color: 'var(--ink)' }}>KOSPI Intel</div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 1 }}>PRO · v2.0</div>
+          </div>
+        </a>
+        <button onClick={onOpenSettings} title={`설정 · ${isMac ? '⌘' : 'Ctrl+'},`}
+          style={{
+            width: 28, height: 28, borderRadius: 5, background: 'transparent',
+            border: '1px solid var(--line)', color: 'var(--ink-3)',
+            display: 'grid', placeItems: 'center', cursor: 'pointer',
+            transition: 'all 0.1s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-3)'; e.currentTarget.style.color = 'var(--accent-bright)'; e.currentTarget.style.borderColor = 'var(--line-bright)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ink-3)'; e.currentTarget.style.borderColor = 'var(--line)'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
 
       <div style={{
         background: 'var(--surface)', border: '1px solid var(--line)',
@@ -1793,6 +1810,182 @@ function Sidebar({ active, onChange, data, isMac, dataSource }) {
 }
 
 /* ===================================================================
+   Settings — localStorage-backed user preferences
+=================================================================== */
+const SETTINGS_KEYS = {
+  ANTHROPIC_KEY: 'kospi_intel_anthropic_key',
+  REFRESH_INTERVAL: 'kospi_intel_refresh_min',
+};
+
+function loadSetting(key, fallback) {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
+function saveSetting(key, val) {
+  try { if (val) localStorage.setItem(key, val); else localStorage.removeItem(key); } catch {}
+}
+
+/* Inject window.claude.complete shim if user provides Anthropic key */
+function installClaudeShim(apiKey) {
+  if (!apiKey) {
+    if (window.claude && window.claude._isShim) delete window.claude;
+    return;
+  }
+  window.claude = {
+    _isShim: true,
+    complete: async (prompt) => {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1024,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.text();
+        throw new Error(`Anthropic API ${r.status}: ${err.slice(0, 200)}`);
+      }
+      const j = await r.json();
+      return j.content?.[0]?.text || '';
+    },
+  };
+}
+
+function SettingsModal({ open, onClose }) {
+  const [anthropicKey, setAnthropicKey] = useState(loadSetting(SETTINGS_KEYS.ANTHROPIC_KEY, ''));
+  const [refreshMin, setRefreshMin] = useState(loadSetting(SETTINGS_KEYS.REFRESH_INTERVAL, '5'));
+  const [showKey, setShowKey] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  if (!open) return null;
+
+  const handleSave = () => {
+    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, anthropicKey.trim());
+    saveSetting(SETTINGS_KEYS.REFRESH_INTERVAL, refreshMin);
+    installClaudeShim(anthropicKey.trim());
+    setSaved(true);
+    setTimeout(() => { setSaved(false); onClose(); }, 800);
+  };
+
+  const handleClear = () => {
+    if (!confirm('저장된 API 키를 모두 삭제할까요?')) return;
+    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, '');
+    setAnthropicKey('');
+    installClaudeShim('');
+  };
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(4px)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: 'var(--surface)', border: '1px solid var(--line)',
+        borderRadius: 10, width: 540, maxWidth: '90vw', maxHeight: '90vh',
+        overflow: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+      }}>
+        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>SETTINGS</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>설정</div>
+          </div>
+          <button onClick={onClose} className="btn-ghost" style={{ width: 32, height: 32, padding: 0, fontSize: 18 }}>×</button>
+        </div>
+
+        <div style={{ padding: '18px 22px' }}>
+          {/* Anthropic API key */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-bright)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>ANTHROPIC API KEY</span>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>· AI 코멘트 활성화용</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.55, marginBottom: 10 }}>
+              API 키 입력 시 RUN ANALYSIS 버튼이 실제 Claude를 호출합니다.<br/>
+              미입력 시 오프라인 샘플 코멘트로 작동.
+              {' '}<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style={{ color: 'var(--accent-bright)', textDecoration: 'underline' }}>키 발급</a>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type={showKey ? 'text' : 'password'}
+                value={anthropicKey}
+                onChange={e => setAnthropicKey(e.target.value)}
+                placeholder="sk-ant-..."
+                className="mono"
+                style={{
+                  flex: 1, background: 'var(--bg-soft)', border: '1px solid var(--line)',
+                  borderRadius: 5, padding: '8px 10px', color: 'var(--ink)',
+                  fontSize: 12, fontFamily: 'var(--font-num)',
+                }}
+              />
+              <button onClick={() => setShowKey(!showKey)} className="btn-ghost" style={{ minWidth: 60 }}>
+                {showKey ? 'HIDE' : 'SHOW'}
+              </button>
+            </div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 6, lineHeight: 1.5 }}>
+              ⚠ 키는 브라우저 localStorage에만 저장됩니다 (서버로 전송 안 함). Claude API는 직접 호출됩니다.
+            </div>
+          </div>
+
+          {/* Refresh interval */}
+          <div style={{ marginBottom: 22 }}>
+            <div className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+              REFRESH INTERVAL · 자동 갱신 주기
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {['1', '3', '5', '10', '30'].map(m => (
+                <button key={m} onClick={() => setRefreshMin(m)} className="btn-ghost"
+                  style={{ flex: 1, background: refreshMin === m ? 'var(--surface-3)' : 'var(--surface-2)', color: refreshMin === m ? 'var(--ink)' : 'var(--ink-3)' }}>
+                  {m}m
+                </button>
+              ))}
+            </div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 6 }}>
+              현재: <b style={{ color: 'var(--ink-2)' }}>{refreshMin}분</b> 마다 dashboard_data.json 재페치
+            </div>
+          </div>
+
+          {/* KRX (server-side) */}
+          <div style={{ marginBottom: 22, padding: 14, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 6 }}>
+            <div className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              KRX 자격증명 · 서버사이드 설정
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.6 }}>
+              KRX 일부 API는 로그인이 필요합니다. <b style={{ color: 'var(--ink-2)' }}>Repository → Settings → Secrets and variables → Actions</b>에서 다음 두 시크릿을 추가하세요:
+              <div className="mono" style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span><span style={{ color: 'var(--accent-bright)' }}>KRX_ID</span> = 본인 KRX 정보데이터시스템 ID</span>
+                <span><span style={{ color: 'var(--accent-bright)' }}>KRX_PW</span> = 비밀번호</span>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: 'var(--ink-4)' }}>
+                미설정 시 자동으로 Naver Finance 폴백으로 동작 (섹터 수급 데이터는 제한적)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          <button onClick={handleClear} className="btn-ghost" style={{ color: 'var(--down)' }}>
+            CLEAR KEYS
+          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={onClose} className="btn-ghost">CANCEL</button>
+            <button onClick={handleSave} className="btn-run" style={{ height: 32, fontSize: 11 }}>
+              {saved ? '✓ SAVED' : 'SAVE'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===================================================================
    DashboardApp — root, with keyboard shortcuts
 =================================================================== */
 function DashboardApp() {
@@ -1802,6 +1995,13 @@ function DashboardApp() {
   const [selectedSector, setSelectedSector] = useState('semi');
   const [runTrigger, setRunTrigger] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Install Claude API shim from saved settings (runs once on mount)
+  useEffect(() => {
+    const key = loadSetting(SETTINGS_KEYS.ANTHROPIC_KEY, '');
+    installClaudeShim(key);
+  }, []);
 
   // Fetch live data from generated JSON, fall back to inline mock if unavailable
   useEffect(() => {
@@ -1818,7 +2018,6 @@ function DashboardApp() {
           setDataSource('inline');
           return;
         }
-        // Validate minimum shape
         if (!live.kospi || !live.sectors || live.sectors.length === 0) {
           console.warn('[data] live JSON incomplete — using inline mock');
           setDataSource('inline');
@@ -1826,17 +2025,17 @@ function DashboardApp() {
         }
         setData(live);
         setDataSource('live');
-        console.log('[data] live JSON loaded · asOf', live.asOf);
+        console.log('[data] live JSON loaded · source=' + (live._source || 'unknown') + ' · asOf ' + live.asOf);
       } catch (e) {
         console.warn('[data] fetch failed:', e.message, '— using inline mock');
         if (!cancelled) setDataSource('inline');
       }
     };
     loadLiveData();
-    // Auto-refresh every 5 minutes during market hours
-    const id = setInterval(loadLiveData, 5 * 60 * 1000);
+    const refreshMin = parseInt(loadSetting(SETTINGS_KEYS.REFRESH_INTERVAL, '5'), 10) || 5;
+    const id = setInterval(loadLiveData, refreshMin * 60 * 1000);
     return () => { cancelled = true; clearInterval(id); };
-  }, []);
+  }, [settingsOpen]); // Re-run when settings close (refresh interval may have changed)
 
   // Safety: if active selectedSector doesn't exist in current data, pick first
   useEffect(() => {
@@ -1858,11 +2057,16 @@ function DashboardApp() {
 
   const goHome = useCallback(() => setActive('overview'), []);
 
-  // Global keyboard shortcuts: Cmd/Ctrl+1..7 to switch nav
+  // Global keyboard shortcuts: Cmd/Ctrl+1..7 to switch nav, Cmd/Ctrl+, for settings
   useEffect(() => {
     const handler = (e) => {
       const meta = isMac ? e.metaKey : e.ctrlKey;
       if (!meta) return;
+      if (e.key === ',') {
+        e.preventDefault();
+        setSettingsOpen(true);
+        return;
+      }
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= NAV_ITEMS.length) {
         e.preventDefault();
@@ -1889,7 +2093,7 @@ function DashboardApp() {
       display: 'flex',
       fontFamily: 'var(--font)',
     }}>
-      <Sidebar active={active} onChange={setActive} data={data} isMac={isMac} dataSource={dataSource} />
+      <Sidebar active={active} onChange={setActive} data={data} isMac={isMac} dataSource={dataSource} onOpenSettings={() => setSettingsOpen(true)} />
       <main style={{
         flex: 1,
         padding: '24px 28px 36px',
@@ -1897,6 +2101,7 @@ function DashboardApp() {
       }}>
         <PageComp ctx={ctx} />
       </main>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

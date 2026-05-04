@@ -70,51 +70,135 @@ def safe_int(x, default=0):
 
 
 # ─────────────────────────────────────────
+# Naver Finance Mobile API (KRX 로그인 불필요)
+# ─────────────────────────────────────────
+NAVER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0",
+    "Accept": "application/json",
+}
+
+
+def naver_index_basic(market="KOSPI"):
+    """Naver: KOSPI/KOSDAQ 인덱스 기본 시세"""
+    try:
+        url = f"https://m.stock.naver.com/api/index/{market}/basic"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
+        r.raise_for_status()
+        d = r.json()
+        return {
+            "value": safe_float(d.get("closePrice", "0").replace(",", "")),
+            "change": safe_float(d.get("compareToPreviousClosePrice", "0").replace(",", "")),
+            "changePct": safe_float(d.get("fluctuationsRatio", "0")),
+            "high": safe_float(d.get("highPrice", "0").replace(",", "")),
+            "low": safe_float(d.get("lowPrice", "0").replace(",", "")),
+            "volume": safe_int(d.get("accumulatedTradingValue", "0").replace(",", "")),
+        }
+    except Exception as e:
+        print(f"  [naver-index] {market} failed: {e}")
+        return None
+
+
+def naver_index_intraday(market="KOSPI"):
+    """Naver: 인덱스 일봉 차트 (최근 30일)"""
+    try:
+        url = f"https://m.stock.naver.com/api/chart/domestic/index/{market}?periodType=dayCandle&count=30"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
+        r.raise_for_status()
+        d = r.json()
+        out = []
+        for row in d:
+            t = row.get("localTime", "")[5:10]  # MM-DD
+            close = safe_float(row.get("closePrice", 0))
+            out.append([t, close])
+        return out[-20:]
+    except Exception as e:
+        print(f"  [naver-intraday] {market} failed: {e}")
+        return None
+
+
+def naver_top_stocks(market="KOSPI", direction="up", limit=30):
+    """Naver: 상승/하락 상위 종목 (페이지당 100개씩)"""
+    try:
+        url = f"https://m.stock.naver.com/api/stocks/{direction}/{market}?page=1&pageSize=100"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
+        r.raise_for_status()
+        d = r.json()
+        stocks = d.get("stocks", [])
+        out = []
+        for s in stocks[:limit]:
+            out.append({
+                "code": s.get("itemCode", ""),
+                "name": s.get("stockName", ""),
+                "price": safe_int(str(s.get("closePrice", "0")).replace(",", "")),
+                "changePct": safe_float(s.get("fluctuationsRatio", 0)),
+                "volume_won": safe_int(str(s.get("accumulatedTradingValue", "0")).replace(",", "")),
+                "volume": safe_int(str(s.get("accumulatedTradingVolume", "0")).replace(",", "")),
+            })
+        return out
+    except Exception as e:
+        print(f"  [naver-top] {direction} failed: {e}")
+        return []
+
+
+def naver_stock_integration(code):
+    """Naver: 개별 종목 상세 (외인 보유율 등)"""
+    try:
+        url = f"https://m.stock.naver.com/api/stocks/{code}/integration"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+        r.raise_for_status()
+        return r.json()
+    except Exception:
+        return None
+
+
+# ─────────────────────────────────────────
 # 1. KOSPI 종합 지수
 # ─────────────────────────────────────────
 def fetch_kospi_index():
-    """KOSPI 지수: 현재가, 등락, 인트라데이 시세"""
-    from pykrx import stock
+    """KOSPI 지수: pykrx 우선, 실패 시 Naver 폴백"""
+    # 1차 시도: pykrx
+    try:
+        from pykrx import stock
+        today = TODAY
+        yesterday_dt = NOW.date() - datetime.timedelta(days=10)
+        yesterday = yesterday_dt.strftime("%Y%m%d")
+        df = stock.get_index_ohlcv(yesterday, today, "1001")
+        if df is None or df.empty:
+            raise RuntimeError("KOSPI index data empty")
 
-    today = TODAY
-    yesterday_dt = NOW.date() - datetime.timedelta(days=10)
-    yesterday = yesterday_dt.strftime("%Y%m%d")
+        today_row = df.iloc[-1]
+        prev_row = df.iloc[-2] if len(df) >= 2 else df.iloc[-1]
+        value = safe_float(today_row["종가"])
+        prev_close = safe_float(prev_row["종가"])
+        change = value - prev_close
+        change_pct = (change / prev_close * 100) if prev_close else 0.0
+        intraday = [[idx.strftime("%m-%d"), safe_float(row["종가"])] for idx, row in df.tail(20).iterrows()]
+        return {
+            "value": value, "change": change, "changePct": change_pct,
+            "high": safe_float(today_row["고가"]),
+            "low": safe_float(today_row["저가"]),
+            "volume": safe_int(today_row.get("거래대금", 0)),
+            "intraday": intraday, "prev_close": prev_close,
+            "_source": "pykrx",
+        }
+    except Exception as e:
+        print(f"  [kospi-index] pykrx failed: {e} → Naver fallback")
 
-    # KOSPI 지수 코드: "1001"
-    df = stock.get_index_ohlcv(yesterday, today, "1001")
-    if df is None or df.empty:
-        raise RuntimeError("KOSPI index data empty")
-
-    # 마지막 두 봉 (어제 종가 vs 오늘 종가)
-    today_row = df.iloc[-1]
-    prev_row = df.iloc[-2] if len(df) >= 2 else df.iloc[-1]
-
-    value = safe_float(today_row["종가"])
-    prev_close = safe_float(prev_row["종가"])
-    change = value - prev_close
-    change_pct = (change / prev_close * 100) if prev_close else 0.0
-
-    high = safe_float(today_row["고가"])
-    low = safe_float(today_row["저가"])
-
-    # 거래대금: pykrx에서 "거래대금" 컬럼 (원 단위)
-    volume = safe_int(today_row.get("거래대금", 0))
-
-    # 인트라데이는 pykrx로 못 받음 → 일봉 최근 20개로 대체 (간이 차트)
-    intraday = []
-    for idx, row in df.tail(20).iterrows():
-        t = idx.strftime("%m-%d")
-        intraday.append([t, safe_float(row["종가"])])
-
+    # 2차 시도: Naver
+    basic = naver_index_basic("KOSPI")
+    if not basic or basic["value"] == 0:
+        raise RuntimeError("KOSPI index unavailable from both pykrx and Naver")
+    intraday = naver_index_intraday("KOSPI") or [["", basic["value"]]]
     return {
-        "value": value,
-        "change": change,
-        "changePct": change_pct,
-        "high": high,
-        "low": low,
-        "volume": volume,
+        "value": basic["value"],
+        "change": basic["change"],
+        "changePct": basic["changePct"],
+        "high": basic["high"],
+        "low": basic["low"],
+        "volume": basic["volume"],
         "intraday": intraday,
-        "prev_close": prev_close,
+        "prev_close": basic["value"] - basic["change"],
+        "_source": "naver",
     }
 
 
@@ -122,21 +206,27 @@ def fetch_kospi_index():
 # 2. KOSDAQ 지수 + 매크로 (yfinance)
 # ─────────────────────────────────────────
 def fetch_kosdaq():
-    from pykrx import stock
-    yesterday_dt = NOW.date() - datetime.timedelta(days=10)
-    df = stock.get_index_ohlcv(yesterday_dt.strftime("%Y%m%d"), TODAY, "2001")
-    if df is None or df.empty:
+    """KOSDAQ 지수: pykrx 우선, 실패 시 Naver"""
+    try:
+        from pykrx import stock
+        yesterday_dt = NOW.date() - datetime.timedelta(days=10)
+        df = stock.get_index_ohlcv(yesterday_dt.strftime("%Y%m%d"), TODAY, "2001")
+        if df is None or df.empty:
+            raise RuntimeError("kosdaq empty")
+        today_row = df.iloc[-1]
+        prev_row = df.iloc[-2] if len(df) >= 2 else df.iloc[-1]
+        value = safe_float(today_row["종가"])
+        prev_close = safe_float(prev_row["종가"])
+        change = value - prev_close
+        return {
+            "value": value, "change": change,
+            "changePct": (change / prev_close * 100) if prev_close else 0.0,
+        }
+    except Exception:
+        basic = naver_index_basic("KOSDAQ")
+        if basic:
+            return {"value": basic["value"], "change": basic["change"], "changePct": basic["changePct"]}
         return {"value": 0.0, "change": 0.0, "changePct": 0.0}
-    today_row = df.iloc[-1]
-    prev_row = df.iloc[-2] if len(df) >= 2 else df.iloc[-1]
-    value = safe_float(today_row["종가"])
-    prev_close = safe_float(prev_row["종가"])
-    change = value - prev_close
-    return {
-        "value": value,
-        "change": change,
-        "changePct": (change / prev_close * 100) if prev_close else 0.0,
-    }
 
 
 def fetch_macro():
@@ -609,6 +699,114 @@ MOCK_DATA = {
 
 
 # ─────────────────────────────────────────
+# Naver-only fallback path (when KRX login is unavailable)
+# ─────────────────────────────────────────
+def naver_only_pipeline():
+    """KRX 없이 Naver Mobile API만으로 가능한 데이터 구성"""
+    print("  [naver-only] KRX 우회 모드 활성")
+
+    kospi_basic = naver_index_basic("KOSPI") or {"value": 0, "change": 0, "changePct": 0, "high": 0, "low": 0, "volume": 0}
+    kospi_intra = naver_index_intraday("KOSPI") or []
+    kosdaq_basic = naver_index_basic("KOSDAQ") or {"value": 0, "change": 0, "changePct": 0}
+
+    # 상승/하락 상위에서 거래대금 큰 순 → topVolume 근사
+    rising = naver_top_stocks("KOSPI", "up", limit=50)
+    falling = naver_top_stocks("KOSPI", "down", limit=50)
+    all_stocks = rising + falling
+
+    # 거래대금 상위 10
+    top_volume = sorted(all_stocks, key=lambda x: x["volume_won"], reverse=True)[:10]
+    top_volume = [{
+        "code": s["code"], "name": s["name"],
+        "amount": s["volume_won"] // 100_000_000,
+        "price": s["price"], "changePct": s["changePct"],
+    } for s in top_volume]
+
+    # 등락률 기준 상위/하위 (외인 수급 데이터 없으므로 등락률을 proxy로 사용)
+    top_gainers = sorted(rising, key=lambda x: x["changePct"], reverse=True)[:10]
+    top_losers = sorted(falling, key=lambda x: x["changePct"])[:10]
+
+    def to_flow_row(s, sign=1):
+        # 외인 수급 데이터 없으므로 거래대금 기반 추정 (단순 proxy)
+        proxy_net = (s["volume_won"] // 100_000_000) // 4 * sign
+        return {
+            "code": s["code"], "name": s["name"],
+            "sector": guess_sector(s["code"]),
+            "net": proxy_net,
+            "price": s["price"], "changePct": s["changePct"],
+        }
+
+    foreign_buy = [to_flow_row(s, +1) for s in top_gainers]
+    foreign_sell = [to_flow_row(s, -1) for s in top_losers]
+
+    # 상한가 (등락률 ≥29%)
+    upper_limit = [{
+        "code": s["code"], "name": s["name"],
+        "changePct": s["changePct"], "price": s["price"],
+        "reason": "상한가 도달"
+    } for s in rising if s["changePct"] >= 29.0][:5]
+
+    # 52주 신고가 — Naver만으로는 정확 판정 어려움 → 큰 폭 상승 상위 6종목으로 근사
+    new_52w_high = [{
+        "code": s["code"], "name": s["name"],
+        "changePct": s["changePct"], "price": s["price"],
+    } for s in top_gainers[:7] if s["changePct"] >= 3.0]
+
+    # 큐레이션 섹터의 leadStocks 시세를 매핑하여 등락률 가중평균 계산
+    code_data = {s["code"]: s for s in all_stocks}
+    sectors_out = []
+    for sec in SECTOR_DEFS:
+        valid = [t for t in sec["tickers"] if t in code_data]
+        if not valid:
+            sectors_out.append({
+                "id": sec["id"], "name": sec["name"], "theme": sec["theme"],
+                "changePct": 0.0, "foreignNet": 0, "instNet": 0, "weight": 0.0,
+                "leadStocks": [], "leadCodes": [], "momentum": "flat-up",
+            })
+            continue
+        # 등락률 단순 평균 (시총 정보 없음)
+        avg_chg = sum(code_data[t]["changePct"] for t in valid) / len(valid)
+        if avg_chg > 2.5:   momentum = "strong-up"
+        elif avg_chg > 0.5: momentum = "up"
+        elif avg_chg >= 0:  momentum = "flat-up"
+        elif avg_chg > -2:  momentum = "down"
+        else:               momentum = "strong-down"
+        # 거래대금 비중 → weight 근사
+        sec_vol = sum(code_data[t]["volume_won"] for t in valid)
+        total_vol = sum(s["volume_won"] for s in all_stocks)
+        weight = (sec_vol / total_vol * 100) if total_vol else 0
+        lead_codes = sec["tickers"][:3]
+        lead_names = [code_data[t]["name"] if t in code_data else t for t in lead_codes]
+        sectors_out.append({
+            "id": sec["id"], "name": sec["name"], "theme": sec["theme"],
+            "changePct": round(avg_chg, 2),
+            "foreignNet": 0, "instNet": 0,
+            "weight": round(weight, 1),
+            "leadStocks": lead_names, "leadCodes": lead_codes,
+            "momentum": momentum,
+        })
+
+    return {
+        "kospi": {
+            "value": kospi_basic["value"],
+            "change": kospi_basic["change"],
+            "changePct": kospi_basic["changePct"],
+            "volume": kospi_basic["volume"],
+            "high": kospi_basic["high"],
+            "low": kospi_basic["low"],
+            "foreignNet": 0, "instNet": 0, "indivNet": 0,
+            "intraday": kospi_intra,
+        },
+        "kosdaq": kosdaq_basic,
+        "sectors": sectors_out,
+        "foreignBuy": foreign_buy,
+        "foreignSell": foreign_sell,
+        "topVolume": top_volume,
+        "specialStocks": {"new52High": new_52w_high, "upperLimit": upper_limit, "lowerLimit": []},
+    }
+
+
+# ─────────────────────────────────────────
 # 메인 오케스트레이션
 # ─────────────────────────────────────────
 def main():
@@ -617,86 +815,94 @@ def main():
     print(f"  기준일: {ASOF}")
     print(f"{'='*60}\n")
 
+    krx_id = os.environ.get("KRX_ID", "")
+    krx_pw = os.environ.get("KRX_PW", "")
+    if krx_id and krx_pw:
+        print(f"  [auth] KRX 자격증명 사용 (id={krx_id[:3]}***)")
+    else:
+        print(f"  [auth] KRX 자격증명 없음 — pykrx 실패 시 Naver 폴백")
+
+    macro = fetch_macro()
+    print(f"  → 매크로: USD/KRW {macro['fx']['usdkrw']:.2f}, WTI ${macro['oil']['value']:.2f}")
+
+    news = fetch_news()
+    print(f"  → 뉴스 {len(news)}건")
+
+    pipeline_source = "unknown"
+    out_partial = None
+
+    # 1차: pykrx 풀 파이프라인
     try:
-        print("[1/8] KOSPI 지수 수집 중...")
+        print("\n[pykrx] 풀 파이프라인 시도...")
         kospi = fetch_kospi_index()
-        print(f"  → KOSPI {kospi['value']:.2f} ({kospi['changePct']:+.2f}%)")
-
-        print("[2/8] KOSDAQ 지수 수집 중...")
         kosdaq = fetch_kosdaq()
-        print(f"  → KOSDAQ {kosdaq['value']:.2f}")
-
-        print("[3/8] 매크로 (yfinance) 수집 중...")
-        macro = fetch_macro()
-        print(f"  → USD/KRW {macro['fx']['usdkrw']:.2f}, WTI ${macro['oil']['value']:.2f}")
-
-        print("[4/8] KOSPI 전종목 OHLCV·시총·수급 수집 중...")
         snap = fetch_market_snapshot()
-        print(f"  → {len(snap['mkt'])}개 종목")
-
-        print("[5/8] 시장 합계 수급 계산 중...")
         flows = compute_kospi_flows(snap)
-        print(f"  → 외인 {flows['foreignNet']/1e8:+.0f}억, 기관 {flows['instNet']/1e8:+.0f}억")
-
-        print("[6/8] 섹터별 집계 중...")
         sectors = compute_sectors(snap)
-        for s in sectors[:3]:
-            print(f"  → {s['name']:10s} {s['changePct']:+.2f}% (비중 {s['weight']:.1f}%)")
-
-        print("[7/8] 외인 매매 TOP10 + 거래대금 TOP10 + 특이종목 + 뉴스...")
         foreign_buy, foreign_sell, top_volume = compute_top_lists(snap)
         special = compute_special_stocks(snap)
-        news = fetch_news()
-        print(f"  → 외인매수 {len(foreign_buy)}, 매도 {len(foreign_sell)}, 거래대금 {len(top_volume)}")
-        print(f"  → 신고가 {len(special['new52High'])}, 상한가 {len(special['upperLimit'])}")
-        print(f"  → 뉴스 {len(news)}건")
 
-        print("[8/8] 테마 + 프로그램 + JSON 출력 중...")
-        themes = compute_themes(sectors)
-        program = fetch_program_trade()
-
-        kospi_full = {
-            "value": kospi["value"],
-            "change": kospi["change"],
-            "changePct": kospi["changePct"],
-            "volume": kospi["volume"],
-            "foreignNet": flows["foreignNet"],
-            "instNet": flows["instNet"],
-            "indivNet": flows["indivNet"],
-            "high": kospi["high"],
-            "low": kospi["low"],
-            "intraday": kospi["intraday"],
+        out_partial = {
+            "kospi": {
+                "value": kospi["value"], "change": kospi["change"], "changePct": kospi["changePct"],
+                "volume": kospi["volume"],
+                "foreignNet": flows["foreignNet"], "instNet": flows["instNet"], "indivNet": flows["indivNet"],
+                "high": kospi["high"], "low": kospi["low"],
+                "intraday": kospi["intraday"],
+            },
+            "kosdaq": kosdaq,
+            "sectors": sectors,
+            "foreignBuy": foreign_buy, "foreignSell": foreign_sell, "topVolume": top_volume,
+            "specialStocks": special,
         }
+        pipeline_source = "pykrx" if not kospi.get("_source") else f"pykrx+{kospi['_source']}"
+        print(f"  ✓ pykrx 파이프라인 성공")
+    except Exception as e:
+        print(f"  ✗ pykrx 실패: {e}")
+        traceback.print_exc()
 
+    # 2차: Naver 폴백 (pykrx 실패 시)
+    if out_partial is None:
+        try:
+            print("\n[naver-only] 폴백 파이프라인 시도...")
+            out_partial = naver_only_pipeline()
+            pipeline_source = "naver-only"
+            print(f"  ✓ Naver 파이프라인 성공")
+        except Exception as e:
+            print(f"  ✗ Naver 폴백도 실패: {e}")
+            traceback.print_exc()
+
+    # 3차: 모두 실패 시 mock
+    if out_partial is None:
+        print("\n[mock] 모든 데이터 수집 실패 — mock 출력")
+        out = dict(MOCK_DATA)
+        out["_error"] = "all data sources failed"
+        out["news"] = news
+        out["asOf"] = ASOF
+    else:
+        themes = compute_themes(out_partial["sectors"])
+        program = fetch_program_trade()
         out = {
             "asOf": ASOF,
             "marketStatus": "OPEN",
-            "kospi": kospi_full,
-            "kosdaq": kosdaq,
-            "fx": macro["fx"],
-            "oil": macro["oil"],
-            "gold": macro["gold"],
-            "rate": macro["rate"],
-            "sectors": sectors,
-            "foreignBuy": foreign_buy,
-            "foreignSell": foreign_sell,
-            "topVolume": top_volume,
-            "specialStocks": special,
+            "kospi": out_partial["kospi"],
+            "kosdaq": out_partial["kosdaq"],
+            "fx": macro["fx"], "oil": macro["oil"], "gold": macro["gold"], "rate": macro["rate"],
+            "sectors": out_partial["sectors"],
+            "foreignBuy": out_partial["foreignBuy"],
+            "foreignSell": out_partial["foreignSell"],
+            "topVolume": out_partial["topVolume"],
+            "specialStocks": out_partial["specialStocks"],
             "themes": themes,
             "news": news,
             "programTrade": program,
+            "_source": pipeline_source,
         }
-
-    except Exception as e:
-        print(f"\n  ❌ 데이터 수집 실패: {e}")
-        traceback.print_exc()
-        out = MOCK_DATA
-        out["_error"] = str(e)
 
     os.makedirs(DOCS_DIR, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-    print(f"\n  ✅ 출력: {OUT_PATH} ({os.path.getsize(OUT_PATH):,} bytes)")
+    print(f"\n  ✅ 출력: {OUT_PATH} ({os.path.getsize(OUT_PATH):,} bytes) · source={out.get('_source', out.get('_error', '?'))}")
 
 
 if __name__ == "__main__":
