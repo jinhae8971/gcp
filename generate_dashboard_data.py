@@ -168,48 +168,128 @@ def naver_stock_basic(code):
 
 
 def naver_index_intraday(market="KOSPI"):
-    """Naver: 인덱스 차트 — 여러 endpoint 시도"""
-    candidates = [
-        f"https://api.stock.naver.com/chart/domestic/index/{market}?periodType=minute1&count=60",
-        f"https://m.stock.naver.com/api/index/{market}/integration",
-        f"https://m.stock.naver.com/api/chart/domestic/index/{market}?periodType=dayCandle&count=30",
-    ]
-    for url in candidates:
-        try:
-            r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
-            if r.status_code != 200:
-                continue
-            d = r.json()
-            if not _NAVER_LOGGED_KEYS["intraday"]:
-                preview = json.dumps(d, ensure_ascii=False)[:300] if not isinstance(d, list) else json.dumps(d[:1], ensure_ascii=False)[:300]
-                print(f"  [naver-debug] intraday({url.split('/')[-1][:30]}): {preview}")
-                _NAVER_RAW_SAMPLES["intraday"] = {"url": url, "preview": preview[:200]}
-                _NAVER_LOGGED_KEYS["intraday"] = True
-            # 응답이 list인 경우 (chart API)
-            if isinstance(d, list) and d:
+    """Naver: 인덱스 차트 — siseJson API (PC) 가 가장 안정적"""
+    # 1. PC siseJson API (분봉 차트용)
+    try:
+        end_dt = NOW.strftime("%Y%m%d")
+        start_dt = (NOW.date() - datetime.timedelta(days=30)).strftime("%Y%m%d")
+        url = f"https://api.finance.naver.com/siseJson.naver?symbol={market}&requestType=1&startTime={start_dt}&endTime={end_dt}&timeframe=day"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+        if r.status_code == 200 and r.text.strip():
+            # response is a JS-array-like text. Parse with eval-safe approach.
+            txt = r.text.strip()
+            # Replace single-quoted dates to double-quoted JSON
+            import re
+            txt = re.sub(r"'([^']*)'", r'"\1"', txt)
+            arr = json.loads(txt)
+            if isinstance(arr, list) and len(arr) > 1:
                 out = []
-                for row in d:
-                    t = (row.get("localTime") or row.get("dateTime") or "")[-8:-3]  # HH:MM
-                    close = safe_float(row.get("closePrice") or row.get("close") or 0)
+                for row in arr[1:]:  # row[0] is header
+                    if len(row) < 2: continue
+                    date_s = str(row[0])
+                    close = safe_float(row[4] if len(row) >= 5 else row[1])
                     if close > 0:
+                        # date format: 20260504 → 05-04
+                        if len(date_s) == 8:
+                            t = f"{date_s[4:6]}-{date_s[6:8]}"
+                        else:
+                            t = date_s[-5:]
                         out.append([t, close])
                 if out:
+                    if not _NAVER_LOGGED_KEYS["intraday"]:
+                        print(f"  [naver-debug] intraday(siseJson): {len(out)} points")
+                        _NAVER_LOGGED_KEYS["intraday"] = True
                     return out[-30:]
-            # integration endpoint: { intradayMinutes: [...], dailyCandles: [...] }
-            if isinstance(d, dict):
-                series = d.get("intradayMinutes") or d.get("dailyCandles") or d.get("minutes") or []
-                if series:
+    except Exception as e:
+        print(f"  [naver-intraday] siseJson failed: {e}")
+
+    # 2. integration endpoint (totalInfos 배열에 분봉 데이터 시도)
+    try:
+        url = f"https://m.stock.naver.com/api/index/{market}/integration"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            # 분봉 series 키 탐색
+            for key in ["intradayMinutes", "minutesData", "minuteData", "minutes", "minuteCandles"]:
+                series = d.get(key)
+                if isinstance(series, list) and series:
                     out = []
                     for row in series:
-                        t = (row.get("localTime") or row.get("time") or "")[-8:-3] if isinstance(row.get("localTime"), str) else ""
+                        t = str(row.get("localTime", row.get("time", "")))[-8:-3]
                         close = safe_float(row.get("closePrice") or row.get("close") or 0)
                         if close > 0:
                             out.append([t, close])
                     if out:
                         return out[-30:]
-        except Exception as e:
-            continue
+    except Exception:
+        pass
+
     print(f"  [naver-intraday] {market} all endpoints failed")
+    return None
+
+
+def fetch_naver_news_v2():
+    """Naver Finance 시황 뉴스 v2 — 여러 source 시도"""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    out = []
+
+    # 1. Naver Finance mobile news API
+    try:
+        r = requests.get(
+            "https://m.stock.naver.com/api/news/section/categoryAll?pageSize=15",
+            headers=headers, timeout=10,
+        )
+        if r.status_code == 200:
+            d = r.json()
+            items = d.get("items") or d.get("articles") or d.get("data", [])
+            for it in items[:10]:
+                headline = it.get("title") or it.get("headline") or ""
+                if not headline:
+                    continue
+                t = it.get("displayDateTime", "") or it.get("publishedAt", "") or ""
+                t = t[11:16] if len(t) >= 16 and ":" in t else NOW.strftime("%H:%M")
+                source = it.get("officeName") or it.get("source") or "네이버금융"
+                out.append({
+                    "time": t, "source": source, "headline": headline,
+                    "sentiment": classify_sentiment(headline),
+                    "tags": extract_tags(headline),
+                })
+            if out:
+                print(f"  [news] mobile API: {len(out)} items")
+                return out
+    except Exception as e:
+        print(f"  [news] mobile API failed: {e}")
+
+    # 2. Naver Finance HTML 페이지
+    try:
+        r = requests.get(
+            "https://finance.naver.com/news/mainnews.naver",
+            headers=headers, timeout=10,
+        )
+        r.encoding = "euc-kr"
+        soup = BeautifulSoup(r.text, "html.parser")
+        for li in (soup.select("li.block1") or soup.select("dl.newsList dd") or soup.select(".articleSubject"))[:10]:
+            a = li.select_one("a")
+            if not a:
+                continue
+            headline = a.get_text(strip=True)
+            if not headline or len(headline) < 5:
+                continue
+            time_el = li.select_one(".date") or li.select_one(".wdate")
+            t = time_el.get_text(strip=True)[-5:] if time_el else NOW.strftime("%H:%M")
+            src_el = li.select_one(".press") or li.select_one("em.press")
+            source = src_el.get_text(strip=True) if src_el else "네이버금융"
+            out.append({
+                "time": t, "source": source, "headline": headline,
+                "sentiment": classify_sentiment(headline),
+                "tags": extract_tags(headline),
+            })
+        if out:
+            print(f"  [news] HTML scrape: {len(out)} items")
+            return out
+    except Exception as e:
+        print(f"  [news] HTML scrape failed: {e}")
+
     return None
 
 
@@ -650,51 +730,13 @@ def compute_special_stocks(snap):
 # 8. 뉴스 (Naver Finance 메인 헤드라인 스크래핑)
 # ─────────────────────────────────────────
 def fetch_news():
-    """Naver 증권 메인 뉴스 스크래핑"""
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    out = []
-    try:
-        r = requests.get(
-            "https://finance.naver.com/news/mainnews.naver",
-            headers=headers, timeout=10,
-        )
-        r.encoding = "euc-kr"
-        soup = BeautifulSoup(r.text, "html.parser")
-        items = soup.select("li.block1") or soup.select("li") or []
-        for li in items[:7]:
-            a = li.select_one("a.tit") or li.select_one("a")
-            if not a:
-                continue
-            headline = a.get_text(strip=True)
-            if not headline or len(headline) < 5:
-                continue
-            time_el = li.select_one("span.wdate") or li.select_one("span.date")
-            t = time_el.get_text(strip=True) if time_el else NOW.strftime("%H:%M")
-            # 시간 추출 시도 (예: "2026-05-04 13:42" → "13:42")
-            if ":" in t and len(t) > 5:
-                t = t.split()[-1] if " " in t else t
-            source = "네이버금융"
-            src_el = li.select_one("span.press") or li.select_one("em.press")
-            if src_el:
-                source = src_el.get_text(strip=True)
-            sentiment = classify_sentiment(headline)
-            out.append({
-                "time": t[:5] if len(t) > 5 else t,
-                "source": source,
-                "headline": headline,
-                "sentiment": sentiment,
-                "tags": extract_tags(headline),
-            })
-        if len(out) < 3:
-            raise RuntimeError(f"only {len(out)} news scraped — fallback")
-    except Exception as e:
-        print(f"  [news] failed: {e}, using fallback")
-        out = [
-            {"time": NOW.strftime("%H:%M"), "source": "시스템", "sentiment": "neutral",
+    """Naver 증권 뉴스 — v2 다중 source 시도"""
+    out = fetch_naver_news_v2()
+    if out and len(out) >= 3:
+        return out
+    return [{"time": NOW.strftime("%H:%M"), "source": "시스템", "sentiment": "neutral",
              "headline": f"실시간 뉴스 수집 일시 중단 — {NOW.strftime('%Y-%m-%d %H:%M')} KST 기준",
-             "tags": ["시스템"]},
-        ]
-    return out
+             "tags": ["시스템"]}]
 
 
 def classify_sentiment(headline):
@@ -1038,10 +1080,6 @@ def main():
             "programTrade": program,
             "_source": pipeline_source,
         }
-
-    # 디버그용 raw 샘플 임베드 (필드명 발견 후 제거)
-    if _NAVER_RAW_SAMPLES:
-        out["_debug"] = _NAVER_RAW_SAMPLES
 
     os.makedirs(DOCS_DIR, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
