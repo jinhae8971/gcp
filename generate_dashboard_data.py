@@ -26,30 +26,50 @@ ASOF = NOW.strftime("%Y-%m-%d %H:%M:%S")
 DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 OUT_PATH = os.path.join(DOCS_DIR, "dashboard_data.json")
 
-# 큐레이션된 10개 섹터 (한국 증시의 주요 테마 그룹)
-# 각 섹터의 대표 종목 코드를 직접 매핑 — pykrx 업종 코드와 다른 분류이므로
+# 큐레이션된 11개 섹터 (한국 증시의 주요 테마 그룹)
+# 각 섹터의 대표 종목 코드를 직접 매핑 — 시총 큰 종목 위주로 확장
 SECTOR_DEFS = [
     {"id": "semi",      "name": "반도체",         "theme": "주도",
-     "tickers": ["005930", "000660", "042700", "039030", "240810"]},
+     "tickers": ["005930", "000660", "042700", "039030", "240810", "058470", "095340"]},
     {"id": "bio",       "name": "바이오/제약",    "theme": "회복",
-     "tickers": ["207940", "068270", "000100", "069620", "326030", "196170"]},
+     "tickers": ["207940", "068270", "000100", "069620", "326030", "196170", "302440", "001060"]},
     {"id": "battery",   "name": "2차전지",        "theme": "조정",
-     "tickers": ["373220", "247540", "003670", "066970", "006400"]},
+     "tickers": ["373220", "247540", "003670", "066970", "006400", "051910", "352820"]},
     {"id": "auto",      "name": "자동차",         "theme": "강세",
-     "tickers": ["005380", "000270", "012330", "204320", "161390"]},
+     "tickers": ["005380", "000270", "012330", "204320", "161390", "018880", "011210"]},
     {"id": "finance",   "name": "금융",           "theme": "안정",
-     "tickers": ["105560", "055550", "032830", "086790", "138930", "316140"]},
+     "tickers": ["105560", "055550", "032830", "086790", "138930", "316140", "024110", "139130", "001450"]},
     {"id": "platform",  "name": "플랫폼/IT",      "theme": "반등",
-     "tickers": ["035420", "035720", "259960", "036570", "251270", "112040"]},
+     "tickers": ["035420", "035720", "259960", "036570", "251270", "112040", "036530", "066570"]},
     {"id": "shipbuild", "name": "조선",           "theme": "주도",
-     "tickers": ["329180", "010140", "042660", "010620", "267250"]},
+     "tickers": ["329180", "010140", "042660", "010620", "272210"]},
     {"id": "steel",     "name": "철강/소재",      "theme": "약세",
      "tickers": ["005490", "004020", "010130", "010120", "001230"]},
     {"id": "cosmetic",  "name": "화장품/소비재",  "theme": "강세",
-     "tickers": ["090430", "051900", "192820", "161890", "271560", "097950"]},
+     "tickers": ["090430", "051900", "192820", "161890", "271560", "097950", "035250"]},
     {"id": "energy",    "name": "정유/에너지",    "theme": "조정",
-     "tickers": ["096770", "010950", "015760", "267250", "267260"]},
+     "tickers": ["096770", "010950", "015760", "267260", "010120"]},
+    {"id": "holding",   "name": "지주/기타대형",  "theme": "안정",
+     "tickers": ["402340", "034730", "028260", "003550", "000880", "001040", "047040", "375500", "006360", "047810", "011200"]},
 ]
+
+# ETF 식별 패턴 (수급 랭킹에서 제외용)
+ETF_NAME_PATTERNS = [
+    "KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "HANARO", "KINDEX", "TREX",
+    "ACE ", "PLUS ", "WOORI ", "FOCUS ", "KIWOOM ", "SOL ",
+    "선물", "인버스", "레버리지", "ETN", "ETF",
+]
+
+def is_etf_name(name):
+    if not name:
+        return False
+    return any(p in name for p in ETF_NAME_PATTERNS)
+
+def is_preferred_share(name):
+    """우선주 식별 (이름이 '우' 또는 '우B'로 끝남)"""
+    if not name:
+        return False
+    return name.endswith("우") or name.endswith("우B") or name.endswith("우C")
 
 
 def safe_float(x, default=0.0):
@@ -102,24 +122,56 @@ def _first_present(d, keys, default=0):
     return default
 
 
+def naver_index_integration(market="KOSPI"):
+    """Naver: 인덱스 통합 정보 — totalInfos 배열에 고가/저가/거래대금 포함"""
+    try:
+        url = f"https://m.stock.naver.com/api/index/{market}/integration"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"  [naver-index-integration] {market} failed: {e}")
+        return None
+
+
+def _extract_total_infos(integration_resp):
+    """totalInfos 배열을 {code: parsed_value} dict로 변환"""
+    if not integration_resp:
+        return {}
+    out = {}
+    for it in integration_resp.get("totalInfos", []):
+        code = it.get("code", "")
+        if code:
+            out[code] = _parse_naver_num(it.get("value"))
+    return out
+
+
 def naver_index_basic(market="KOSPI"):
-    """Naver: KOSPI/KOSDAQ 인덱스 기본 시세"""
+    """Naver: KOSPI/KOSDAQ 인덱스 기본 시세 — basic + integration 합쳐서 high/low 포함"""
     try:
         url = f"https://m.stock.naver.com/api/index/{market}/basic"
         r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
         r.raise_for_status()
         d = r.json()
         if not _NAVER_LOGGED_KEYS["index"]:
-            print(f"  [naver-debug] index raw: {json.dumps(d, ensure_ascii=False)[:600]}")
-            _NAVER_RAW_SAMPLES["index_kospi"] = d
+            print(f"  [naver-debug] index raw keys: {list(d.keys())[:20]}")
             _NAVER_LOGGED_KEYS["index"] = True
+
+        # high/low/volume은 integration endpoint의 totalInfos에서 추출
+        integration = naver_index_integration(market)
+        info = _extract_total_infos(integration)
+
+        # totalInfos의 거래대금/거래량 — 단위는 백만원 추정
+        trading_value_million = info.get("accumulatedTradingValue") or info.get("tradingValue") or 0
+
         return {
             "value":     _first_present(d, ["closePrice", "lastPrice", "currentPrice"]),
             "change":    _first_present(d, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
             "changePct": _first_present(d, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
-            "high":      _first_present(d, ["highPrice", "high"]),
-            "low":       _first_present(d, ["lowPrice", "low"]),
-            "volume":    _first_present(d, ["accumulatedTradingValue", "tradingValue", "tradeAmount", "accumulatedTradingVolume"]),
+            "high":      info.get("highPrice") or info.get("high") or 0,
+            "low":       info.get("lowPrice") or info.get("low") or 0,
+            "open":      info.get("openPrice") or 0,
+            "volume":    int(trading_value_million * 1_000_000) if trading_value_million else 0,
         }
     except Exception as e:
         print(f"  [naver-index] {market} failed: {e}")
@@ -899,9 +951,12 @@ def naver_only_pipeline():
     kospi_intra = naver_index_intraday("KOSPI") or []
     kosdaq_basic = naver_index_basic("KOSDAQ") or {"value": 0, "change": 0, "changePct": 0}
 
-    # 상승/하락 상위 (등락률 기준)
-    rising = naver_top_stocks("KOSPI", "up", limit=50)
-    falling = naver_top_stocks("KOSPI", "down", limit=50)
+    # 상승/하락 상위 (등락률 기준) — ETF 제외
+    rising_raw = naver_top_stocks("KOSPI", "up", limit=80)
+    falling_raw = naver_top_stocks("KOSPI", "down", limit=80)
+    rising = [s for s in rising_raw if not is_etf_name(s.get("name", ""))]
+    falling = [s for s in falling_raw if not is_etf_name(s.get("name", ""))]
+    print(f"  [naver-only] 일반종목: 상승 {len(rising)}/{len(rising_raw)}, 하락 {len(falling)}/{len(falling_raw)} (ETF 제외)")
     all_stocks = rising + falling
 
     # 큐레이션 섹터의 모든 ticker → 일부는 TOP에 없을 수 있으므로 개별 페치
@@ -922,22 +977,23 @@ def naver_only_pipeline():
             time.sleep(0.05)
     print(f"  [naver-only] 개별 페치 완료: {fetched}/{len(needed)}")
 
-    # 거래대금 상위 10 (전체 stocks + 페치 종목 합산)
     all_known = list(code_data.values())
-    top_volume_raw = sorted([s for s in all_known if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
+
+    # 거래대금 상위 10 (ETF 제외, 일반 종목만)
+    candidates_volume = [s for s in all_known if s.get("volume_won", 0) > 0 and not is_etf_name(s.get("name", ""))]
+    top_volume_raw = sorted(candidates_volume, key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
     top_volume = [{
         "code": s["code"], "name": s["name"],
         "amount": s.get("volume_won", 0) // 100_000_000,
         "price": s.get("price", 0), "changePct": s.get("changePct", 0),
     } for s in top_volume_raw]
 
-    # 외인 수급 proxy: 거래대금 기준 상위 종목 (실제 외인 데이터 없음)
+    # 외인 수급 proxy: 거래대금 큰 상승종목 = 매수 강세, 거래대금 큰 하락종목 = 매도 강세 (ETF 이미 제외됨)
     top_gainers = sorted([s for s in rising if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
     top_losers = sorted([s for s in falling if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
 
     def to_flow_row(s, sign=1):
-        # 거래대금의 ~5%를 외인 순매수로 추정 (proxy, 억 단위)
-        # volume_won은 원 단위 → /1e8 = 억원, * 0.05 = 5%
+        # 거래대금의 ~5%를 외인 순매수로 추정 (proxy)
         eok = (s.get("volume_won", 0) // 100_000_000)
         proxy_net = max(1, eok // 20) * sign
         return {
@@ -945,81 +1001,104 @@ def naver_only_pipeline():
             "sector": guess_sector(s["code"]),
             "net": proxy_net,
             "price": s.get("price", 0), "changePct": s.get("changePct", 0),
+            "_proxy": True,  # UI에서 추정값임을 표시
         }
 
     foreign_buy = [to_flow_row(s, +1) for s in top_gainers]
     foreign_sell = [to_flow_row(s, -1) for s in top_losers]
 
-    # 상한가 (등락률 ≥29%)
+    # 상한가 (등락률 ≥29%, ETF/우선주 제외)
     upper_limit = [{
         "code": s["code"], "name": s["name"],
         "changePct": s["changePct"], "price": s["price"],
         "reason": "상한가 도달"
-    } for s in rising if s.get("changePct", 0) >= 29.0][:5]
+    } for s in rising if s.get("changePct", 0) >= 29.0 and not is_preferred_share(s.get("name", ""))][:5]
 
-    # 52주 신고가 근사 (큰 폭 상승)
+    # 52주 신고가 근사 — 시총 1000억 이상 + ETF/우선주 제외
+    MARKETCAP_FLOOR = 100_000_000_000  # 1000억원
+    candidates_52w = [s for s in rising
+                      if s.get("changePct", 0) >= 3.0
+                      and s.get("marketCap", 0) >= MARKETCAP_FLOOR
+                      and not is_etf_name(s.get("name", ""))
+                      and not is_preferred_share(s.get("name", ""))]
     new_52w_high = [{
         "code": s["code"], "name": s["name"],
         "changePct": s["changePct"], "price": s["price"],
-    } for s in sorted(rising, key=lambda x: x.get("changePct", 0), reverse=True) if s.get("changePct", 0) >= 3.0][:8]
+    } for s in sorted(candidates_52w, key=lambda x: x.get("changePct", 0), reverse=True)[:8]]
 
-    # 섹터 집계 — 이제 모든 leadStocks 데이터가 있어야 함
-    sectors_out = []
-    total_market_cap = sum(s.get("marketCap", 0) for s in all_known)
+    # 섹터 집계 — 비중은 우리 11개 섹터 내에서 정규화 (총합 100%)
+    sectors_raw = []
     for sec in SECTOR_DEFS:
         valid = [t for t in sec["tickers"] if t in code_data]
         if not valid:
-            sectors_out.append({
-                "id": sec["id"], "name": sec["name"], "theme": sec["theme"],
-                "changePct": 0.0, "foreignNet": 0, "instNet": 0, "weight": 0.0,
-                "leadStocks": [], "leadCodes": [], "momentum": "flat-up",
-            })
+            sectors_raw.append({"id": sec["id"], "name": sec["name"], "theme": sec["theme"],
+                                "_cap": 0, "_chg": 0.0, "_lead_codes": [], "_lead_names": []})
             continue
 
-        # 시총 가중 평균 등락률 (시총 정보 있으면), 없으면 단순 평균
         sector_cap = sum(code_data[t].get("marketCap", 0) for t in valid)
         if sector_cap > 0:
             avg_chg = sum(code_data[t].get("marketCap", 0) * code_data[t].get("changePct", 0) for t in valid) / sector_cap
-            weight = (sector_cap / total_market_cap * 100) if total_market_cap else 0
         else:
             avg_chg = sum(code_data[t].get("changePct", 0) for t in valid) / len(valid)
-            sec_vol = sum(code_data[t].get("volume_won", 0) for t in valid)
-            total_vol = sum(s.get("volume_won", 0) for s in all_known)
-            weight = (sec_vol / total_vol * 100) if total_vol else 0
 
-        if avg_chg > 2.5:   momentum = "strong-up"
-        elif avg_chg > 0.5: momentum = "up"
-        elif avg_chg >= -0.5: momentum = "flat-up"
-        elif avg_chg > -2:  momentum = "down"
-        else:               momentum = "strong-down"
-
-        # 시총 상위 3종목으로 leadStocks 정렬
+        # 시총 상위 3개 leadStocks
         valid_sorted = sorted(valid, key=lambda t: code_data[t].get("marketCap", 0) or code_data[t].get("volume_won", 0), reverse=True)
         lead_codes = valid_sorted[:3]
         lead_names = [code_data[t].get("name", t) for t in lead_codes]
 
-        sectors_out.append({
+        sectors_raw.append({
             "id": sec["id"], "name": sec["name"], "theme": sec["theme"],
+            "_cap": sector_cap, "_chg": avg_chg,
+            "_lead_codes": lead_codes, "_lead_names": lead_names,
+        })
+
+    # 비중 정규화: 큐레이션 섹터들의 시총 합을 100%로 (반도체가 너무 큰 비중 차지하지 않도록 sqrt 보정)
+    import math
+    total_cap = sum(s["_cap"] for s in sectors_raw)
+    # sqrt 가중치로 작은 섹터도 가시성 보장 (heatmap 시각용)
+    sqrt_caps = [math.sqrt(s["_cap"]) if s["_cap"] > 0 else 0 for s in sectors_raw]
+    sqrt_total = sum(sqrt_caps) or 1
+
+    sectors_out = []
+    for sec_raw, sqcap in zip(sectors_raw, sqrt_caps):
+        avg_chg = sec_raw["_chg"]
+        if avg_chg > 2.5:    momentum = "strong-up"
+        elif avg_chg > 0.5:  momentum = "up"
+        elif avg_chg >= -0.5: momentum = "flat-up"
+        elif avg_chg > -2:   momentum = "down"
+        else:                momentum = "strong-down"
+
+        # 비중: sqrt 정규화 (반도체 ~25%, 다른 큰 섹터 ~10%, 작은 섹터 ~5%)
+        weight_sqrt = (sqcap / sqrt_total * 100) if sqrt_total else 0
+        # 실제 시총 비중도 함께 (참고용 — UI는 weight_sqrt 사용)
+        weight_real = (sec_raw["_cap"] / total_cap * 100) if total_cap else 0
+
+        sectors_out.append({
+            "id": sec_raw["id"], "name": sec_raw["name"], "theme": sec_raw["theme"],
             "changePct": round(avg_chg, 2),
             "foreignNet": 0, "instNet": 0,
-            "weight": round(weight, 1),
-            "leadStocks": lead_names, "leadCodes": lead_codes,
+            "weight": round(weight_sqrt, 1),
+            "weightActual": round(weight_real, 1),
+            "leadStocks": sec_raw["_lead_names"], "leadCodes": sec_raw["_lead_codes"],
             "momentum": momentum,
         })
 
-    # KOSPI 합계 거래대금 = 모든 알려진 종목의 거래대금 합산 (근사)
-    # all_known은 약 100개 + 누락 섹터 추가분 → 코스피 ~800개 중 일부. 평균 거래대금 비율로 보정
-    sample_total = sum(s.get("volume_won", 0) for s in all_known)
-    kospi_volume_won = int(sample_total * 1.5)  # 표본 → 전체 추정 (대표주 위주이므로 비중 높음)
+    # KOSPI 거래대금: integration totalInfos에 있으면 그걸 사용, 없으면 종목 합산
+    if kospi_basic.get("volume", 0) > 1_000_000_000_000:  # 1조원 이상이면 신뢰
+        kospi_volume_won = kospi_basic["volume"]
+    else:
+        sample_total = sum(s.get("volume_won", 0) for s in all_known)
+        kospi_volume_won = int(sample_total * 1.5)  # 표본 → 전체 추정
 
     return {
         "kospi": {
             "value": kospi_basic.get("value", 0),
             "change": kospi_basic.get("change", 0),
             "changePct": kospi_basic.get("changePct", 0),
-            "volume": kospi_volume_won,  # 인덱스 endpoint에 거래대금 없으므로 합산값 사용
+            "volume": kospi_volume_won,
             "high": kospi_basic.get("high", 0),
             "low": kospi_basic.get("low", 0),
+            "open": kospi_basic.get("open", 0),
             "foreignNet": 0, "instNet": 0, "indivNet": 0,
             "intraday": kospi_intra,
         },
