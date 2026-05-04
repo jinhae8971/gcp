@@ -395,7 +395,7 @@ function formatKpiVal(val, unit, pct){
   return `${val.toFixed(2)}`;
 }
 
-function KPI({ kr, en, val, unit, pct, chg, up, accent, onClick, dim }){
+function KPI({ kr, en, val, unit, pct, chg, up, accent, onClick, dim, live }){
   return (
     <button onClick={onClick} style={{
       flex:1, padding:"14px 18px",
@@ -411,6 +411,15 @@ function KPI({ kr, en, val, unit, pct, chg, up, accent, onClick, dim }){
         position:"absolute", left:0, top:14, bottom:14, width:2,
         background:accent, opacity:0.7,
       }}/>
+      {live && (
+        <span title="실시간 / AI 도출"
+          style={{
+            position:"absolute", top:8, right:10,
+            width:6, height:6, borderRadius:3,
+            background:"var(--up)", boxShadow:"0 0 6px var(--up)",
+            animation:"pulse 2s ease-in-out infinite",
+          }}/>
+      )}
       <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:6}}>
         <div style={{fontSize:10.5, color:"var(--text-2)", letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
           {kr} <span style={{color:"var(--text-3)"}}>· {en}</span>
@@ -1003,12 +1012,19 @@ function HeroChord({ periodFactor }){
   );
 }
 
-function HeroBubble({ periodFactor }){
+function HeroBubble({ periodFactor, ai }){
   const xMin=-6, xMax=28, yMin=-10, yMax=10;
   const sx = v => 10 + ((v-xMin)/(xMax-xMin))*82;
   const sy = v => 92 - ((v-yMin)/(yMax-yMin))*82;
   const sr = aum => 1.2 + Math.sqrt(aum)/8;
   const [hover, setHover] = useState(null);
+
+  // AI bubble rows are absolute 30D values — don't re-scale by period.
+  const aiRows = ai?.data?.bubble;
+  const usingAI = Array.isArray(aiRows) && aiRows.length >= 6;
+  const dataset = usingAI
+    ? aiRows.map(b => ({ ...b, ret: Number(b.ret) || 0, flow: Number(b.flow) || 0, aum: Number(b.aum) || 0, _scale: 1 }))
+    : BUBBLE_DATA.map(b => ({ ...b, _scale: periodFactor }));
 
   return (
     <div style={{position:"relative", width:"100%", height:"100%"}}>
@@ -1035,8 +1051,8 @@ function HeroBubble({ periodFactor }){
         </g>
         <text x="88" y="14" textAnchor="end" style={{fontSize:1.6, fill:"var(--up)", opacity:0.7, fontWeight:600}}>인기 ↗</text>
         <text x="14" y="90" textAnchor="start" style={{fontSize:1.6, fill:"var(--down)", opacity:0.7, fontWeight:600}}>외면 ↙</text>
-        {BUBBLE_DATA.map(b => {
-          const flowScaled = b.flow * periodFactor;
+        {dataset.map(b => {
+          const flowScaled = b.flow * b._scale;
           const x = sx(b.ret), y = sy(Math.max(yMin, Math.min(yMax, flowScaled))), r = sr(b.aum);
           const isH = hover===b.id;
           return (
@@ -1055,8 +1071,9 @@ function HeroBubble({ periodFactor }){
         })}
       </svg>
       {hover && (() => {
-        const b = BUBBLE_DATA.find(x=>x.id===hover);
-        const flowScaled = b.flow * periodFactor;
+        const b = dataset.find(x=>x.id===hover);
+        if (!b) return null;
+        const flowScaled = b.flow * b._scale;
         return (
           <div style={{
             position:"absolute", right:14, top:14,
@@ -1090,7 +1107,25 @@ window.HeroBubble = HeroBubble;
 // =====================================================================
 function PanelAssetRotation({ periodFactor, ai }){
   const [highlight, setHighlight] = useState(null);
-  const data = ASSET_ROTATION.map(a => ({ ...a, flowScaled: a.flow*periodFactor, prevScaled: a.prev*periodFactor }));
+  // AI assetRotation rows are ALREADY 30-day net flows — don't re-multiply by periodFactor.
+  // Sample data is calibrated for 1M and scales with periodFactor.
+  const aiRows = ai?.data?.assetRotation;
+  const usingAI = Array.isArray(aiRows) && aiRows.length >= 4;
+  const data = usingAI
+    ? ASSET_ROTATION.map(sample => {
+        const live = aiRows.find(r => r.id === sample.id);
+        if (!live) return { ...sample, flowScaled: sample.flow*periodFactor, prevScaled: sample.prev*periodFactor };
+        return {
+          ...sample,
+          kr: live.kr || sample.kr,
+          en: live.en || sample.en,
+          color: live.color || sample.color,
+          share: Number(live.share) || sample.share,
+          flowScaled: Number(live.flow) || 0,
+          prevScaled: Number(live.prev) || 0,
+        };
+      })
+    : ASSET_ROTATION.map(a => ({ ...a, flowScaled: a.flow*periodFactor, prevScaled: a.prev*periodFactor }));
   const max = Math.max(...data.map(a=>Math.abs(a.flowScaled))) || 1;
   const total = data.reduce((s,a)=>s+Math.abs(a.flowScaled),0);
   return (
@@ -1872,28 +1907,52 @@ function Header({ activeNav, onNav, period, onOpenSettings, feed, onRefresh }){
   );
 }
 
-function KpiStrip({ periodFactor, period, onJump, feed }){
+function KpiStrip({ periodFactor, period, onJump, feed, derived }){
   return (
     <div style={{
       display:"flex", borderBottom:"1px solid var(--line)",
       background:"rgba(10,15,28,0.4)", backdropFilter:"blur(8px)",
     }}>
       {KPIS.map((k,i) => {
-        // Scale dollar/percent values; keep DXY/VIX as-is (level metrics) and override with live data when available
-        let val = k.val, chg = k.chg, up = k.up;
+        // Scale dollar/percent values; override with live values when available
+        let val = k.val, chg = k.chg, up = k.up, live = false;
+
         if (k.en === "DXY" && feed?.dxy && feed.dxy.source !== "sample" && !feed.dxy.error){
           val = feed.dxy.value;
           chg = (feed.dxy.chg>=0?"+":"") + feed.dxy.chg.toFixed(2) + "%";
           up = feed.dxy.chg >= 0;
+          live = true;
         } else if (k.en === "VIX" && feed?.vix && feed.vix.source !== "sample" && !feed.vix.error){
           val = feed.vix.value;
           chg = (feed.vix.chg>=0?"+":"") + feed.vix.chg.toFixed(2) + "%";
           up = feed.vix.chg >= 0;
-        } else if (k.unit==="$B") val = k.val * periodFactor;
-        else if (k.unit==="%")    val = k.val * (period==="1D"?0.05:period==="1W"?0.3:period==="1M"?1:period==="3M"?1.4:period==="1Y"?1.8:2.2);
+          live = true;
+        } else if (k.en === "Global flow" && Number.isFinite(derived?.globalFlow)){
+          val = derived.globalFlow;
+          live = true;
+        } else if (k.en === "Bonds → Risk" && Number.isFinite(derived?.bondsToRisk)){
+          val = derived.bondsToRisk;
+          chg = derived.bondsToRisk >= 0 ? "회전 진행" : "회귀 진행";
+          up = derived.bondsToRisk >= 0;
+          live = true;
+        } else if (k.en === "US → Asia inflow" && Number.isFinite(derived?.usToAsia)){
+          val = derived.usToAsia;
+          live = true;
+        } else if (k.en === "Global M2 YoY" && Number.isFinite(derived?.m2Avg)){
+          val = derived.m2Avg;
+          chg = derived.m2Avg >= 0 ? "확장세" : "긴축세";
+          up = derived.m2Avg >= 0;
+          live = true;
+        } else if (k.unit==="$B") {
+          val = k.val * periodFactor;
+        } else if (k.unit==="%") {
+          val = k.val * (period==="1D"?0.05:period==="1W"?0.3:period==="1M"?1:period==="3M"?1.4:period==="1Y"?1.8:2.2);
+        }
+
         return (
           <KPI key={i} {...k} val={val} chg={chg} up={up}
             accent={`var(--accent-${k.accent})`}
+            live={live}
             onClick={()=>k.anchor && onJump(k.anchor)}/>
         );
       })}
@@ -2064,17 +2123,19 @@ function Hero({ view, scrub, filter, setFilter, periodFactor, period, ai }){
         "RETURN × FLOW × AUM · YTD"
       }
       accent="var(--accent-cyan)" padding={false}
-      right={view==="map" ? (
-        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
-          <AISourceBadge ai={ai}/>
-          <AssetFilter filter={filter} setFilter={setFilter}/>
-        </div>
-      ) : null}>
+      right={
+        view==="map" ? (
+          <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
+            <AISourceBadge ai={ai}/>
+            <AssetFilter filter={filter} setFilter={setFilter}/>
+          </div>
+        ) : view==="bubble" ? <AISourceBadge ai={ai}/> : null
+      }>
       <div style={{position:"relative", flex:1, minHeight:0, height:"100%"}}>
         {view==="map"    && <HeroMap scrub={scrub} filterAsset={filter} periodFactor={periodFactor} ai={ai}/>}
         {view==="sankey" && <HeroSankey periodFactor={periodFactor}/>}
         {view==="chord"  && <HeroChord  periodFactor={periodFactor}/>}
-        {view==="bubble" && <HeroBubble periodFactor={periodFactor}/>}
+        {view==="bubble" && <HeroBubble periodFactor={periodFactor} ai={ai}/>}
       </div>
     </Card>
   );
@@ -2282,6 +2343,75 @@ function SettingsDrawer({ open, onClose, period, setPeriod, heroView, setHeroVie
   );
 }
 
+// =====================================================================
+// Phase-1 KPI derive: pull live values out of the AI bundle + FRED M2,
+// fall back to the curated KPIS constant (with the period multiplier
+// applied) when AI hasn't loaded yet or fields are missing.
+// =====================================================================
+// Approximate share of nominal world GDP across the 5 M2 series we track
+// (US, EU/Eurozone, CN, JP, IN — 2024). Re-normalized to sum to 1.
+const M2_GDP_WEIGHTS = { US: 0.355, EU: 0.289, CN: 0.237, JP: 0.066, IN: 0.053 };
+const ASIA_NODES = new Set(["IN","CN","JP","KR","SEA"]);
+
+function deriveKPIs(ai, m2Data){
+  const out = { globalFlow:null, bondsToRisk:null, usToAsia:null, m2Avg:null, sources:{} };
+
+  const geo = ai?.data?.geoFlows;
+  if (Array.isArray(geo) && geo.length >= 6){
+    let total = 0, asia = 0;
+    for (const f of geo){
+      const v = Number(f.value);
+      if (!Number.isFinite(v)) continue;
+      total += Math.abs(v);
+      if (f.from === "US" && ASIA_NODES.has(f.to) && v > 0) asia += v;
+    }
+    out.globalFlow = total;
+    out.usToAsia = asia;
+    out.sources.globalFlow = "ai-geo";
+    out.sources.usToAsia = "ai-geo";
+  }
+
+  const etf = ai?.data?.etfFlows;
+  if (Array.isArray(etf) && etf.length >= 3){
+    // Color-keyed: cyan=equities, purple=bonds, amber=gold, lime=commodities, mag=cash
+    let equities=0, bonds=0, gold=0, commodities=0;
+    for (const e of etf){
+      const v = Number(e.value);
+      if (!Number.isFinite(v)) continue;
+      if (e.color === "cyan")   equities    += v;
+      if (e.color === "purple") bonds       += v;
+      if (e.color === "amber")  gold        += v;
+      if (e.color === "lime")   commodities += v;
+    }
+    // Bonds → risk asset rotation: positive = money leaving bonds, entering risk
+    out.bondsToRisk = (equities + gold + commodities) - bonds;
+    out.sources.bondsToRisk = "ai-etf";
+  }
+
+  // GDP-weighted M2 YoY across the 5 FRED series
+  if (m2Data && typeof m2Data === "object"){
+    let weightedSum = 0, totalWeight = 0;
+    for (const [code, w] of Object.entries(M2_GDP_WEIGHTS)){
+      const series = m2Data[code]?.series;
+      if (Array.isArray(series) && series.length){
+        const latest = series[series.length - 1];
+        if (Number.isFinite(latest)){
+          weightedSum += latest * w;
+          totalWeight += w;
+        }
+      }
+    }
+    if (totalWeight > 0){
+      out.m2Avg = weightedSum / totalWeight;
+      out.sources.m2Avg = totalWeight >= 0.95 ? "fred-weighted" : "fred-partial";
+    }
+  }
+
+  return out;
+}
+
+window.deriveKPIs = deriveKPIs;
+
 // ============================================================
 function App(){
   const [heroView, setHeroView] = useState("map");
@@ -2294,6 +2424,7 @@ function App(){
 
   const { feed, keys, setKeys, refresh } = useDataFeed();
   const periodFactor = PERIOD_FACTOR[period] || 1;
+  const derived = useMemo(() => deriveKPIs(feed.ai, feed.m2?.data), [feed.ai, feed.m2]);
 
   const onNav = (id) => {
     setActiveNav(id);
@@ -2341,7 +2472,7 @@ function App(){
       <Header activeNav={activeNav} onNav={onNav} period={period}
         onOpenSettings={()=>setSettingsOpen(true)}
         feed={feed} onRefresh={refresh}/>
-      <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav} feed={feed}/>
+      <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav} feed={feed} derived={derived}/>
       <TimeControls period={period} setPeriod={setPeriod} scrub={scrub} setScrub={setScrub}/>
 
       <div id="flow-tracking" className="gmm-main-grid" style={{

@@ -3,6 +3,7 @@ __pycache__/
 
 # Local environment (Docker)
 .env
+.env.local
 
 # OS
 .DS_Store
