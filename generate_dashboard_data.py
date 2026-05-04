@@ -127,47 +127,90 @@ def naver_index_basic(market="KOSPI"):
 
 
 def naver_stock_basic(code):
-    """Naver: 개별 종목 기본 시세 (등락률·종가)"""
-    try:
-        url = f"https://m.stock.naver.com/api/stocks/{code}/basic"
-        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
-        r.raise_for_status()
-        d = r.json()
-        if not _NAVER_LOGGED_KEYS["stock_basic"]:
-            print(f"  [naver-debug] stock_basic raw: {json.dumps(d, ensure_ascii=False)[:800]}")
-            _NAVER_RAW_SAMPLES["stock_basic"] = d
-            _NAVER_LOGGED_KEYS["stock_basic"] = True
-        return {
-            "code": code,
-            "name":      d.get("stockName") or d.get("itemName") or d.get("name") or code,
-            "price":     int(_first_present(d, ["closePrice", "lastPrice", "currentPrice"])),
-            "changePct": _first_present(d, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
-            "change":    _first_present(d, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
-            "volume_won": int(_first_present(d, ["accumulatedTradingValue", "tradingValue", "tradeAmount"])),
-            "volume":    int(_first_present(d, ["accumulatedTradingVolume", "tradingVolume"])),
-            "marketCap": int(_first_present(d, ["marketValue", "marketCap", "marketValueAmount"])),
-        }
-    except Exception as e:
-        print(f"  [naver-stock-basic] {code} failed: {e}")
-        return None
+    """Naver: 개별 종목 기본 시세 — 여러 endpoint 시도"""
+    candidates = [
+        f"https://m.stock.naver.com/api/stock/{code}/basic",          # 단수형
+        f"https://m.stock.naver.com/api/stocks/{code}/basic",         # 복수형 (실패 가능)
+        f"https://m.stock.naver.com/api/stocks/{code}/integration",   # 통합 데이터
+    ]
+    last_err = None
+    for url in candidates:
+        try:
+            r = requests.get(url, headers=NAVER_HEADERS, timeout=6)
+            if r.status_code != 200:
+                last_err = f"HTTP {r.status_code}"
+                continue
+            d = r.json()
+            if not _NAVER_LOGGED_KEYS["stock_basic"]:
+                print(f"  [naver-debug] stock_basic({url.split('/')[-1]}) raw: {json.dumps(d, ensure_ascii=False)[:400]}")
+                _NAVER_RAW_SAMPLES["stock_basic"] = {"url": url, "data": d}
+                _NAVER_LOGGED_KEYS["stock_basic"] = True
+            # integration endpoint은 stockBasic 또는 별도 객체로 감쌀 수 있음
+            stock = d.get("stockBasic") or d.get("basic") or d
+            # value 단위: accumulatedTradingValue는 백만원 → 원으로 변환
+            tv_million = _first_present(stock, ["accumulatedTradingValue", "tradingValue"])
+            mv_eok = _first_present(stock, ["marketValue", "marketCap"])
+            return {
+                "code": code,
+                "name":      stock.get("stockName") or stock.get("itemName") or stock.get("name") or code,
+                "price":     int(_first_present(stock, ["closePriceRaw", "closePrice", "lastPrice", "currentPrice"])),
+                "changePct": _first_present(stock, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
+                "change":    _first_present(stock, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
+                "volume_won": int(tv_million * 1_000_000),  # 백만원 → 원
+                "volume":    int(_first_present(stock, ["accumulatedTradingVolume", "tradingVolume"])),
+                "marketCap": int(mv_eok * 100_000_000),  # 억원 → 원
+            }
+        except Exception as e:
+            last_err = str(e)
+            continue
+    print(f"  [naver-stock-basic] {code} failed all endpoints: {last_err}")
+    return None
 
 
 def naver_index_intraday(market="KOSPI"):
-    """Naver: 인덱스 일봉 차트 (최근 30일)"""
-    try:
-        url = f"https://m.stock.naver.com/api/chart/domestic/index/{market}?periodType=dayCandle&count=30"
-        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
-        r.raise_for_status()
-        d = r.json()
-        out = []
-        for row in d:
-            t = row.get("localTime", "")[5:10]  # MM-DD
-            close = safe_float(row.get("closePrice", 0))
-            out.append([t, close])
-        return out[-20:]
-    except Exception as e:
-        print(f"  [naver-intraday] {market} failed: {e}")
-        return None
+    """Naver: 인덱스 차트 — 여러 endpoint 시도"""
+    candidates = [
+        f"https://api.stock.naver.com/chart/domestic/index/{market}?periodType=minute1&count=60",
+        f"https://m.stock.naver.com/api/index/{market}/integration",
+        f"https://m.stock.naver.com/api/chart/domestic/index/{market}?periodType=dayCandle&count=30",
+    ]
+    for url in candidates:
+        try:
+            r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+            if r.status_code != 200:
+                continue
+            d = r.json()
+            if not _NAVER_LOGGED_KEYS["intraday"]:
+                preview = json.dumps(d, ensure_ascii=False)[:300] if not isinstance(d, list) else json.dumps(d[:1], ensure_ascii=False)[:300]
+                print(f"  [naver-debug] intraday({url.split('/')[-1][:30]}): {preview}")
+                _NAVER_RAW_SAMPLES["intraday"] = {"url": url, "preview": preview[:200]}
+                _NAVER_LOGGED_KEYS["intraday"] = True
+            # 응답이 list인 경우 (chart API)
+            if isinstance(d, list) and d:
+                out = []
+                for row in d:
+                    t = (row.get("localTime") or row.get("dateTime") or "")[-8:-3]  # HH:MM
+                    close = safe_float(row.get("closePrice") or row.get("close") or 0)
+                    if close > 0:
+                        out.append([t, close])
+                if out:
+                    return out[-30:]
+            # integration endpoint: { intradayMinutes: [...], dailyCandles: [...] }
+            if isinstance(d, dict):
+                series = d.get("intradayMinutes") or d.get("dailyCandles") or d.get("minutes") or []
+                if series:
+                    out = []
+                    for row in series:
+                        t = (row.get("localTime") or row.get("time") or "")[-8:-3] if isinstance(row.get("localTime"), str) else ""
+                        close = safe_float(row.get("closePrice") or row.get("close") or 0)
+                        if close > 0:
+                            out.append([t, close])
+                    if out:
+                        return out[-30:]
+        except Exception as e:
+            continue
+    print(f"  [naver-intraday] {market} all endpoints failed")
+    return None
 
 
 def naver_top_stocks(market="KOSPI", direction="up", limit=30):
@@ -184,13 +227,16 @@ def naver_top_stocks(market="KOSPI", direction="up", limit=30):
             _NAVER_LOGGED_KEYS["stock_list"] = True
         out = []
         for s in stocks[:limit]:
+            tv_million = _first_present(s, ["accumulatedTradingValue", "tradingValue", "tradeAmount"])
+            mv_eok = _first_present(s, ["marketValue", "marketCap"])
             out.append({
                 "code": s.get("itemCode") or s.get("code", ""),
                 "name": s.get("stockName") or s.get("name", ""),
-                "price":     int(_first_present(s, ["closePrice", "lastPrice"])),
+                "price":     int(_first_present(s, ["closePriceRaw", "closePrice", "lastPrice"])),
                 "changePct": _first_present(s, ["fluctuationsRatio", "changeRate"]),
-                "volume_won": int(_first_present(s, ["accumulatedTradingValue", "tradingValue", "tradeAmount"])),
+                "volume_won": int(tv_million * 1_000_000),  # 백만원 → 원
                 "volume":     int(_first_present(s, ["accumulatedTradingVolume", "tradingVolume"])),
+                "marketCap":  int(mv_eok * 100_000_000),  # 억원 → 원
             })
         return out
     except Exception as e:
@@ -804,8 +850,10 @@ def naver_only_pipeline():
     top_losers = sorted([s for s in falling if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
 
     def to_flow_row(s, sign=1):
-        # 거래대금의 ~5%를 외인 순매수로 추정 (proxy)
-        proxy_net = max(1, (s.get("volume_won", 0) // 100_000_000) // 20) * sign
+        # 거래대금의 ~5%를 외인 순매수로 추정 (proxy, 억 단위)
+        # volume_won은 원 단위 → /1e8 = 억원, * 0.05 = 5%
+        eok = (s.get("volume_won", 0) // 100_000_000)
+        proxy_net = max(1, eok // 20) * sign
         return {
             "code": s["code"], "name": s["name"],
             "sector": guess_sector(s["code"]),
@@ -874,14 +922,16 @@ def naver_only_pipeline():
         })
 
     # KOSPI 합계 거래대금 = 모든 알려진 종목의 거래대금 합산 (근사)
-    kospi_volume_won = sum(s.get("volume_won", 0) for s in all_known) * 5  # 표본 stocks → 전체 추정
+    # all_known은 약 100개 + 누락 섹터 추가분 → 코스피 ~800개 중 일부. 평균 거래대금 비율로 보정
+    sample_total = sum(s.get("volume_won", 0) for s in all_known)
+    kospi_volume_won = int(sample_total * 1.5)  # 표본 → 전체 추정 (대표주 위주이므로 비중 높음)
 
     return {
         "kospi": {
             "value": kospi_basic.get("value", 0),
             "change": kospi_basic.get("change", 0),
             "changePct": kospi_basic.get("changePct", 0),
-            "volume": kospi_basic.get("volume", 0) or kospi_volume_won,
+            "volume": kospi_volume_won,  # 인덱스 endpoint에 거래대금 없으므로 합산값 사용
             "high": kospi_basic.get("high", 0),
             "low": kospi_basic.get("low", 0),
             "foreignNet": 0, "instNet": 0, "indivNet": 0,
