@@ -1,0 +1,64 @@
+name: 📊 KOSPI Dashboard Data
+
+on:
+  schedule:
+    # 평일(월~금) 09:00~16:00 KST 매 정시 + 추가 틱 (KST = UTC+9)
+    - cron: '0 0 * * 1-5'   # 09:00 KST
+    - cron: '0 1 * * 1-5'   # 10:00 KST
+    - cron: '0 2 * * 1-5'   # 11:00 KST
+    - cron: '0 3 * * 1-5'   # 12:00 KST
+    - cron: '0 4 * * 1-5'   # 13:00 KST
+    - cron: '30 4 * * 1-5'  # 13:30 KST
+    - cron: '0 5 * * 1-5'   # 14:00 KST
+    - cron: '0 6 * * 1-5'   # 15:00 KST
+    - cron: '20 6 * * 1-5'  # 15:20 KST
+    - cron: '0 7 * * 1-5'   # 16:00 KST (장마감 후)
+  workflow_dispatch:
+  # 데이터 수집 코드/워크플로 변경 시 즉시 트리거
+  push:
+    branches: [main]
+    paths:
+      - 'generate_dashboard_data.py'
+      - '.github/workflows/dashboard_data.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-dashboard-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    concurrency:
+      group: dashboard-data
+      cancel-in-progress: false
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pykrx scipy numpy yfinance requests beautifulsoup4 lxml
+
+      - name: 📊 Generate dashboard data
+        env:
+          # KRX 로그인 자격증명 (선택) — pykrx가 자동 사용. 없어도 Naver 폴백으로 동작.
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+          # Anthropic API key (선택, 향후 서버사이드 AI 사용 시)
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 generate_dashboard_data.py
+
+      - name: 💾 Commit & push docs/dashboard_data.json
+        run: |
+          git config user.name  "Winter Bot"
+          git config user.email "winter-bot@github-actions"
+          git add docs/dashboard_data.json
+          git diff --staged --quiet || git commit -m "📊 Dashboard data $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')"
+          git push

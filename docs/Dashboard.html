@@ -2,49 +2,68 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>코스피 주도섹터 & 수급 대시보드</title>
-<meta name="viewport" content="width=1440" />
+<title>KOSPI Intel · 코스피 주도섹터 & 수급 대시보드</title>
+<meta name="viewport" content="width=1520" />
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Geist:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #f2f4f6;
-  --bg-soft: #f8f9fa;
-  --surface: #ffffff;
-  --surface-2: #fafbfc;
-  --line: #e5e8eb;
-  --line-soft: #eef0f2;
-  --ink: #191f28;
-  --ink-2: #4e5968;
-  --ink-3: #8b95a1;
-  --ink-4: #b0b8c1;
-  --primary: #3182f6;
-  --primary-soft: #e8f3ff;
-  --primary-ink: #1b64da;
-  --up: #f04452;
-  --up-soft: #fdecee;
-  --up-ink: #d63846;
-  --down: #3182f6;
-  --down-soft: #e8f3ff;
-  --down-ink: #1b64da;
-  --flat: #8b95a1;
-  --warn: #ff9500;
-  --warn-soft: #fff4e0;
-  --positive-bg: #fdecee;
-  --negative-bg: #e8f3ff;
+  --bg:        #0a0b0d;
+  --bg-soft:   #111316;
+  --surface:   #15171b;
+  --surface-2: #1a1d22;
+  --surface-3: #21252b;
+  --line:      #262a31;
+  --line-soft: #1d2026;
+  --line-bright: #353a43;
 
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
-  --r-2xl: 24px;
+  --ink:    #e8eaed;
+  --ink-2:  #a8afba;
+  --ink-3:  #6b7280;
+  --ink-4:  #424852;
 
-  --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-2: 0 2px 8px rgba(20,30,50,0.06);
-  --shadow-3: 0 8px 24px rgba(20,30,50,0.08);
+  --accent:        #e6b450;
+  --accent-soft:   rgba(230,180,80,0.12);
+  --accent-bright: #f5cb6b;
 
-  --font: 'Pretendard', 'Pretendard Variable', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
-  --font-num: 'Pretendard', ui-monospace, 'SF Mono', Menlo, monospace;
+  --up:        #ff5d6c;
+  --up-bright: #ff8090;
+  --up-soft:   rgba(255,93,108,0.12);
+  --up-glow:   rgba(255,93,108,0.35);
+
+  --down:        #4d8eff;
+  --down-bright: #7aa9ff;
+  --down-soft:   rgba(77,142,255,0.12);
+  --down-glow:   rgba(77,142,255,0.35);
+
+  --flat:  #6b7280;
+  --warn:  #f5a623;
+  --pos-green: #2dd47c;
+
+  --font: 'Geist', 'Pretendard Variable', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-num: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: 'Geist', 'Pretendard Variable', system-ui, sans-serif;
+
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 10px;
+  --r-2xl: 12px;
+
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.03) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 1px 0 rgba(255,255,255,0.03) inset, 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-glow-up: 0 0 0 1px var(--up-glow), 0 4px 24px var(--up-glow);
+  --shadow-glow-down: 0 0 0 1px var(--down-glow), 0 4px 24px var(--down-glow);
+
+  --primary: var(--accent);
+  --primary-soft: var(--accent-soft);
+  --primary-ink: var(--accent-bright);
+  --up-ink: var(--up-bright);
+  --down-ink: var(--down-bright);
+  --warn-soft: rgba(245,166,35,0.14);
+  --positive-bg: var(--up-soft);
+  --negative-bg: var(--down-soft);
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -53,86 +72,116 @@ body {
   font-family: var(--font);
   color: var(--ink);
   background: var(--bg);
-  font-feature-settings: 'tnum' on, 'cv11' on;
+  font-feature-settings: 'tnum' on, 'ss01' on, 'cv11' on;
+  letter-spacing: -0.01em;
+  min-width: 1500px;
 }
 
 button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+
+::selection { background: var(--accent-soft); color: var(--accent-bright); }
 
 .up { color: var(--up); }
 .down { color: var(--down); }
 .flat { color: var(--flat); }
-.tnum { font-variant-numeric: tabular-nums; }
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' on; }
+.mono { font-family: var(--font-num); }
 
 .dash-card {
   background: var(--surface);
   border-radius: var(--r-xl);
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   overflow: hidden;
+  position: relative;
+}
+.dash-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 30%);
 }
 
 .card-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 12px 20px;
+  padding: 16px 18px 10px 18px;
+  position: relative;
+  z-index: 1;
 }
 .card-title {
-  font-size: 16px; font-weight: 700; color: var(--ink);
+  font-size: 11px; font-weight: 700; color: var(--ink-2);
   display: flex; align-items: center; gap: 8px;
-  letter-spacing: -0.2px;
+  text-transform: uppercase; letter-spacing: 0.08em;
 }
-.card-subtitle {
-  font-size: 12px; color: var(--ink-3); font-weight: 500;
-}
+.card-subtitle { font-size: 11px; color: var(--ink-3); font-weight: 500; }
+
 .tag-live {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; font-weight: 600; color: var(--up);
-  background: var(--up-soft);
-  padding: 2px 6px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9px; font-weight: 700; color: var(--up-bright);
+  background: transparent; padding: 2px 7px 2px 6px; border-radius: 3px;
+  letter-spacing: 0.1em; border: 1px solid var(--up-soft);
+  text-transform: uppercase; font-family: var(--font-num);
 }
 .tag-live::before {
   content:''; width: 5px; height:5px; border-radius:50%;
   background: var(--up); animation: pulse 1.4s infinite;
+  box-shadow: 0 0 6px var(--up);
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
+  50% { opacity: 0.3; transform: scale(0.6); }
 }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--line-bright); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 .btn-run {
-  background: var(--ink);
-  color: white;
-  border: none;
-  height: 48px;
-  padding: 0 24px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  letter-spacing: -0.3px;
-  transition: transform 0.06s ease, background 0.15s ease;
+  background: linear-gradient(180deg, var(--accent-bright) 0%, var(--accent) 100%);
+  color: #1a1206;
+  border: 1px solid rgba(255,255,255,0.15);
+  height: 40px; padding: 0 18px; border-radius: var(--r-md);
+  font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 8px;
+  letter-spacing: 0.02em; transition: all 0.15s ease;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 4px 16px rgba(230,180,80,0.25);
+  text-transform: uppercase; font-family: var(--font);
 }
-.btn-run:hover { background: #000; }
-.btn-run:active { transform: scale(0.98); }
-.btn-run.loading { background: var(--ink-2); pointer-events: none; }
+.btn-run:hover {
+  filter: brightness(1.08); transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 6px 20px rgba(230,180,80,0.35);
+}
+.btn-run:active { transform: translateY(0); }
+.btn-run.loading {
+  background: var(--surface-3); color: var(--ink-2);
+  pointer-events: none; box-shadow: none; border-color: var(--line);
+}
 
 .btn-ghost {
-  background: var(--bg);
-  color: var(--ink-2);
-  border: none;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
+  background: var(--surface-2); color: var(--ink-2);
+  border: 1px solid var(--line);
+  height: 32px; padding: 0 12px; border-radius: var(--r-md);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+  transition: all 0.12s ease; text-transform: uppercase;
 }
-.btn-ghost:hover { background: var(--line); }
+.btn-ghost:hover {
+  background: var(--surface-3); color: var(--ink);
+  border-color: var(--line-bright);
+}
 
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+table th {
+  text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 10px !important; color: var(--ink-3) !important;
+  border-bottom: 1px solid var(--line); padding-bottom: 10px !important;
+}
+
+.stock-link { color: inherit; text-decoration: none; transition: color 0.1s; }
+.stock-link:hover { color: var(--accent-bright); }
 </style>
 </head>
 <body>
@@ -143,20 +192,14 @@ button { font-family: inherit; cursor: pointer; }
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 
 <script>
-/* ============== Mock 한국 주식시장 데이터 (KOSPI) ============== */
 window.MARKET_DATA = {
   asOf: '2026-05-04 13:42:18',
   marketStatus: 'OPEN',
   kospi: {
-    value: 2847.32,
-    change: +28.41,
-    changePct: +1.01,
+    value: 2847.32, change: +28.41, changePct: +1.01,
     volume: 4283000000000,
-    foreignNet: +324700000000,
-    instNet: +184200000000,
-    indivNet: -508900000000,
-    high: 2851.90,
-    low: 2819.04,
+    foreignNet: +324700000000, instNet: +184200000000, indivNet: -508900000000,
+    high: 2851.90, low: 2819.04,
     intraday: [
       ['09:00', 2820.5],['09:15', 2823.2],['09:30', 2828.7],['09:45', 2825.1],
       ['10:00', 2830.4],['10:15', 2834.8],['10:30', 2839.2],['10:45', 2842.5],
@@ -172,16 +215,16 @@ window.MARKET_DATA = {
   rate: { value: 3.250, change: 0, label: '기준금리' },
 
   sectors: [
-    { id: 'semi', name: '반도체', changePct: +3.42, foreignNet: +1842, instNet: +621, weight: 28.4, leadStocks: ['삼성전자','SK하이닉스','한미반도체'], theme: '주도', momentum: 'strong-up' },
-    { id: 'bio', name: '바이오/제약', changePct: +2.18, foreignNet: +412, instNet: +198, weight: 8.2, leadStocks: ['삼성바이오로직스','셀트리온','유한양행'], theme: '회복', momentum: 'up' },
-    { id: 'battery', name: '2차전지', changePct: -1.84, foreignNet: -589, instNet: -241, weight: 11.6, leadStocks: ['LG에너지솔루션','POSCO홀딩스','에코프로비엠'], theme: '조정', momentum: 'down' },
-    { id: 'auto', name: '자동차', changePct: +1.12, foreignNet: +287, instNet: +94, weight: 9.8, leadStocks: ['현대차','기아','현대모비스'], theme: '강세', momentum: 'up' },
-    { id: 'finance', name: '금융', changePct: +0.62, foreignNet: +178, instNet: +312, weight: 12.4, leadStocks: ['KB금융','신한지주','삼성생명'], theme: '안정', momentum: 'flat-up' },
-    { id: 'platform', name: '플랫폼/IT', changePct: +1.94, foreignNet: +342, instNet: +201, weight: 7.1, leadStocks: ['카카오','네이버','크래프톤'], theme: '반등', momentum: 'up' },
-    { id: 'shipbuild', name: '조선', changePct: +4.21, foreignNet: +189, instNet: +287, weight: 3.8, leadStocks: ['HD현대중공업','삼성중공업','한화오션'], theme: '주도', momentum: 'strong-up' },
-    { id: 'steel', name: '철강/소재', changePct: -0.74, foreignNet: -82, instNet: -41, weight: 4.2, leadStocks: ['POSCO홀딩스','현대제철','고려아연'], theme: '약세', momentum: 'down' },
-    { id: 'cosmetic', name: '화장품/소비재', changePct: +2.84, foreignNet: +124, instNet: +88, weight: 3.4, leadStocks: ['아모레퍼시픽','LG생활건강','코스맥스'], theme: '강세', momentum: 'up' },
-    { id: 'energy', name: '정유/에너지', changePct: -1.21, foreignNet: -54, instNet: -28, weight: 4.6, leadStocks: ['SK이노베이션','S-Oil','한국전력'], theme: '조정', momentum: 'down' },
+    { id: 'semi', name: '반도체', changePct: +3.42, foreignNet: +1842, instNet: +621, weight: 28.4, leadStocks: ['삼성전자','SK하이닉스','한미반도체'], leadCodes: ['005930','000660','042700'], theme: '주도', momentum: 'strong-up' },
+    { id: 'bio', name: '바이오/제약', changePct: +2.18, foreignNet: +412, instNet: +198, weight: 8.2, leadStocks: ['삼성바이오로직스','셀트리온','유한양행'], leadCodes: ['207940','068270','000100'], theme: '회복', momentum: 'up' },
+    { id: 'battery', name: '2차전지', changePct: -1.84, foreignNet: -589, instNet: -241, weight: 11.6, leadStocks: ['LG에너지솔루션','POSCO홀딩스','에코프로비엠'], leadCodes: ['373220','005490','247540'], theme: '조정', momentum: 'down' },
+    { id: 'auto', name: '자동차', changePct: +1.12, foreignNet: +287, instNet: +94, weight: 9.8, leadStocks: ['현대차','기아','현대모비스'], leadCodes: ['005380','000270','012330'], theme: '강세', momentum: 'up' },
+    { id: 'finance', name: '금융', changePct: +0.62, foreignNet: +178, instNet: +312, weight: 12.4, leadStocks: ['KB금융','신한지주','삼성생명'], leadCodes: ['105560','055550','032830'], theme: '안정', momentum: 'flat-up' },
+    { id: 'platform', name: '플랫폼/IT', changePct: +1.94, foreignNet: +342, instNet: +201, weight: 7.1, leadStocks: ['카카오','네이버','크래프톤'], leadCodes: ['035720','035420','259960'], theme: '반등', momentum: 'up' },
+    { id: 'shipbuild', name: '조선', changePct: +4.21, foreignNet: +189, instNet: +287, weight: 3.8, leadStocks: ['HD현대중공업','삼성중공업','한화오션'], leadCodes: ['329180','010140','042660'], theme: '주도', momentum: 'strong-up' },
+    { id: 'steel', name: '철강/소재', changePct: -0.74, foreignNet: -82, instNet: -41, weight: 4.2, leadStocks: ['POSCO홀딩스','현대제철','고려아연'], leadCodes: ['005490','004020','010130'], theme: '약세', momentum: 'down' },
+    { id: 'cosmetic', name: '화장품/소비재', changePct: +2.84, foreignNet: +124, instNet: +88, weight: 3.4, leadStocks: ['아모레퍼시픽','LG생활건강','코스맥스'], leadCodes: ['090430','051900','192820'], theme: '강세', momentum: 'up' },
+    { id: 'energy', name: '정유/에너지', changePct: -1.21, foreignNet: -54, instNet: -28, weight: 4.6, leadStocks: ['SK이노베이션','S-Oil','한국전력'], leadCodes: ['096770','010950','015760'], theme: '조정', momentum: 'down' },
   ],
 
   foreignBuy: [
@@ -242,14 +285,14 @@ window.MARKET_DATA = {
   },
 
   themes: [
-    { name: 'HBM/AI 반도체', heat: 98, changePct: +4.82, stocks: ['SK하이닉스','한미반도체','이오테크닉스'] },
-    { name: '조선/방산', heat: 92, changePct: +3.94, stocks: ['HD현대중공업','한화오션','한화시스템'] },
-    { name: '원전 르네상스', heat: 87, changePct: +3.21, stocks: ['두산에너빌리티','한전기술','우진'] },
-    { name: 'K-뷰티', heat: 81, changePct: +2.84, stocks: ['아모레퍼시픽','코스맥스','한국콜마'] },
-    { name: '바이오 신약', heat: 74, changePct: +2.18, stocks: ['셀트리온','유한양행','대웅제약'] },
-    { name: '전력기기/송배전', heat: 71, changePct: +2.94, stocks: ['HD현대일렉트릭','LS일렉트릭','효성중공업'] },
-    { name: '2차전지 (조정)', heat: 64, changePct: -1.84, stocks: ['LG에너지솔루션','에코프로비엠','포스코퓨처엠'] },
-    { name: '로봇/자동화', heat: 58, changePct: +1.42, stocks: ['두산로보틱스','레인보우로보틱스','로보스타'] },
+    { name: 'HBM/AI 반도체', heat: 98, changePct: +4.82, stocks: ['SK하이닉스','한미반도체','이오테크닉스'], codes: ['000660','042700','039030'] },
+    { name: '조선/방산', heat: 92, changePct: +3.94, stocks: ['HD현대중공업','한화오션','한화시스템'], codes: ['329180','042660','272210'] },
+    { name: '원전 르네상스', heat: 87, changePct: +3.21, stocks: ['두산에너빌리티','한전기술','우진'], codes: ['034020','052690','105840'] },
+    { name: 'K-뷰티', heat: 81, changePct: +2.84, stocks: ['아모레퍼시픽','코스맥스','한국콜마'], codes: ['090430','192820','161890'] },
+    { name: '바이오 신약', heat: 74, changePct: +2.18, stocks: ['셀트리온','유한양행','대웅제약'], codes: ['068270','000100','069620'] },
+    { name: '전력기기/송배전', heat: 71, changePct: +2.94, stocks: ['HD현대일렉트릭','LS일렉트릭','효성중공업'], codes: ['267260','010120','298040'] },
+    { name: '2차전지 (조정)', heat: 64, changePct: -1.84, stocks: ['LG에너지솔루션','에코프로비엠','포스코퓨처엠'], codes: ['373220','247540','003670'] },
+    { name: '로봇/자동화', heat: 58, changePct: +1.42, stocks: ['두산로보틱스','레인보우로보틱스','로보스타'], codes: ['454910','277810','090360'] },
   ],
 
   news: [
@@ -263,10 +306,8 @@ window.MARKET_DATA = {
   ],
 
   programTrade: {
-    arbBuy: 1842,
-    arbSell: -642,
-    nonArbBuy: 4821,
-    nonArbSell: -2184,
+    arbBuy: 1842, arbSell: -642,
+    nonArbBuy: 4821, nonArbSell: -2184,
     netTotal: 3837,
   },
 };
@@ -276,11 +317,8 @@ window.MARKET_DATA = {
 /* eslint-disable */
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-/* ============== Number formatters ============== */
-function fmtPrice(n) {
-  if (n == null) return '-';
-  return n.toLocaleString('ko-KR');
-}
+/* ============== Formatters ============== */
+function fmtPrice(n) { if (n == null) return '-'; return n.toLocaleString('ko-KR'); }
 function fmtPct(n, withSign = true) {
   if (n == null) return '-';
   const sign = n > 0 ? '+' : '';
@@ -295,9 +333,7 @@ function fmtEok(amountWon) {
   if (amountWon == null) return '-';
   const v = amountWon;
   const sign = v > 0 ? '+' : '';
-  if (Math.abs(v) >= 10000) {
-    return `${sign}${(v / 10000).toFixed(2)}조`;
-  }
+  if (Math.abs(v) >= 10000) return `${sign}${(v / 10000).toFixed(2)}조`;
   return `${sign}${Math.round(v).toLocaleString('ko-KR')}억`;
 }
 function colorFor(n) {
@@ -305,23 +341,65 @@ function colorFor(n) {
   if (n < 0) return 'var(--down)';
   return 'var(--flat)';
 }
-function bgFor(n) {
-  if (n > 0) return 'var(--up-soft)';
-  if (n < 0) return 'var(--down-soft)';
-  return 'var(--bg)';
-}
-function arrow(n) {
-  if (n > 0) return '▲';
-  if (n < 0) return '▼';
-  return '·';
-}
+function arrow(n) { if (n > 0) return '▲'; if (n < 0) return '▼'; return '·'; }
 
 function nowKST() {
-  const d = new Date();
-  return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  return new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 }
 
-/* ============== Sparkline (SVG) ============== */
+/* ============== Naver Finance / News links (functional, not decorative) ============== */
+function naverFinanceUrl(code) {
+  return `https://finance.naver.com/item/main.naver?code=${code}`;
+}
+function naverNameSearchUrl(name) {
+  return `https://finance.naver.com/search/search.naver?query=${encodeURIComponent(name)}`;
+}
+function naverNewsSearchUrl(headline) {
+  return `https://search.naver.com/search.naver?where=news&query=${encodeURIComponent(headline)}`;
+}
+
+function StockLink({ code, name, children, style }) {
+  const url = code ? naverFinanceUrl(code) : naverNameSearchUrl(name);
+  return (
+    <a className="stock-link" href={url} target="_blank" rel="noopener noreferrer" title={code ? `${name} ${code} · Naver Finance` : `${name} · 검색`} style={style}>
+      {children}
+    </a>
+  );
+}
+
+/* ============== Korean market hours status (real-time) ============== */
+function useMarketStatus() {
+  const [status, setStatus] = useState(() => computeMarketStatus());
+  useEffect(() => {
+    const id = setInterval(() => setStatus(computeMarketStatus()), 30000);
+    return () => clearInterval(id);
+  }, []);
+  return status;
+}
+function computeMarketStatus() {
+  const d = new Date();
+  const kst = new Date(d.getTime() + (d.getTimezoneOffset() + 540) * 60000);
+  const day = kst.getUTCDay();
+  const hh = kst.getUTCHours();
+  const mm = kst.getUTCMinutes();
+  const minutes = hh * 60 + mm;
+  if (day === 0 || day === 6) return { label: 'MARKET CLOSED', open: false, dotColor: 'var(--flat)' };
+  if (minutes < 540) return { label: 'PRE-MARKET', open: false, dotColor: 'var(--accent)' };
+  if (minutes >= 540 && minutes < 930) return { label: 'MARKET OPEN', open: true, dotColor: 'var(--pos-green)' };
+  return { label: 'AFTER HOURS', open: false, dotColor: 'var(--flat)' };
+}
+
+/* ============== Live countdown (NEXT TICK 30s loop) ============== */
+function useTickCountdown(seconds = 30) {
+  const [n, setN] = useState(seconds);
+  useEffect(() => {
+    const id = setInterval(() => setN(prev => prev <= 1 ? seconds : prev - 1), 1000);
+    return () => clearInterval(id);
+  }, [seconds]);
+  return n;
+}
+
+/* ============== Sparkline ============== */
 function Sparkline({ data, width = 80, height = 28, color, fill = true, strokeWidth = 1.5 }) {
   if (!data || data.length === 0) return null;
   const min = Math.min(...data);
@@ -364,17 +442,22 @@ function LiveClock() {
   return <span className="tnum">{t}</span>;
 }
 
+function SectorDot({ momentum }) {
+  const map = {
+    'strong-up': 'var(--up)', 'up': 'var(--up-bright)', 'flat-up': '#ffb8be',
+    'down': 'var(--down-bright)', 'strong-down': 'var(--down)',
+  };
+  return <span style={{ width: 8, height: 8, borderRadius: 999, background: map[momentum] || 'var(--ink-4)', display: 'inline-block', boxShadow: `0 0 6px ${map[momentum] || 'var(--ink-4)'}` }} />;
+}
+
 function RunButton({ onClick, loading, label = '실행', loadingLabel = '분석 중...' }) {
   return (
     <button className={`btn-run ${loading ? 'loading' : ''}`} onClick={onClick} disabled={loading}>
       {loading ? (
-        <>
-          <Spinner />
-          <span>{loadingLabel}</span>
-        </>
+        <><Spinner /><span>{loadingLabel}</span></>
       ) : (
         <>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
             <path d="M3 1.5v11l9-5.5L3 1.5z" fill="currentColor" />
           </svg>
           <span>{label}</span>
@@ -409,73 +492,97 @@ function CardHead({ title, subtitle, right, live }) {
 }
 
 /* ===================================================================
-   1) Top Header
+   MarketHeader
 =================================================================== */
-function MarketHeader({ data, onRun, loading, runLabel = '시장 분석 실행' }) {
+function MarketHeader({ data, onRun, loading, runLabel = 'RUN ANALYSIS' }) {
   const k = data.kospi;
+  const isUp = k.change >= 0;
   return (
-    <div className="dash-card" style={{ padding: '20px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 220 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-2)' }}>KOSPI</span>
-            <span className="tag-live">장중</span>
-            <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>· <LiveClock /></span>
+    <div className="dash-card" style={{ padding: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, position: 'relative', zIndex: 1 }}>
+        <div style={{
+          flex: '0 0 auto', padding: '20px 28px',
+          borderRight: '1px solid var(--line)', minWidth: 320,
+          background: isUp ? 'linear-gradient(180deg, var(--up-soft) 0%, transparent 70%)' : 'linear-gradient(180deg, var(--down-soft) 0%, transparent 70%)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>KOSPI · KRX</span>
+            <span className="tag-live">LIVE</span>
+            <span className="mono" style={{ fontSize: 10, color: 'var(--ink-3)' }}><LiveClock /> KST</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.5px' }} className="tnum">
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+            <span className="tnum mono" style={{ fontSize: 38, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1 }}>
               {k.value.toFixed(2)}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: colorFor(k.change) }} className="tnum">
-              {arrow(k.change)} {Math.abs(k.change).toFixed(2)} ({fmtPct(k.changePct)})
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span className="tnum mono" style={{ fontSize: 14, fontWeight: 600, color: colorFor(k.change), lineHeight: 1 }}>
+                {arrow(k.change)} {Math.abs(k.change).toFixed(2)}
+              </span>
+              <span className="tnum mono" style={{ fontSize: 14, fontWeight: 700, color: colorFor(k.change), lineHeight: 1 }}>
+                {fmtPct(k.changePct)}
+              </span>
+            </div>
+          </div>
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Sparkline data={k.intraday.map(p => p[1])} width={180} height={32} color={colorFor(k.change)} strokeWidth={1.5} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              <span className="mono">H {k.high.toFixed(2)}</span>
+              <span className="mono">L {k.low.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
-        <div style={{ background: 'var(--bg-soft)', padding: '10px 14px', borderRadius: 12 }}>
-          <Sparkline data={k.intraday.map(p => p[1])} width={140} height={40} color={colorFor(k.change)} strokeWidth={1.8} />
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <MacroCell label="KOSDAQ" value={data.kosdaq.value.toFixed(2)} pct={data.kosdaq.changePct} />
+          <MacroCell label="USD/KRW" value={data.fx.usdkrw.toFixed(2)} pct={data.fx.changePct} invert />
+          <MacroCell label="WTI CRUDE" value={data.oil.value.toFixed(2)} unit="$" pct={data.oil.changePct} />
+          <MacroCell label="GOLD" value={data.gold.value.toFixed(2)} unit="$" pct={data.gold.changePct} />
+          <MacroCell label="BOK RATE" value={`${data.rate.value.toFixed(2)}%`} pct={null} />
         </div>
 
-        <div style={{ display: 'flex', gap: 12, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <MacroChip label="KOSDAQ" value={data.kosdaq.value.toFixed(2)} pct={data.kosdaq.changePct} />
-          <MacroChip label="USD/KRW" value={data.fx.usdkrw.toFixed(2)} pct={data.fx.changePct} invert />
-          <MacroChip label="WTI" value={`$${data.oil.value.toFixed(2)}`} pct={data.oil.changePct} />
-          <MacroChip label="기준금리" value={`${data.rate.value.toFixed(2)}%`} pct={null} />
+        <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 20px', borderLeft: '1px solid var(--line)' }}>
+          <RunButton onClick={onRun} loading={loading} label={runLabel} loadingLabel="ANALYZING..." />
         </div>
-
-        <RunButton onClick={onRun} loading={loading} label={runLabel} loadingLabel="AI 분석 중..." />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--line-soft)' }}>
-        <SummaryStat label="거래대금" value={`${(k.volume / 1e12).toFixed(2)}조원`} sub="코스피 누적" />
-        <SummaryStat label="외국인" value={fmtEok(k.foreignNet / 1e8)} sub="순매수" pct={k.foreignNet > 0 ? +1 : -1} />
-        <SummaryStat label="기관" value={fmtEok(k.instNet / 1e8)} sub="순매수" pct={k.instNet > 0 ? +1 : -1} />
-        <SummaryStat label="개인" value={fmtEok(k.indivNet / 1e8)} sub="순매수" pct={k.indivNet > 0 ? +1 : -1} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--line)', background: 'var(--surface-2)' }}>
+        <FlowCell label="거래대금" value={`₩${(k.volume / 1e12).toFixed(2)}T`} sub="누적" />
+        <FlowCell label="외국인" value={fmtEok(k.foreignNet / 1e8)} sub="NET BUY" pct={k.foreignNet > 0 ? +1 : -1} />
+        <FlowCell label="기관" value={fmtEok(k.instNet / 1e8)} sub="NET BUY" pct={k.instNet > 0 ? +1 : -1} />
+        <FlowCell label="개인" value={fmtEok(k.indivNet / 1e8)} sub="NET BUY" pct={k.indivNet > 0 ? +1 : -1} />
       </div>
     </div>
   );
 }
 
-function MacroChip({ label, value, pct, invert }) {
+function MacroCell({ label, value, pct, invert, unit }) {
   const realPct = invert ? -pct : pct;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 78 }}>
-      <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>{label}</span>
-      <span style={{ fontSize: 14, fontWeight: 700 }} className="tnum">{value}</span>
+    <div style={{
+      flex: 1, padding: '20px 18px', borderRight: '1px solid var(--line)',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, minWidth: 0,
+    }}>
+      <span style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
+      <span className="tnum mono" style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', lineHeight: 1 }}>
+        {unit}{value}
+      </span>
       {pct != null && (
-        <span style={{ fontSize: 11, fontWeight: 600, color: colorFor(realPct) }} className="tnum">
-          {arrow(realPct)} {fmtPct(Math.abs(pct), false)}
+        <span className="tnum mono" style={{ fontSize: 11, fontWeight: 600, color: colorFor(realPct) }}>
+          {realPct >= 0 ? '+' : ''}{realPct.toFixed(2)}%
         </span>
       )}
     </div>
   );
 }
 
-function SummaryStat({ label, value, sub, pct }) {
+function FlowCell({ label, value, sub, pct }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>{label} · {sub}</div>
-      <div style={{ fontSize: 18, fontWeight: 800, color: pct == null ? 'var(--ink)' : colorFor(pct), marginTop: 2 }} className="tnum">
+    <div style={{ padding: '12px 20px', borderRight: '1px solid var(--line)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+        <span style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
+        <span style={{ fontSize: 9, color: 'var(--ink-4)', fontWeight: 600, letterSpacing: '0.05em' }}>{sub}</span>
+      </div>
+      <div className="tnum mono" style={{ fontSize: 18, fontWeight: 700, color: pct == null ? 'var(--ink)' : colorFor(pct), letterSpacing: '-0.01em' }}>
         {value}
       </div>
     </div>
@@ -483,71 +590,57 @@ function SummaryStat({ label, value, sub, pct }) {
 }
 
 /* ===================================================================
-   2) Sector Heatmap
+   SectorHeatmap
 =================================================================== */
 function SectorHeatmap({ sectors, onSelect, selectedId }) {
   const total = sectors.reduce((s, x) => s + x.weight, 0);
   return (
     <div className="dash-card">
-      <CardHead
-        title="주도섹터 히트맵"
-        subtitle="시가총액 비중 × 등락률"
-        right={<LegendInline />}
-        live
-      />
-      <div style={{ padding: '0 16px 16px 16px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 1fr)',
-          gridAutoRows: '70px',
-          gap: 6,
-        }}>
+      <CardHead title="Sector Heatmap · 주도섹터" subtitle="시총 비중 × 등락률" right={<LegendInline />} live />
+      <div style={{ padding: '0 14px 14px 14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '74px', gap: 4 }}>
           {sectors.map((s) => {
             const span = Math.max(2, Math.round((s.weight / total) * 12));
             const rowSpan = s.weight > 12 ? 2 : 1;
             const intensity = Math.min(1, Math.abs(s.changePct) / 4);
             const isUp = s.changePct >= 0;
-            const baseUp = [240, 68, 82];
-            const baseDn = [49, 130, 246];
+            const baseUp = [255, 93, 108];
+            const baseDn = [77, 142, 255];
             const base = isUp ? baseUp : baseDn;
-            const alpha = 0.10 + intensity * 0.85;
+            const alpha = 0.08 + intensity * 0.55;
             const bg = `rgba(${base[0]},${base[1]},${base[2]},${alpha})`;
-            const ink = intensity > 0.55 ? '#fff' : (isUp ? 'var(--up-ink)' : 'var(--down-ink)');
             const isSel = selectedId === s.id;
+            const txt = intensity > 0.6 ? '#fff' : 'var(--ink)';
             return (
               <button
                 key={s.id}
                 onClick={() => onSelect && onSelect(s.id)}
+                title={`${s.name} · ${s.theme} · 주요종목: ${s.leadStocks.join(', ')}`}
                 style={{
-                  gridColumn: `span ${span}`,
-                  gridRow: `span ${rowSpan}`,
+                  gridColumn: `span ${span}`, gridRow: `span ${rowSpan}`,
                   background: bg,
-                  border: isSel ? '2px solid var(--ink)' : '1px solid rgba(255,255,255,0.5)',
-                  borderRadius: 12,
-                  padding: '10px 12px',
-                  textAlign: 'left',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  color: ink,
-                  transition: 'transform 0.12s ease, border 0.12s ease',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  position: 'relative',
+                  border: isSel ? `1px solid ${isUp ? 'var(--up)' : 'var(--down)'}` : '1px solid var(--line)',
+                  boxShadow: isSel ? `0 0 0 1px ${isUp ? 'var(--up)' : 'var(--down)'}, 0 0 24px ${isUp ? 'var(--up-glow)' : 'var(--down-glow)'}` : 'none',
+                  borderRadius: 6, padding: '8px 10px', textAlign: 'left',
+                  display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                  color: txt, transition: 'all 0.12s ease', cursor: 'pointer',
+                  fontFamily: 'inherit', position: 'relative', overflow: 'hidden',
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = ''}
+                onMouseEnter={e => { if (!isSel) e.currentTarget.style.borderColor = 'var(--line-bright)'; }}
+                onMouseLeave={e => { if (!isSel) e.currentTarget.style.borderColor = 'var(--line)'; }}
               >
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '-0.2px' }}>{s.name}</div>
-                  <div style={{ fontSize: 10, opacity: 0.85, marginTop: 1 }}>{s.theme} · 비중 {s.weight.toFixed(1)}%</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '-0.01em' }}>{s.name}</div>
+                  <div style={{ fontSize: 9, opacity: 0.7, marginTop: 2, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    {s.weight.toFixed(1)}% · {s.theme}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                  <span className="tnum" style={{ fontSize: 18, fontWeight: 800 }}>
+                  <span className="tnum mono" style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.01em' }}>
                     {fmtPct(s.changePct)}
                   </span>
-                  <span className="tnum" style={{ fontSize: 10, opacity: 0.85 }}>
-                    외 {fmtEok(s.foreignNet)}
+                  <span className="tnum mono" style={{ fontSize: 9, opacity: 0.7, fontWeight: 600 }}>
+                    {fmtEok(s.foreignNet)}
                   </span>
                 </div>
               </button>
@@ -561,51 +654,64 @@ function SectorHeatmap({ sectors, onSelect, selectedId }) {
 
 function LegendInline() {
   return (
-    <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11, color: 'var(--ink-3)' }}>
-      <span>약세</span>
-      {[ '#3182f6', '#7aa9f7', '#dde6f3', '#fdecee', '#ff7b86', '#f04452' ].map((c,i) => (
-        <span key={i} style={{ width: 14, height: 10, borderRadius: 2, background: c }} />
+    <div style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+      <span>BEAR</span>
+      {[ 'rgba(77,142,255,0.65)', 'rgba(77,142,255,0.30)', 'rgba(255,255,255,0.05)', 'rgba(255,93,108,0.30)', 'rgba(255,93,108,0.65)' ].map((c,i) => (
+        <span key={i} style={{ width: 16, height: 8, borderRadius: 1, background: c }} />
       ))}
-      <span>강세</span>
+      <span>BULL</span>
     </div>
   );
 }
 
 /* ===================================================================
-   3) Sector Detail
+   SectorDetail (with clickable lead stock chips)
 =================================================================== */
 function SectorDetail({ sector }) {
   if (!sector) return null;
   const isUp = sector.changePct >= 0;
   return (
-    <div className="dash-card" style={{ background: isUp ? 'var(--up-soft)' : 'var(--down-soft)' }}>
-      <div style={{ padding: '18px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+    <div className="dash-card" style={{
+      borderColor: isUp ? 'var(--up-soft)' : 'var(--down-soft)',
+      background: `linear-gradient(180deg, ${isUp ? 'var(--up-soft)' : 'var(--down-soft)'} 0%, var(--surface) 60%)`,
+    }}>
+      <div style={{ padding: '16px 18px', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: isUp ? 'var(--up-ink)' : 'var(--down-ink)' }}>
-              {sector.theme === '주도' ? '🏆 ' : ''}선택한 섹터
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
+              SELECTED · {sector.theme}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2, letterSpacing: '-0.4px' }}>{sector.name}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>{sector.name}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div className="tnum" style={{ fontSize: 24, fontWeight: 800, color: colorFor(sector.changePct) }}>
+            <div className="tnum mono" style={{ fontSize: 28, fontWeight: 700, color: colorFor(sector.changePct), letterSpacing: '-0.02em', lineHeight: 1 }}>
               {fmtPct(sector.changePct)}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>
-              외 {fmtEok(sector.foreignNet)} · 기 {fmtEok(sector.instNet)}
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
-          {sector.leadStocks.map(s => (
-            <span key={s} style={{
-              background: 'rgba(255,255,255,0.7)',
-              padding: '4px 10px',
-              borderRadius: 999,
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--ink)',
-            }}>{s}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12, paddingTop: 10, borderTop: '1px solid var(--line)' }}>
+          <div>
+            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>FOREIGN</div>
+            <div className="tnum mono" style={{ fontSize: 14, fontWeight: 600, color: colorFor(sector.foreignNet), marginTop: 2 }}>{fmtEok(sector.foreignNet)}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>INSTITUTION</div>
+            <div className="tnum mono" style={{ fontSize: 14, fontWeight: 600, color: colorFor(sector.instNet), marginTop: 2 }}>{fmtEok(sector.instNet)}</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {sector.leadStocks.map((s, i) => (
+            <StockLink key={s} code={sector.leadCodes && sector.leadCodes[i]} name={s}>
+              <span style={{
+                background: 'var(--surface-2)', border: '1px solid var(--line)',
+                padding: '4px 9px', borderRadius: 3, fontSize: 11, fontWeight: 600,
+                color: 'var(--ink-2)', display: 'inline-block',
+                transition: 'all 0.1s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent-bright)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-2)'; }}
+              >{s}</span>
+            </StockLink>
           ))}
         </div>
       </div>
@@ -614,92 +720,90 @@ function SectorDetail({ sector }) {
 }
 
 /* ===================================================================
-   4) Supply & Demand
+   SupplyDemand
 =================================================================== */
 function SupplyDemand({ data }) {
   const [tab, setTab] = useState('foreign-buy');
   const tabs = [
-    { id: 'foreign-buy', label: '외국인 순매수', list: data.foreignBuy, dir: 'up' },
-    { id: 'foreign-sell', label: '외국인 순매도', list: data.foreignSell, dir: 'down' },
-    { id: 'volume', label: '거래대금 상위', list: data.topVolume, dir: 'mixed' },
+    { id: 'foreign-buy', label: '외국인 매수' },
+    { id: 'foreign-sell', label: '외국인 매도' },
+    { id: 'volume', label: '거래대금' },
   ];
-  const active = tabs.find(t => t.id === tab);
-  const max = Math.max(...active.list.map(x => Math.abs(x.net || x.amount || 1)));
+  const lists = { 'foreign-buy': data.foreignBuy, 'foreign-sell': data.foreignSell, 'volume': data.topVolume };
+  const list = lists[tab];
+  const isVolume = tab === 'volume';
+  const max = Math.max(...list.map(x => Math.abs(x.net || x.amount || 1)));
 
   return (
     <div className="dash-card" style={{ height: '100%' }}>
       <CardHead
-        title="실시간 수급 현황"
-        live
+        title="Order Flow · 실시간 수급" live
         right={
-          <div style={{ display: 'flex', gap: 4, background: 'var(--bg)', padding: 3, borderRadius: 10 }}>
-            {tabs.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                style={{
-                  border: 'none',
-                  background: tab === t.id ? 'var(--surface)' : 'transparent',
-                  color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)',
-                  fontSize: 12, fontWeight: 600,
-                  padding: '6px 10px', borderRadius: 8,
-                  boxShadow: tab === t.id ? 'var(--shadow-1)' : 'none',
-                }}
-              >
-                {t.label}
-              </button>
+          <div style={{ display: 'flex', gap: 0, border: '1px solid var(--line)', borderRadius: 5, overflow: 'hidden' }}>
+            {tabs.map((t, i) => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                border: 'none',
+                background: tab === t.id ? 'var(--surface-3)' : 'transparent',
+                color: tab === t.id ? 'var(--ink)' : 'var(--ink-3)',
+                fontSize: 10, fontWeight: 700, padding: '6px 10px',
+                borderRight: i < tabs.length - 1 ? '1px solid var(--line)' : 'none',
+                letterSpacing: '0.04em', textTransform: 'uppercase',
+                fontFamily: 'inherit',
+              }}>{t.label}</button>
             ))}
           </div>
         }
       />
-      <div style={{ padding: '0 8px 12px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div style={{ padding: '0 0 4px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
-            <tr style={{ color: 'var(--ink-3)', fontSize: 11, fontWeight: 600 }}>
-              <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600 }}>#</th>
-              <th style={{ textAlign: 'left', padding: '6px 12px', fontWeight: 600 }}>종목</th>
-              <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 600 }}>현재가</th>
-              <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 600 }}>등락률</th>
-              <th style={{ textAlign: 'right', padding: '6px 12px', fontWeight: 600, width: '32%' }}>
-                {tab === 'volume' ? '거래대금(억)' : '순매수(억)'}
+            <tr>
+              <th style={{ textAlign: 'left', padding: '4px 18px', fontWeight: 700, width: 28 }}>#</th>
+              <th style={{ textAlign: 'left', padding: '4px 18px', fontWeight: 700 }}>SYMBOL</th>
+              <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>LAST</th>
+              <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>CHG%</th>
+              <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700, width: '34%' }}>
+                {isVolume ? 'VOLUME (₩억)' : 'NET (₩억)'}
               </th>
             </tr>
           </thead>
           <tbody>
-            {active.list.map((row, i) => {
+            {list.map((row, i) => {
               const v = Math.abs(row.net || row.amount || 0);
               const w = (v / max) * 100;
               const isNeg = (row.net || 0) < 0;
               return (
-                <tr key={row.code} style={{
-                  borderTop: i === 0 ? 'none' : '1px solid var(--line-soft)',
-                }}>
-                  <td style={{ padding: '10px 12px', color: 'var(--ink-3)', fontWeight: 600 }} className="tnum">{i + 1}</td>
-                  <td style={{ padding: '10px 12px' }}>
-                    <div style={{ fontWeight: 700 }}>{row.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 1 }}>{row.code} · {row.sector}</div>
+                <tr key={row.code}
+                  style={{ borderTop: '1px solid var(--line-soft)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <td className="mono tnum" style={{ padding: '8px 18px', color: 'var(--ink-3)', fontWeight: 600, fontSize: 11 }}>{String(i + 1).padStart(2, '0')}</td>
+                  <td style={{ padding: '8px 18px' }}>
+                    <StockLink code={row.code} name={row.name}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{row.name}</div>
+                      <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', marginTop: 1, letterSpacing: '0.04em' }}>{row.code} · {row.sector}</div>
+                    </StockLink>
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600 }} className="tnum">
+                  <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', fontWeight: 600, color: 'var(--ink)' }}>
                     {fmtPrice(row.price)}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: colorFor(row.changePct) }} className="tnum">
+                  <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', fontWeight: 700, color: colorFor(row.changePct) }}>
                     {fmtPct(row.changePct)}
                   </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right' }}>
+                  <td style={{ padding: '8px 18px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                      <div style={{
-                        width: 80, height: 5, background: 'var(--line-soft)', borderRadius: 999, overflow: 'hidden',
-                      }}>
+                      <div style={{ width: 80, height: 3, background: 'var(--line-soft)', borderRadius: 0, overflow: 'hidden' }}>
                         <div style={{
                           width: `${w}%`, height: '100%',
-                          background: isNeg ? 'var(--down)' : 'var(--up)',
-                          borderRadius: 999,
+                          background: isNeg ? 'var(--down)' : (isVolume ? 'var(--accent)' : 'var(--up)'),
+                          boxShadow: `0 0 8px ${isNeg ? 'var(--down-glow)' : (isVolume ? 'rgba(230,180,80,0.4)' : 'var(--up-glow)')}`,
                         }} />
                       </div>
-                      <span className="tnum" style={{
-                        fontWeight: 700,
+                      <span className="tnum mono" style={{
+                        fontWeight: 700, fontSize: 12,
                         color: row.net != null ? colorFor(row.net) : 'var(--ink)',
-                        minWidth: 56, textAlign: 'right',
+                        minWidth: 60, textAlign: 'right',
                       }}>
                         {row.net != null ? fmtChange(row.net) : fmtPrice(row.amount)}
                       </span>
@@ -716,48 +820,52 @@ function SupplyDemand({ data }) {
 }
 
 /* ===================================================================
-   5) Special Stocks
+   SpecialStocks (clickable stock names)
 =================================================================== */
 function SpecialStocks({ data }) {
   return (
     <div className="dash-card">
-      <CardHead title="특이 종목" subtitle="52주 신고가 · 상한가" />
-      <div style={{ padding: '0 20px 18px' }}>
+      <CardHead title="Special Movers · 특이 종목" subtitle="52W HIGH · UPPER LIMIT" />
+      <div style={{ padding: '0 18px 16px' }}>
         {data.specialStocks.upperLimit.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-              <span style={{ background: 'var(--up)', color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>↑ 상한가</span>
-              <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{data.specialStocks.upperLimit.length}종목</span>
+              <span style={{ background: 'var(--up)', color: '#fff', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 2, letterSpacing: '0.06em' }}>↑ UPPER LIMIT</span>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{data.specialStocks.upperLimit.length} STOCKS</span>
             </div>
             {data.specialStocks.upperLimit.map(s => (
-              <div key={s.code} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--ink-3)' }}>{s.reason}</div>
+              <StockLink key={s.code} code={s.code} name={s.name}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-3)' }}>{s.reason}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div className="tnum mono" style={{ fontWeight: 700, color: 'var(--up)', fontSize: 13 }}>{fmtPct(s.changePct)}</div>
+                    <div className="tnum mono" style={{ fontSize: 10, color: 'var(--ink-3)' }}>{fmtPrice(s.price)}</div>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="tnum" style={{ fontWeight: 700, color: 'var(--up)' }}>{fmtPct(s.changePct)}</div>
-                  <div className="tnum" style={{ fontSize: 11, color: 'var(--ink-3)' }}>{fmtPrice(s.price)}</div>
-                </div>
-              </div>
+              </StockLink>
             ))}
           </div>
         )}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            <span style={{ background: 'var(--warn-soft)', color: 'var(--warn)', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>★ 52주 신고가</span>
-            <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>{data.specialStocks.new52High.length}종목</span>
+            <span style={{ background: 'var(--accent-soft)', color: 'var(--accent-bright)', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 2, letterSpacing: '0.06em', border: '1px solid var(--accent-soft)' }}>★ 52W HIGH</span>
+            <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{data.specialStocks.new52High.length} STOCKS</span>
           </div>
           {data.specialStocks.new52High.slice(0, 6).map(s => (
-            <div key={s.code} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderTop: '1px solid var(--line-soft)' }}>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <span className="tnum" style={{ fontSize: 12, color: 'var(--ink-3)' }}>{fmtPrice(s.price)}</span>
-                <span className="tnum" style={{ fontWeight: 700, color: 'var(--up)', minWidth: 56, textAlign: 'right' }}>
-                  {fmtPct(s.changePct)}
-                </span>
+            <StockLink key={s.code} code={s.code} name={s.name}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderTop: '1px solid var(--line-soft)' }}>
+                <div style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <span className="tnum mono" style={{ fontSize: 11, color: 'var(--ink-3)' }}>{fmtPrice(s.price)}</span>
+                  <span className="tnum mono" style={{ fontWeight: 700, color: 'var(--up)', fontSize: 12, minWidth: 56, textAlign: 'right' }}>
+                    {fmtPct(s.changePct)}
+                  </span>
+                </div>
               </div>
-            </div>
+            </StockLink>
           ))}
         </div>
       </div>
@@ -766,40 +874,44 @@ function SpecialStocks({ data }) {
 }
 
 /* ===================================================================
-   6) Theme Trends
+   ThemeTrends (functional theme name → search)
 =================================================================== */
 function ThemeTrends({ themes }) {
   const max = Math.max(...themes.map(t => t.heat));
   return (
     <div className="dash-card">
-      <CardHead title="테마주 트렌드" subtitle="검색·거래 열기 지수" />
-      <div style={{ padding: '0 20px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <CardHead title="Thematic Heat · 테마 트렌드" subtitle="검색·거래 열기" />
+      <div style={{ padding: '0 18px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {themes.map((t, i) => (
-          <div key={t.name}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
-                <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 700, minWidth: 16 }} className="tnum">#{i + 1}</span>
-                <span style={{ fontSize: 13, fontWeight: 700 }}>{t.name}</span>
+          <a key={t.name}
+            href={naverNewsSearchUrl(t.name)}
+            target="_blank" rel="noopener noreferrer"
+            className="stock-link"
+            title={`'${t.name}' 뉴스 검색`}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 5 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                <span className="mono tnum" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, minWidth: 18 }}>{String(i + 1).padStart(2, '0')}</span>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>{t.name}</span>
               </div>
-              <span className="tnum" style={{ fontSize: 12, fontWeight: 700, color: colorFor(t.changePct) }}>
+              <span className="tnum mono" style={{ fontSize: 12, fontWeight: 700, color: colorFor(t.changePct) }}>
                 {fmtPct(t.changePct)}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ flex: 1, height: 6, background: 'var(--line-soft)', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ flex: 1, height: 3, background: 'var(--line-soft)', borderRadius: 0, overflow: 'hidden' }}>
                 <div style={{
-                  width: `${(t.heat / max) * 100}%`,
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #ffd1d6 0%, #f04452 100%)',
-                  borderRadius: 999,
+                  width: `${(t.heat / max) * 100}%`, height: '100%',
+                  background: `linear-gradient(90deg, var(--accent) 0%, var(--up) 100%)`,
+                  boxShadow: '0 0 12px rgba(230,180,80,0.4)',
                 }} />
               </div>
-              <span className="tnum" style={{ fontSize: 11, color: 'var(--ink-3)', minWidth: 24, textAlign: 'right' }}>{t.heat}</span>
+              <span className="tnum mono" style={{ fontSize: 10, color: 'var(--ink-3)', minWidth: 22, textAlign: 'right', fontWeight: 600 }}>{t.heat}</span>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 4 }}>
+            <div style={{ fontSize: 10, color: 'var(--ink-3)', marginTop: 4, fontWeight: 500 }}>
               {t.stocks.join(' · ')}
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
@@ -807,46 +919,48 @@ function ThemeTrends({ themes }) {
 }
 
 /* ===================================================================
-   7) News Headlines
+   NewsList (clickable headline → Naver news search)
 =================================================================== */
 function NewsList({ news }) {
   const sentColor = { positive: 'var(--up)', negative: 'var(--down)', neutral: 'var(--ink-3)' };
-  const sentBg = { positive: 'var(--up-soft)', negative: 'var(--down-soft)', neutral: 'var(--bg)' };
   return (
     <div className="dash-card">
-      <CardHead title="실시간 뉴스" live />
-      <div style={{ padding: '0 4px 8px' }}>
+      <CardHead title="Newswire · 실시간 뉴스" live />
+      <div style={{ padding: '0' }}>
         {news.map((n, i) => (
-          <div key={i} style={{
-            padding: '10px 16px',
-            borderTop: i === 0 ? 'none' : '1px solid var(--line-soft)',
-            display: 'flex',
-            gap: 10,
-            alignItems: 'flex-start',
-          }}>
-            <span style={{
-              width: 4, alignSelf: 'stretch', background: sentColor[n.sentiment], borderRadius: 999, marginTop: 2,
-            }} />
+          <a key={i} href={naverNewsSearchUrl(n.headline)} target="_blank" rel="noopener noreferrer" className="stock-link"
+            style={{
+              padding: '10px 18px',
+              borderTop: i === 0 ? 'none' : '1px solid var(--line-soft)',
+              display: 'flex', gap: 12, alignItems: 'flex-start',
+              transition: 'background 0.1s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span style={{ width: 2, alignSelf: 'stretch', background: sentColor[n.sentiment], marginTop: 2, boxShadow: `0 0 6px ${sentColor[n.sentiment]}` }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.45, color: 'var(--ink)' }}>
+              <div style={{ fontSize: 12, fontWeight: 500, lineHeight: 1.5, color: 'var(--ink)' }}>
                 {n.headline}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                <span className="tnum" style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 600 }}>{n.time}</span>
-                <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>·</span>
-                <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>{n.source}</span>
+                <span className="tnum mono" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{n.time}</span>
+                <span style={{ fontSize: 10, color: 'var(--ink-4)' }}>·</span>
+                <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 500 }}>{n.source}</span>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
                   {n.tags.map(tag => (
                     <span key={tag} style={{
-                      fontSize: 10, fontWeight: 600,
-                      background: sentBg[n.sentiment], color: sentColor[n.sentiment],
-                      padding: '2px 6px', borderRadius: 4,
-                    }}>#{tag}</span>
+                      fontSize: 9, fontWeight: 700,
+                      color: sentColor[n.sentiment],
+                      border: `1px solid ${sentColor[n.sentiment]}33`,
+                      padding: '1px 5px', borderRadius: 2, letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                    }}>{tag}</span>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
@@ -854,7 +968,7 @@ function NewsList({ news }) {
 }
 
 /* ===================================================================
-   8) Program Trade
+   ProgramTrade
 =================================================================== */
 function ProgramTrade({ data }) {
   const p = data.programTrade;
@@ -862,19 +976,19 @@ function ProgramTrade({ data }) {
   const Bar = ({ label, v, max }) => {
     const w = (Math.abs(v) / max) * 100;
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 70px', alignItems: 'center', gap: 10 }}>
-        <span style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 600 }}>{label}</span>
-        <div style={{ height: 16, background: 'var(--bg)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 80px', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{label}</span>
+        <div style={{ height: 14, background: 'var(--surface-2)', borderRadius: 0, position: 'relative', overflow: 'hidden', border: '1px solid var(--line)' }}>
           <div style={{
             position: 'absolute', top: 0, bottom: 0,
             left: v < 0 ? `${100 - w}%` : '50%',
             width: `${w / 2}%`,
             background: v < 0 ? 'var(--down)' : 'var(--up)',
-            borderRadius: 4,
+            boxShadow: `0 0 12px ${v < 0 ? 'var(--down-glow)' : 'var(--up-glow)'}`,
           }} />
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'var(--line)' }} />
+          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'var(--line-bright)' }} />
         </div>
-        <span className="tnum" style={{ fontSize: 12, fontWeight: 700, color: colorFor(v), textAlign: 'right' }}>
+        <span className="tnum mono" style={{ fontSize: 12, fontWeight: 700, color: colorFor(v), textAlign: 'right' }}>
           {fmtChange(v)}억
         </span>
       </div>
@@ -882,52 +996,20 @@ function ProgramTrade({ data }) {
   };
   return (
     <div className="dash-card">
-      <CardHead title="프로그램 매매" subtitle={`전체 순매수 ${fmtChange(p.netTotal)}억`} />
-      <div style={{ padding: '0 20px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Bar label="차익 매수" v={p.arbBuy} max={max} />
-        <Bar label="차익 매도" v={p.arbSell} max={max} />
-        <Bar label="비차익 매수" v={p.nonArbBuy} max={max} />
-        <Bar label="비차익 매도" v={p.nonArbSell} max={max} />
+      <CardHead title="Program Trading · 프로그램 매매" subtitle={`NET ${fmtChange(p.netTotal)}억`} />
+      <div style={{ padding: '0 18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Bar label="ARB BUY" v={p.arbBuy} max={max} />
+        <Bar label="ARB SELL" v={p.arbSell} max={max} />
+        <Bar label="NON-ARB BUY" v={p.nonArbBuy} max={max} />
+        <Bar label="NON-ARB SELL" v={p.nonArbSell} max={max} />
       </div>
     </div>
   );
 }
 
 /* ===================================================================
-   9) AI Panel
+   AI Panel
 =================================================================== */
-function Section({ label, children }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function SkeletonLine({ w, h, radius = 4 }) {
-  return (
-    <div style={{
-      width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg, var(--line-soft) 0%, var(--line) 50%, var(--line-soft) 100%)',
-      backgroundSize: '200% 100%',
-      animation: 'shimmer 1.4s infinite',
-    }} />
-  );
-}
-
-function AIIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M8 1.5L9.5 5.5L13.5 7L9.5 8.5L8 12.5L6.5 8.5L2.5 7L6.5 5.5L8 1.5Z" fill="var(--primary)" />
-      <circle cx="12.5" cy="3" r="1" fill="var(--primary)" />
-      <circle cx="3" cy="12" r="0.8" fill="var(--primary)" opacity="0.6" />
-    </svg>
-  );
-}
-
 function AIPanel({ data, runTrigger }) {
   const [state, setState] = useState('idle');
   const [summary, setSummary] = useState(null);
@@ -939,7 +1021,7 @@ function AIPanel({ data, runTrigger }) {
     setSummary(null);
     try {
       if (!window.claude || typeof window.claude.complete !== 'function') {
-        throw new Error('Claude API 미연결 — 오프라인 분석 사용');
+        throw new Error('CLAUDE API NOT CONNECTED');
       }
       const topSectors = [...data.sectors].sort((a, b) => b.changePct - a.changePct).slice(0, 3);
       const bottomSectors = [...data.sectors].sort((a, b) => a.changePct - b.changePct).slice(0, 2);
@@ -971,7 +1053,7 @@ ${newsBrief}
 
       const text = await window.claude.complete(prompt);
       const m = text.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('JSON 파싱 실패');
+      if (!m) throw new Error('JSON parse failed');
       const parsed = JSON.parse(m[0]);
       setSummary(parsed);
       setState('ready');
@@ -1000,123 +1082,970 @@ ${newsBrief}
   }, [runTrigger]);
 
   const toneColor = summary?.tone === 'bullish' ? 'var(--up)'
-                  : summary?.tone === 'bearish' ? 'var(--down)' : 'var(--flat)';
-  const toneBg = summary?.tone === 'bullish' ? 'var(--up-soft)'
-               : summary?.tone === 'bearish' ? 'var(--down-soft)' : 'var(--bg)';
-  const toneLabel = summary?.tone === 'bullish' ? '강세' : summary?.tone === 'bearish' ? '약세' : '중립';
+                  : summary?.tone === 'bearish' ? 'var(--down)' : 'var(--accent-bright)';
+  const toneSoft = summary?.tone === 'bullish' ? 'var(--up-soft)'
+                 : summary?.tone === 'bearish' ? 'var(--down-soft)' : 'var(--accent-soft)';
+  const toneLabel = summary?.tone === 'bullish' ? 'BULLISH' : summary?.tone === 'bearish' ? 'BEARISH' : 'NEUTRAL';
+
+  // Map watchlist names back to stock codes for clickable cards
+  const codeIndex = useMemo(() => {
+    const idx = {};
+    [...data.foreignBuy, ...data.foreignSell, ...data.topVolume,
+     ...data.specialStocks.new52High, ...data.specialStocks.upperLimit].forEach(s => {
+      if (s.code && s.name) idx[s.name] = s.code;
+    });
+    data.sectors.forEach(s => {
+      (s.leadStocks || []).forEach((n, i) => { if (s.leadCodes && s.leadCodes[i]) idx[n] = s.leadCodes[i]; });
+    });
+    return idx;
+  }, [data]);
 
   return (
     <div className="dash-card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardHead
-        title={<span style={{ display:'flex', alignItems:'center', gap:6 }}><AIIcon /> AI 시장 코멘트</span>}
-        subtitle="Claude · 실시간 분석"
+        title={<span style={{ display:'flex', alignItems:'center', gap:6 }}><AIIcon /> AI Analyst · 시장 코멘트</span>}
+        subtitle="CLAUDE"
+        live={state === 'loading'}
       />
 
       {state === 'idle' && (
-        <div style={{ padding: '20px 24px 32px', textAlign: 'center', color: 'var(--ink-3)' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-2)', marginBottom: 4 }}>
-            시장 분석 대기 중
+        <div style={{ padding: '32px 24px', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, margin: '0 auto 14px', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--surface-2)', display: 'grid', placeItems: 'center' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-bright)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l2 6 6 1.5-6 1.5-2 6-2-6-6-1.5 6-1.5L12 3z"/>
+            </svg>
           </div>
-          <div style={{ fontSize: 12, lineHeight: 1.6 }}>
-            상단의 <b style={{ color: 'var(--ink)' }}>'시장 분석 실행'</b> 버튼을 눌러<br />
-            AI 코멘트를 생성하세요.
+          <div className="mono" style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-2)', marginBottom: 6, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            STANDBY
+          </div>
+          <div style={{ fontSize: 11, lineHeight: 1.6, color: 'var(--ink-3)' }}>
+            <b style={{ color: 'var(--accent-bright)' }}>RUN ANALYSIS</b> 버튼을 눌러<br />
+            시장 코멘트를 생성하세요.
           </div>
         </div>
       )}
 
       {state === 'loading' && (
-        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <SkeletonLine w="60%" h={20} />
-          <SkeletonLine w="100%" h={12} />
-          <SkeletonLine w="92%" h={12} />
-          <SkeletonLine w="78%" h={12} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-            <SkeletonLine w="30%" h={28} radius={8} />
-            <SkeletonLine w="30%" h={28} radius={8} />
-            <SkeletonLine w="30%" h={28} radius={8} />
+          <SkeletonLine w="100%" h={10} />
+          <SkeletonLine w="92%" h={10} />
+          <SkeletonLine w="78%" h={10} />
+          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+            <SkeletonLine w="30%" h={26} radius={4} />
+            <SkeletonLine w="30%" h={26} radius={4} />
+            <SkeletonLine w="30%" h={26} radius={4} />
           </div>
-          <div style={{ fontSize: 12, color: 'var(--primary)', textAlign: 'center', marginTop: 8, fontWeight: 600 }}>
-            <Spinner /> &nbsp; AI가 시장을 분석하고 있어요...
+          <div className="mono" style={{ fontSize: 10, color: 'var(--accent-bright)', textAlign: 'center', marginTop: 6, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', display:'flex', alignItems:'center', justifyContent:'center', gap: 6 }}>
+            <Spinner /> ANALYZING MARKET DATA...
           </div>
         </div>
       )}
 
       {state === 'ready' && summary && (
-        <div style={{ padding: '0 20px 20px', overflowY: 'auto', flex: 1 }}>
-          <div style={{ background: toneBg, padding: '14px 16px', borderRadius: 12, marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: toneColor, background: 'rgba(255,255,255,0.7)', padding: '2px 8px', borderRadius: 4 }}>
-                {toneLabel} 시장
+        <div style={{ padding: '0 18px 18px', overflowY: 'auto', flex: 1 }}>
+          <div style={{
+            background: toneSoft,
+            border: `1px solid ${toneColor}33`,
+            padding: '14px 16px', borderRadius: 6, marginBottom: 14,
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 2, background: toneColor, boxShadow: `0 0 12px ${toneColor}` }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span className="mono" style={{ fontSize: 9, fontWeight: 800, color: toneColor, padding: '2px 7px', border: `1px solid ${toneColor}66`, borderRadius: 2, letterSpacing: '0.1em' }}>
+                {toneLabel}
               </span>
-              <span className="tnum" style={{ fontSize: 11, color: 'var(--ink-3)' }}>{data.asOf}</span>
+              <span className="tnum mono" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{data.asOf}</span>
             </div>
-            <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.3px' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.35, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
               {summary.headline}
             </div>
           </div>
 
-          <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--ink-2)', marginBottom: 18 }}>
+          <div style={{ fontSize: 12, lineHeight: 1.7, color: 'var(--ink-2)', marginBottom: 18 }}>
             {summary.summary}
           </div>
 
-          <Section label="주도 요인">
+          <Section label="DRIVERS · 주도 요인">
             <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display:'flex', flexDirection:'column', gap:6 }}>
               {summary.drivers?.map((d, i) => (
-                <li key={i} style={{ display: 'flex', gap: 8, fontSize: 13, lineHeight: 1.5 }}>
-                  <span style={{ color: 'var(--up)', fontWeight: 800 }}>·</span>
+                <li key={i} style={{ display: 'flex', gap: 8, fontSize: 12, lineHeight: 1.5, color: 'var(--ink-2)' }}>
+                  <span className="mono" style={{ color: 'var(--up)', fontWeight: 700, fontSize: 11, minWidth: 22 }}>+{String(i+1).padStart(2,'0')}</span>
                   <span>{d}</span>
                 </li>
               ))}
             </ul>
           </Section>
 
-          <Section label="주목 종목">
-            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          <Section label="WATCHLIST · 주목 종목">
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
               {summary.watchlist?.map((w, i) => (
-                <div key={i} style={{ background: 'var(--bg-soft)', padding: '10px 12px', borderRadius: 10 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{w.name}</div>
-                  <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 2, lineHeight: 1.45 }}>{w.reason}</div>
-                </div>
+                <StockLink key={i} code={codeIndex[w.name]} name={w.name}>
+                  <div style={{ background: 'var(--surface-2)', border: '1px solid var(--line)', padding: '10px 12px', borderRadius: 5, transition: 'all 0.1s' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; }}
+                  >
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{w.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2, lineHeight: 1.45 }}>{w.reason}</div>
+                  </div>
+                </StockLink>
               ))}
             </div>
           </Section>
 
-          <Section label="리스크 요인">
+          <Section label="RISKS · 리스크">
             <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display:'flex', flexDirection:'column', gap:6 }}>
               {summary.risks?.map((r, i) => (
-                <li key={i} style={{ display: 'flex', gap: 8, fontSize: 13, lineHeight: 1.5 }}>
-                  <span style={{ color: 'var(--down)', fontWeight: 800 }}>·</span>
+                <li key={i} style={{ display: 'flex', gap: 8, fontSize: 12, lineHeight: 1.5, color: 'var(--ink-2)' }}>
+                  <span className="mono" style={{ color: 'var(--down)', fontWeight: 700, fontSize: 11, minWidth: 22 }}>-{String(i+1).padStart(2,'0')}</span>
                   <span>{r}</span>
                 </li>
               ))}
             </ul>
           </Section>
 
-          <Section label="오후장 전망">
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink-2)' }}>
+          <Section label="OUTLOOK · 오후장 전망">
+            <div style={{ fontSize: 12, lineHeight: 1.7, color: 'var(--ink-2)' }}>
               {summary.outlook}
             </div>
           </Section>
 
-          <button onClick={generate} className="btn-ghost" style={{ width: '100%', marginTop: 14 }}>
-            ↻ 다시 분석하기
+          <button onClick={generate} className="btn-ghost" style={{ width: '100%', marginTop: 8 }}>
+            ↻ RE-RUN ANALYSIS
           </button>
-          {error && <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 8, textAlign:'center' }}>※ AI 호출 실패 — 오프라인 샘플 분석을 표시했습니다.</div>}
+          {error && <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 8, textAlign:'center', letterSpacing: '0.04em' }}>// {error} — SHOWING SAMPLE OUTPUT</div>}
         </div>
       )}
     </div>
   );
 }
 
+function Section({ label, children }) {
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SkeletonLine({ w, h, radius = 3 }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: radius,
+      background: 'linear-gradient(90deg, var(--line-soft) 0%, var(--line-bright) 50%, var(--line-soft) 100%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.4s infinite',
+    }} />
+  );
+}
+
+function AIIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--accent-bright)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5L9.5 5.5L13.5 7L9.5 8.5L8 12.5L6.5 8.5L2.5 7L6.5 5.5L8 1.5Z" />
+      <circle cx="12.5" cy="3" r="1" fill="var(--accent-bright)" stroke="none" />
+    </svg>
+  );
+}
+
 /* ===================================================================
-   10) Layout A — Pro Cockpit (메인)
+   PageHead with clickable breadcrumb
 =================================================================== */
-function App() {
-  const data = window.MARKET_DATA;
+function PageHead({ title, subtitle, breadcrumb, action, onBreadcrumbHome }) {
+  // breadcrumb is "대시보드 · 주도섹터" — first segment is clickable to overview
+  const parts = (breadcrumb || '').split(' · ');
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+      padding: '0 0 16px',
+      borderBottom: '1px solid var(--line)',
+      marginBottom: 14,
+    }}>
+      <div>
+        {breadcrumb && (
+          <div className="mono" style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-3)', marginBottom: 6, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {parts.map((p, i) => (
+              <span key={i}>
+                {i > 0 && <span style={{ margin: '0 6px', color: 'var(--ink-4)' }}>·</span>}
+                {i === 0 && onBreadcrumbHome ? (
+                  <a href="#" onClick={e => { e.preventDefault(); onBreadcrumbHome(); }}
+                     style={{ color: 'var(--ink-2)', cursor: 'pointer' }}
+                     onMouseEnter={e => e.currentTarget.style.color = 'var(--accent-bright)'}
+                     onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-2)'}
+                  >{p}</a>
+                ) : <span>{p}</span>}
+              </span>
+            ))}
+          </div>
+        )}
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--ink)' }}>
+          {title}
+        </h1>
+        {subtitle && (
+          <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 4, fontWeight: 500 }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function StatCard({ label, value, delta, sub, icon }) {
+  return (
+    <div className="dash-card" style={{ padding: '14px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
+        {icon && <span style={{ color: 'var(--ink-4)' }}>{icon}</span>}
+      </div>
+      <div className="tnum mono" style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginTop: 4, color: 'var(--ink)' }}>
+        {value}
+      </div>
+      {(delta != null || sub) && (
+        <div className="tnum mono" style={{ fontSize: 10, marginTop: 2, color: delta != null ? colorFor(delta) : 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.04em' }}>
+          {delta != null && <>{arrow(delta)} {fmtPct(Math.abs(delta), false)} · </>}{sub}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InvestorCard({ label, net, streak, highlight }) {
+  const isPos = net >= 0;
+  return (
+    <div className="dash-card" style={{
+      padding: '16px 18px',
+      borderColor: highlight ? (isPos ? 'var(--up-soft)' : 'var(--down-soft)') : 'var(--line)',
+      background: highlight ? `linear-gradient(180deg, ${isPos ? 'var(--up-soft)' : 'var(--down-soft)'} 0%, var(--surface) 60%)` : 'var(--surface)',
+    }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</div>
+      <div className="tnum mono" style={{ fontSize: 24, fontWeight: 700, color: colorFor(net), letterSpacing: '-0.02em', marginTop: 4 }}>
+        {fmtEok(net)}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>{streak}</div>
+    </div>
+  );
+}
+
+function RankList({ title, rows, field, positive }) {
+  const max = Math.max(...rows.map(r => Math.abs(r[field])));
+  return (
+    <div className="dash-card">
+      <CardHead title={title} />
+      <div style={{ padding: '0 0 4px' }}>
+        {rows.map((r, i) => {
+          const w = (Math.abs(r[field]) / max) * 100;
+          return (
+            <StockLink key={r.code} code={r.code} name={r.name}>
+              <div style={{
+                padding: '8px 18px',
+                borderTop: i === 0 ? '1px solid var(--line)' : '1px solid var(--line-soft)',
+                display: 'grid',
+                gridTemplateColumns: '24px 1fr auto auto',
+                gap: 10, alignItems: 'center',
+                transition: 'background 0.1s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <span className="tnum mono" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>{String(i+1).padStart(2,'0')}</span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)' }}>{r.name}</div>
+                  <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', letterSpacing: '0.04em' }}>{r.sector}</div>
+                </div>
+                <div style={{ width: 70, height: 3, background: 'var(--line-soft)', overflow: 'hidden' }}>
+                  <div style={{ width: `${w}%`, height: '100%', background: positive ? 'var(--up)' : 'var(--down)', boxShadow: `0 0 8px ${positive ? 'var(--up-glow)' : 'var(--down-glow)'}` }} />
+                </div>
+                <span className="tnum mono" style={{ fontWeight: 700, fontSize: 12, color: colorFor(r[field]), minWidth: 60, textAlign: 'right' }}>
+                  {fmtChange(r[field])}억
+                </span>
+              </div>
+            </StockLink>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ============== Pages ============== */
+
+function OverviewPage({ ctx }) {
+  const { data, sector, selectedSector, setSelectedSector, runTrigger, loading, onRun, goHome } = ctx;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead title="오늘의 시장" subtitle="장중 실시간 주도섹터·수급 현황을 한눈에 확인하세요." breadcrumb="대시보드" />
+      <MarketHeader data={data} onRun={onRun} loading={loading} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <SectorHeatmap sectors={data.sectors} onSelect={setSelectedSector} selectedId={selectedSector} />
+          <SupplyDemand data={data} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <AIPanel data={data} runTrigger={runTrigger} />
+          <NewsList news={data.news.slice(0, 5)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectorsPage({ ctx }) {
+  const { data, sector, selectedSector, setSelectedSector, goHome } = ctx;
+  const sorted = [...data.sectors].sort((a, b) => b.changePct - a.changePct);
+  const upCount = data.sectors.filter(s => s.changePct > 0).length;
+  const downCount = data.sectors.length - upCount;
+  const breadthPct = (upCount / data.sectors.length) * 100;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead title="주도섹터 분석" subtitle="시가총액 비중과 등락률, 외국인·기관 자금 흐름을 종합한 섹터 리더보드" breadcrumb="대시보드 · 주도섹터" onBreadcrumbHome={goHome} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        <StatCard label="상승 섹터" value={`${upCount}/${data.sectors.length}`} sub={`시장 폭 ${breadthPct.toFixed(0)}%`} delta={+1} />
+        <StatCard label="하락 섹터" value={`${downCount}/${data.sectors.length}`} sub="조정 진행" delta={-1} />
+        <StatCard label="최강 섹터" value={sorted[0].name} sub={fmtPct(sorted[0].changePct)} delta={sorted[0].changePct} />
+        <StatCard label="최약 섹터" value={sorted[sorted.length - 1].name} sub={fmtPct(sorted[sorted.length - 1].changePct)} delta={sorted[sorted.length - 1].changePct} />
+      </div>
+      <SectorHeatmap sectors={data.sectors} onSelect={setSelectedSector} selectedId={selectedSector} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 14 }}>
+        <SectorDetail sector={sector} />
+        <div className="dash-card">
+          <CardHead title="섹터 자금 흐름" subtitle="외국인 + 기관 순매수 (억원)" />
+          <div style={{ padding: '0 0 12px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '4px 18px', fontWeight: 700 }}>SECTOR</th>
+                  <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>CHG%</th>
+                  <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>FOREIGN</th>
+                  <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>INST</th>
+                  <th style={{ textAlign: 'right', padding: '4px 18px', fontWeight: 700 }}>TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((s, i) => {
+                  const total = s.foreignNet + s.instNet;
+                  const isSel = selectedSector === s.id;
+                  return (
+                    <tr key={s.id}
+                      onClick={() => setSelectedSector(s.id)}
+                      style={{ borderTop: '1px solid var(--line-soft)', cursor: 'pointer', background: isSel ? 'var(--surface-2)' : 'transparent', transition: 'background 0.1s' }}
+                      onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--surface-2)'; }}
+                      onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <td style={{ padding: '8px 18px' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <SectorDot momentum={s.momentum} />
+                          <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{s.name}</span>
+                        </div>
+                      </td>
+                      <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', fontWeight: 700, color: colorFor(s.changePct) }}>
+                        {fmtPct(s.changePct)}
+                      </td>
+                      <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', color: colorFor(s.foreignNet), fontWeight: 600 }}>
+                        {fmtChange(s.foreignNet)}
+                      </td>
+                      <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', color: colorFor(s.instNet), fontWeight: 600 }}>
+                        {fmtChange(s.instNet)}
+                      </td>
+                      <td className="tnum mono" style={{ padding: '8px 18px', textAlign: 'right', fontWeight: 800, color: colorFor(total) }}>
+                        {fmtChange(total)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SupplyPage({ ctx }) {
+  const { data, goHome } = ctx;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead title="수급 분석" subtitle="투자주체별 매매 동향과 종목별 자금 흐름" breadcrumb="대시보드 · 수급" onBreadcrumbHome={goHome} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <InvestorCard label="외국인" net={data.kospi.foreignNet/1e8} streak="8거래일 연속 순매수" highlight />
+        <InvestorCard label="기관" net={data.kospi.instNet/1e8} streak="3일 연속 순매수" />
+        <InvestorCard label="개인" net={data.kospi.indivNet/1e8} streak="외국인 매물 받아냄" />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <RankList title="외국인 순매수 TOP 10" rows={data.foreignBuy} field="net" positive />
+        <RankList title="외국인 순매도 TOP 10" rows={data.foreignSell} field="net" />
+      </div>
+      <SupplyDemand data={data} />
+    </div>
+  );
+}
+
+function ThemesPage({ ctx }) {
+  const { data, goHome } = ctx;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead title="테마주 · 특징주" subtitle="실시간 검색·거래 열기 지수와 시장의 주목 종목" breadcrumb="대시보드 · 테마" onBreadcrumbHome={goHome} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <ThemeTrends themes={data.themes} />
+        <SpecialStocks data={data} />
+      </div>
+      <div className="dash-card">
+        <CardHead title="테마별 구성 종목" subtitle="히트맵 강도순" />
+        <div style={{ padding: '0 20px 18px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          {data.themes.map(t => (
+            <div key={t.name} style={{
+              border: '1px solid var(--line)', borderRadius: 6,
+              padding: '12px 14px', background: 'var(--surface-2)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <a href={naverNewsSearchUrl(t.name)} target="_blank" rel="noopener noreferrer" className="stock-link" style={{ fontSize: 13, fontWeight: 600 }}>
+                  {t.name}
+                </a>
+                <span className="tnum mono" style={{ fontWeight: 700, color: colorFor(t.changePct), fontSize: 13 }}>{fmtPct(t.changePct)}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap' }}>
+                {t.stocks.map((s, i) => (
+                  <StockLink key={s} code={t.codes && t.codes[i]} name={s}>
+                    <span style={{
+                      background: 'var(--surface-3)', border: '1px solid var(--line)',
+                      padding: '2px 7px', borderRadius: 3, fontSize: 10, fontWeight: 600,
+                      color: 'var(--ink-2)', display: 'inline-block', transition: 'all 0.1s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent-bright)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line)'; e.currentTarget.style.color = 'var(--ink-2)'; }}
+                    >{s}</span>
+                  </StockLink>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                <span>HEAT</span>
+                <div style={{ flex: 1, height: 3, background: 'var(--line-soft)' }}>
+                  <div style={{ width: `${t.heat}%`, height: '100%', background: `linear-gradient(90deg, var(--accent) 0%, var(--up) 100%)`, boxShadow: '0 0 8px rgba(230,180,80,0.4)' }} />
+                </div>
+                <span className="tnum mono" style={{ fontWeight: 700, color: 'var(--ink-2)' }}>{t.heat}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgramPage({ ctx }) {
+  const { data, goHome } = ctx;
+  const p = data.programTrade;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead title="프로그램 매매" subtitle="차익·비차익 거래의 실시간 흐름" breadcrumb="대시보드 · 프로그램" onBreadcrumbHome={goHome} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <StatCard label="전체 순매수" value={`${fmtChange(p.netTotal)}억`} delta={p.netTotal > 0 ? 1 : -1} sub="장중 누적" />
+        <StatCard label="차익 순매수" value={`${fmtChange(p.arbBuy + p.arbSell)}억`} delta={p.arbBuy + p.arbSell > 0 ? 1 : -1} />
+        <StatCard label="비차익 순매수" value={`${fmtChange(p.nonArbBuy + p.nonArbSell)}억`} delta={p.nonArbBuy + p.nonArbSell > 0 ? 1 : -1} />
+      </div>
+      <ProgramTrade data={data} />
+      <div className="dash-card" style={{ padding: '16px 18px' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>INTERPRETATION GUIDE</div>
+        <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.7 }}>
+          <li><b style={{color:'var(--ink)'}}>차익거래</b>: 선·현물 가격차를 이용한 매매. 외국인 비중이 높음.</li>
+          <li><b style={{color:'var(--ink)'}}>비차익거래</b>: 바스켓 매매로 방향성 베팅. 장기 자금 흐름의 시그널.</li>
+          <li>오늘은 비차익 매수 우위로 <b style={{ color: 'var(--up)' }}>방향성 자금</b>이 유입 중입니다.</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function NewsPage({ ctx }) {
+  const { data, goHome } = ctx;
+  const [filter, setFilter] = useState('all');
+  const filters = [
+    { id: 'all', label: '전체' },
+    { id: 'positive', label: '호재' },
+    { id: 'negative', label: '악재' },
+    { id: 'neutral', label: '중립' },
+  ];
+  const filtered = filter === 'all' ? data.news : data.news.filter(n => n.sentiment === filter);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead
+        title="실시간 뉴스 · 공시" subtitle="시장 영향도 분석 · 호재/악재 분류"
+        breadcrumb="대시보드 · 뉴스" onBreadcrumbHome={goHome}
+        action={
+          <div style={{ display: 'flex', gap: 0, border: '1px solid var(--line)', borderRadius: 5, overflow:'hidden' }}>
+            {filters.map((f, i) => (
+              <button key={f.id} onClick={() => setFilter(f.id)} style={{
+                border: 'none',
+                background: filter === f.id ? 'var(--surface-3)' : 'transparent',
+                color: filter === f.id ? 'var(--ink)' : 'var(--ink-3)',
+                padding: '6px 12px', fontSize: 10, fontWeight: 700,
+                fontFamily: 'inherit', letterSpacing: '0.06em', textTransform: 'uppercase',
+                borderRight: i < filters.length - 1 ? '1px solid var(--line)' : 'none',
+              }}>{f.label} ({filter === 'all' ? data.news.length : data.news.filter(n => n.sentiment === f.id).length})</button>
+            ))}
+          </div>
+        }
+      />
+      {filtered.length === 0 ? (
+        <div className="dash-card" style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 12 }}>
+          해당 분류의 뉴스가 없습니다.
+        </div>
+      ) : <NewsList news={filtered} />}
+    </div>
+  );
+}
+
+function AIPage({ ctx }) {
+  const { data, runTrigger, loading, onRun, setSelectedSector, setActive, goHome } = ctx;
+  const handleSectorClick = (id) => {
+    setSelectedSector(id);
+    setActive('sectors');
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead
+        title="AI 시장 코멘트" subtitle="Claude가 실시간 데이터를 종합해 작성하는 전문 애널리스트 리포트"
+        breadcrumb="대시보드 · AI" onBreadcrumbHome={goHome}
+        action={<RunButton onClick={onRun} loading={loading} label="새 분석 실행" loadingLabel="분석 중..." />}
+      />
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14, alignItems: 'flex-start' }}>
+        <AIPanel data={data} runTrigger={runTrigger} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="dash-card" style={{ padding: '16px 18px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>ANALYSIS INPUT</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.7 }}>
+              KOSPI 시세, 10개 섹터 등락률·수급, 투자주체별 자금흐름, 8개 테마 열기, 7건의 뉴스 헤드라인을 Claude에 전달하여 통합 분석을 생성합니다.
+            </div>
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div>
+                <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>SECTORS</div>
+                <div className="tnum mono" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{data.sectors.length}</div>
+              </div>
+              <div>
+                <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>THEMES</div>
+                <div className="tnum mono" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{data.themes.length}</div>
+              </div>
+              <div>
+                <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>NEWS</div>
+                <div className="tnum mono" style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{data.news.length}</div>
+              </div>
+            </div>
+          </div>
+          <SectorHeatmap sectors={data.sectors} onSelect={handleSectorClick} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PAGES = {
+  overview: OverviewPage,
+  sectors: SectorsPage,
+  supply: SupplyPage,
+  themes: ThemesPage,
+  program: ProgramPage,
+  news: NewsPage,
+  ai: AIPage,
+};
+
+/* ===================================================================
+   Sidebar — with live countdown, real market status, keyboard shortcuts
+=================================================================== */
+const NAV_ITEMS = [
+  { id: 'overview', label: 'Overview',     kr: '대시보드',     icon: 'home',  shortcut: '1' },
+  { id: 'sectors',  label: 'Sectors',      kr: '주도섹터',     icon: 'grid',  shortcut: '2' },
+  { id: 'supply',   label: 'Order Flow',   kr: '수급 분석',    icon: 'flow',  shortcut: '3' },
+  { id: 'themes',   label: 'Themes',       kr: '테마/특징주',  icon: 'spark', shortcut: '4' },
+  { id: 'program',  label: 'Program',      kr: '프로그램',     icon: 'bars',  shortcut: '5' },
+  { id: 'news',     label: 'Newswire',     kr: '뉴스/공시',    icon: 'doc',   shortcut: '6' },
+  { id: 'ai',       label: 'AI Analyst',   kr: 'AI 분석',      icon: 'ai',    shortcut: '7' },
+];
+
+function NavIcon({ name }) {
+  const props = { width: 16, height: 16, viewBox: '0 0 18 18', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'home':  return <svg {...props}><path d="M3 7.5L9 3l6 4.5V14a1 1 0 0 1-1 1h-3v-4H7v4H4a1 1 0 0 1-1-1V7.5Z"/></svg>;
+    case 'grid':  return <svg {...props}><rect x="3" y="3" width="5.5" height="5.5" rx="0.5"/><rect x="9.5" y="3" width="5.5" height="5.5" rx="0.5"/><rect x="3" y="9.5" width="5.5" height="5.5" rx="0.5"/><rect x="9.5" y="9.5" width="5.5" height="5.5" rx="0.5"/></svg>;
+    case 'flow':  return <svg {...props}><path d="M3 5h7M3 9h11M3 13h5"/><path d="M12 3l3 2-3 2M14 11l-3 2 3 2"/></svg>;
+    case 'spark': return <svg {...props}><path d="M9 2l1.7 4.3L15 8l-4.3 1.7L9 14l-1.7-4.3L3 8l4.3-1.7L9 2Z"/></svg>;
+    case 'bars':  return <svg {...props}><path d="M4 14V8M9 14V4M14 14v-6"/></svg>;
+    case 'doc':   return <svg {...props}><path d="M5 2h6l3 3v11H5V2Z"/><path d="M11 2v3h3M7 8h6M7 11h6M7 14h4"/></svg>;
+    case 'ai':    return <svg {...props}><path d="M9 2l1.5 4L14 7.5 10.5 9 9 13 7.5 9 4 7.5 7.5 6 9 2Z"/><circle cx="14" cy="3.5" r="0.9"/></svg>;
+    default: return null;
+  }
+}
+
+function Sidebar({ active, onChange, data, isMac, dataSource, onOpenSettings }) {
+  const marketStatus = useMarketStatus();
+  const tickCountdown = useTickCountdown(30);
+  const sourceLabel = dataSource === 'live' ? 'LIVE DATA' : dataSource === 'fetching' ? 'FETCHING...' : 'SAMPLE DATA';
+  const sourceColor = dataSource === 'live' ? 'var(--pos-green)' : dataSource === 'fetching' ? 'var(--accent)' : 'var(--ink-4)';
+  return (
+    <aside style={{
+      width: 232, flexShrink: 0,
+      background: 'var(--bg-soft)', borderRight: '1px solid var(--line)',
+      display: 'flex', flexDirection: 'column',
+      padding: '18px 12px 14px',
+      position: 'sticky', top: 0, height: '100vh',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 6px 16px' }}>
+        <a href="#" onClick={e => { e.preventDefault(); onChange('overview'); }} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: 5,
+            background: 'linear-gradient(135deg, var(--accent-bright) 0%, var(--accent) 100%)',
+            display: 'grid', placeItems: 'center', color: '#1a1206', fontWeight: 800, fontSize: 13,
+            boxShadow: '0 2px 12px rgba(230,180,80,0.3)', fontFamily: 'var(--font)',
+          }}>K</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13, letterSpacing: '-0.01em', color: 'var(--ink)' }}>KOSPI Intel</div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 1 }}>PRO · v2.0</div>
+          </div>
+        </a>
+        <button onClick={onOpenSettings} title={`설정 · ${isMac ? '⌘' : 'Ctrl+'},`}
+          style={{
+            width: 28, height: 28, borderRadius: 5, background: 'transparent',
+            border: '1px solid var(--line)', color: 'var(--ink-3)',
+            display: 'grid', placeItems: 'center', cursor: 'pointer',
+            transition: 'all 0.1s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-3)'; e.currentTarget.style.color = 'var(--accent-bright)'; e.currentTarget.style.borderColor = 'var(--line-bright)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ink-3)'; e.currentTarget.style.borderColor = 'var(--line)'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div style={{
+        background: 'var(--surface)', border: '1px solid var(--line)',
+        borderRadius: 6, padding: '10px 12px', marginBottom: 14,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>KOSPI</span>
+          <span className="tag-live" style={{ fontSize: 8 }}>LIVE</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+          <span className="tnum mono" style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
+            {data.kospi.value.toFixed(2)}
+          </span>
+          <span className="tnum mono" style={{ fontSize: 11, fontWeight: 700, color: colorFor(data.kospi.changePct) }}>
+            {fmtPct(data.kospi.changePct)}
+          </span>
+        </div>
+        <div style={{ marginTop: 6 }}>
+          <Sparkline data={data.kospi.intraday.map(p => p[1])} width={196} height={24} color={colorFor(data.kospi.changePct)} />
+        </div>
+      </div>
+
+      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.12em', padding: '6px 10px 6px', textTransform: 'uppercase' }}>
+        Analysis
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {NAV_ITEMS.map(item => {
+          const isActive = active === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onChange(item.id)}
+              title={`${item.kr} · ${isMac ? '⌘' : 'Ctrl+'}${item.shortcut}`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 10px', borderRadius: 5,
+                border: '1px solid transparent',
+                background: isActive ? 'var(--surface-3)' : 'transparent',
+                borderColor: isActive ? 'var(--line-bright)' : 'transparent',
+                color: isActive ? 'var(--ink)' : 'var(--ink-2)',
+                fontFamily: 'inherit', fontSize: 12, fontWeight: 500,
+                textAlign: 'left', transition: 'all 0.1s', position: 'relative',
+              }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--ink)'; } }}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--ink-2)'; } }}
+            >
+              {isActive && <span style={{ position: 'absolute', left: -1, top: 6, bottom: 6, width: 2, background: 'var(--accent)', borderRadius: 0, boxShadow: '0 0 8px var(--accent)' }} />}
+              <span style={{ color: isActive ? 'var(--accent)' : 'var(--ink-3)' }}><NavIcon name={item.icon} /></span>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontWeight: 600, letterSpacing: '-0.01em' }}>{item.label}</span>
+                <span style={{ fontSize: 10, color: isActive ? 'var(--ink-3)' : 'var(--ink-4)', marginTop: 0, fontWeight: 500 }}>{item.kr}</span>
+              </div>
+              <span className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', fontWeight: 600, padding: '1px 4px', border: '1px solid var(--line)', borderRadius: 2 }}>
+                {isMac ? '⌘' : '⌃'}{item.shortcut}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ flex: 1 }} />
+
+      <div style={{
+        padding: '10px 12px', background: 'var(--surface)',
+        border: '1px solid var(--line)', borderRadius: 6,
+        fontSize: 10, color: 'var(--ink-3)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+          <span style={{ width: 5, height: 5, borderRadius: 999, background: marketStatus.dotColor, boxShadow: `0 0 6px ${marketStatus.dotColor}` }} />
+          <span style={{ fontWeight: 700, color: 'var(--ink-2)', fontSize: 10, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{marketStatus.label}</span>
+        </div>
+        <div className="mono tnum" style={{ fontSize: 9, color: 'var(--ink-3)' }}><LiveClock /> KST</div>
+        <div className="mono" style={{ fontSize: 9, marginTop: 2, color: 'var(--ink-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span>NEXT TICK</span>
+          <span className="tnum" style={{ color: tickCountdown <= 5 ? 'var(--accent-bright)' : 'var(--ink-3)' }}>{String(tickCountdown).padStart(2, '0')}s</span>
+        </div>
+        <div className="mono" style={{ fontSize: 9, marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--line-soft)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 4, height: 4, borderRadius: 999, background: sourceColor, boxShadow: `0 0 4px ${sourceColor}` }} />
+          <span style={{ color: sourceColor, fontWeight: 700, letterSpacing: '0.06em' }}>{sourceLabel}</span>
+          <span className="tnum" style={{ color: 'var(--ink-4)', marginLeft: 'auto' }} title={`데이터 기준: ${data.asOf}`}>{(data.asOf || '').slice(11, 16)}</span>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ===================================================================
+   Settings — localStorage-backed user preferences
+=================================================================== */
+const SETTINGS_KEYS = {
+  ANTHROPIC_KEY: 'kospi_intel_anthropic_key',
+  REFRESH_INTERVAL: 'kospi_intel_refresh_min',
+};
+
+function loadSetting(key, fallback) {
+  try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
+}
+function saveSetting(key, val) {
+  try { if (val) localStorage.setItem(key, val); else localStorage.removeItem(key); } catch {}
+}
+
+/* Inject window.claude.complete shim if user provides Anthropic key */
+function installClaudeShim(apiKey) {
+  if (!apiKey) {
+    if (window.claude && window.claude._isShim) delete window.claude;
+    return;
+  }
+  window.claude = {
+    _isShim: true,
+    complete: async (prompt) => {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1024,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+      if (!r.ok) {
+        const err = await r.text();
+        throw new Error(`Anthropic API ${r.status}: ${err.slice(0, 200)}`);
+      }
+      const j = await r.json();
+      return j.content?.[0]?.text || '';
+    },
+  };
+}
+
+function SettingsModal({ open, onClose }) {
+  const [anthropicKey, setAnthropicKey] = useState(loadSetting(SETTINGS_KEYS.ANTHROPIC_KEY, ''));
+  const [refreshMin, setRefreshMin] = useState(loadSetting(SETTINGS_KEYS.REFRESH_INTERVAL, '5'));
+  const [showKey, setShowKey] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  if (!open) return null;
+
+  const handleSave = () => {
+    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, anthropicKey.trim());
+    saveSetting(SETTINGS_KEYS.REFRESH_INTERVAL, refreshMin);
+    installClaudeShim(anthropicKey.trim());
+    setSaved(true);
+    setTimeout(() => { setSaved(false); onClose(); }, 800);
+  };
+
+  const handleClear = () => {
+    if (!confirm('저장된 API 키를 모두 삭제할까요?')) return;
+    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, '');
+    setAnthropicKey('');
+    installClaudeShim('');
+  };
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(4px)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: 'var(--surface)', border: '1px solid var(--line)',
+        borderRadius: 10, width: 540, maxWidth: '90vw', maxHeight: '90vh',
+        overflow: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+      }}>
+        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div className="mono" style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>SETTINGS</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>설정</div>
+          </div>
+          <button onClick={onClose} className="btn-ghost" style={{ width: 32, height: 32, padding: 0, fontSize: 18 }}>×</button>
+        </div>
+
+        <div style={{ padding: '18px 22px' }}>
+          {/* Anthropic API key */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-bright)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>ANTHROPIC API KEY</span>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600 }}>· AI 코멘트 활성화용</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.55, marginBottom: 10 }}>
+              API 키 입력 시 RUN ANALYSIS 버튼이 실제 Claude를 호출합니다.<br/>
+              미입력 시 오프라인 샘플 코멘트로 작동.
+              {' '}<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style={{ color: 'var(--accent-bright)', textDecoration: 'underline' }}>키 발급</a>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type={showKey ? 'text' : 'password'}
+                value={anthropicKey}
+                onChange={e => setAnthropicKey(e.target.value)}
+                placeholder="sk-ant-..."
+                className="mono"
+                style={{
+                  flex: 1, background: 'var(--bg-soft)', border: '1px solid var(--line)',
+                  borderRadius: 5, padding: '8px 10px', color: 'var(--ink)',
+                  fontSize: 12, fontFamily: 'var(--font-num)',
+                }}
+              />
+              <button onClick={() => setShowKey(!showKey)} className="btn-ghost" style={{ minWidth: 60 }}>
+                {showKey ? 'HIDE' : 'SHOW'}
+              </button>
+            </div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 6, lineHeight: 1.5 }}>
+              ⚠ 키는 브라우저 localStorage에만 저장됩니다 (서버로 전송 안 함). Claude API는 직접 호출됩니다.
+            </div>
+          </div>
+
+          {/* Refresh interval */}
+          <div style={{ marginBottom: 22 }}>
+            <div className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+              REFRESH INTERVAL · 자동 갱신 주기
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {['1', '3', '5', '10', '30'].map(m => (
+                <button key={m} onClick={() => setRefreshMin(m)} className="btn-ghost"
+                  style={{ flex: 1, background: refreshMin === m ? 'var(--surface-3)' : 'var(--surface-2)', color: refreshMin === m ? 'var(--ink)' : 'var(--ink-3)' }}>
+                  {m}m
+                </button>
+              ))}
+            </div>
+            <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 6 }}>
+              현재: <b style={{ color: 'var(--ink-2)' }}>{refreshMin}분</b> 마다 dashboard_data.json 재페치
+            </div>
+          </div>
+
+          {/* KRX (server-side) */}
+          <div style={{ marginBottom: 22, padding: 14, background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: 6 }}>
+            <div className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-2)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              KRX 자격증명 · 서버사이드 설정
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--ink-3)', lineHeight: 1.6 }}>
+              KRX 일부 API는 로그인이 필요합니다. <b style={{ color: 'var(--ink-2)' }}>Repository → Settings → Secrets and variables → Actions</b>에서 다음 두 시크릿을 추가하세요:
+              <div className="mono" style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span><span style={{ color: 'var(--accent-bright)' }}>KRX_ID</span> = 본인 KRX 정보데이터시스템 ID</span>
+                <span><span style={{ color: 'var(--accent-bright)' }}>KRX_PW</span> = 비밀번호</span>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: 'var(--ink-4)' }}>
+                미설정 시 자동으로 Naver Finance 폴백으로 동작 (섹터 수급 데이터는 제한적)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          <button onClick={handleClear} className="btn-ghost" style={{ color: 'var(--down)' }}>
+            CLEAR KEYS
+          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={onClose} className="btn-ghost">CANCEL</button>
+            <button onClick={handleSave} className="btn-run" style={{ height: 32, fontSize: 11 }}>
+              {saved ? '✓ SAVED' : 'SAVE'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===================================================================
+   DashboardApp — root, with keyboard shortcuts
+=================================================================== */
+function DashboardApp() {
+  const [active, setActive] = useState('overview');
+  const [data, setData] = useState(window.MARKET_DATA);
+  const [dataSource, setDataSource] = useState('inline'); // 'inline' | 'live' | 'fetching'
   const [selectedSector, setSelectedSector] = useState('semi');
   const [runTrigger, setRunTrigger] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Install Claude API shim from saved settings (runs once on mount)
+  useEffect(() => {
+    const key = loadSetting(SETTINGS_KEYS.ANTHROPIC_KEY, '');
+    installClaudeShim(key);
+  }, []);
+
+  // Fetch live data from generated JSON, fall back to inline mock if unavailable
+  useEffect(() => {
+    let cancelled = false;
+    const loadLiveData = async () => {
+      setDataSource('fetching');
+      try {
+        const r = await fetch('dashboard_data.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const live = await r.json();
+        if (cancelled) return;
+        if (live._error) {
+          console.warn('[data] live JSON has error flag:', live._error, '— using inline mock');
+          setDataSource('inline');
+          return;
+        }
+        if (!live.kospi || !live.sectors || live.sectors.length === 0) {
+          console.warn('[data] live JSON incomplete — using inline mock');
+          setDataSource('inline');
+          return;
+        }
+        setData(live);
+        setDataSource('live');
+        console.log('[data] live JSON loaded · source=' + (live._source || 'unknown') + ' · asOf ' + live.asOf);
+      } catch (e) {
+        console.warn('[data] fetch failed:', e.message, '— using inline mock');
+        if (!cancelled) setDataSource('inline');
+      }
+    };
+    loadLiveData();
+    const refreshMin = parseInt(loadSetting(SETTINGS_KEYS.REFRESH_INTERVAL, '5'), 10) || 5;
+    const id = setInterval(loadLiveData, refreshMin * 60 * 1000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [settingsOpen]); // Re-run when settings close (refresh interval may have changed)
+
+  // Safety: if active selectedSector doesn't exist in current data, pick first
+  useEffect(() => {
+    if (data.sectors && data.sectors.length > 0 && !data.sectors.find(s => s.id === selectedSector)) {
+      setSelectedSector(data.sectors[0].id);
+    }
+  }, [data, selectedSector]);
+
+  // Detect Mac for ⌘ vs Ctrl key hint
+  const isMac = useMemo(() => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform), []);
 
   const sector = data.sectors.find(s => s.id === selectedSector);
 
@@ -1126,30 +2055,60 @@ function App() {
     setTimeout(() => setLoading(false), 2400);
   }, []);
 
+  const goHome = useCallback(() => setActive('overview'), []);
+
+  // Global keyboard shortcuts: Cmd/Ctrl+1..7 to switch nav, Cmd/Ctrl+, for settings
+  useEffect(() => {
+    const handler = (e) => {
+      const meta = isMac ? e.metaKey : e.ctrlKey;
+      if (!meta) return;
+      if (e.key === ',') {
+        e.preventDefault();
+        setSettingsOpen(true);
+        return;
+      }
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= NAV_ITEMS.length) {
+        e.preventDefault();
+        setActive(NAV_ITEMS[num - 1].id);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isMac]);
+
+  // Update document title with active section
+  useEffect(() => {
+    const item = NAV_ITEMS.find(i => i.id === active);
+    document.title = `KOSPI Intel · ${item ? item.kr : '대시보드'}`;
+  }, [active]);
+
+  const ctx = { data, sector, selectedSector, setSelectedSector, runTrigger, loading, onRun, goHome, setActive };
+  const PageComp = PAGES[active] || PAGES.overview;
+
   return (
-    <div style={{ maxWidth: 1448, margin: '0 auto', padding: 24, background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <MarketHeader data={data} onRun={onRun} loading={loading} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 0.85fr', gap: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <SectorHeatmap sectors={data.sectors} onSelect={setSelectedSector} selectedId={selectedSector} />
-          <SectorDetail sector={sector} />
-          <SupplyDemand data={data} />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <ThemeTrends themes={data.themes} />
-          <SpecialStocks data={data} />
-          <ProgramTrade data={data} />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <AIPanel data={data} runTrigger={runTrigger} />
-          <NewsList news={data.news.slice(0, 5)} />
-        </div>
-      </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--bg)',
+      display: 'flex',
+      fontFamily: 'var(--font)',
+    }}>
+      <Sidebar active={active} onChange={setActive} data={data} isMac={isMac} dataSource={dataSource} onOpenSettings={() => setSettingsOpen(true)} />
+      <main style={{
+        flex: 1,
+        padding: '24px 28px 36px',
+        minWidth: 0,
+      }}>
+        <PageComp ctx={ctx} />
+      </main>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<DashboardApp />);
+
 </script>
+
 </body>
 </html>
