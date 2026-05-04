@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-05-04 13:16:59",
+  "asOf": "2026-05-04 13:19:54",
   "marketStatus": "OPEN",
   "kospi": {
-    "value": 6907.54,
-    "change": 308.67,
-    "changePct": 4.68,
-    "volume": 58394865,
+    "value": 6909.11,
+    "change": 310.24,
+    "changePct": 4.7,
+    "volume": 61278440,
     "high": 0,
     "low": 0,
     "foreignNet": 0,
@@ -14,9 +14,9 @@
     "intraday": []
   },
   "kosdaq": {
-    "value": 1214.51,
-    "change": 22.16,
-    "changePct": 1.86,
+    "value": 1213.9,
+    "change": 21.55,
+    "changePct": 1.81,
     "high": 0,
     "low": 0,
     "volume": 0
@@ -27,14 +27,14 @@
     "changePct": -0.1892822330930867
   },
   "oil": {
-    "value": 101.38999938964844,
-    "change": -0.5500030517578125,
-    "changePct": -0.5395360394207827
+    "value": 101.18000030517578,
+    "change": -0.7600021362304688,
+    "changePct": -0.745538667872122
   },
   "gold": {
-    "value": 4621.7998046875,
-    "change": -8.10009765625,
-    "changePct": -0.17495189587467247
+    "value": 4621.5,
+    "change": -8.39990234375,
+    "changePct": -0.18142729909771477
   },
   "rate": {
     "value": 3.25,
@@ -46,10 +46,10 @@
       "id": "semi",
       "name": "반도체",
       "theme": "주도",
-      "changePct": 11.82,
+      "changePct": 11.74,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 47.9,
+      "weight": 45.9,
       "leadStocks": [
         "SK하이닉스"
       ],
@@ -74,7 +74,7 @@
       "id": "battery",
       "name": "2차전지",
       "theme": "조정",
-      "changePct": 11.61,
+      "changePct": 11.48,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 1.5,
@@ -117,7 +117,7 @@
       "changePct": 10.57,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 0.8,
+      "weight": 0.7,
       "leadStocks": [
         "크래프톤"
       ],
@@ -154,17 +154,13 @@
       "id": "cosmetic",
       "name": "화장품/소비재",
       "theme": "강세",
-      "changePct": 10.24,
+      "changePct": 0.0,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 0.7,
-      "leadStocks": [
-        "LG생활건강"
-      ],
-      "leadCodes": [
-        "051900"
-      ],
-      "momentum": "strong-up"
+      "weight": 0.0,
+      "leadStocks": [],
+      "leadCodes": [],
+      "momentum": "flat-up"
     },
     {
       "id": "energy",
@@ -185,80 +181,80 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "net": 1,
-      "price": 1438000,
-      "changePct": 11.82
+      "price": 1437000,
+      "changePct": 11.74
     },
     {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "기타",
       "net": 1,
-      "price": 976000,
-      "changePct": 16.05
+      "price": 983000,
+      "changePct": 16.88
     },
     {
       "code": "006340",
       "name": "대원전선",
       "sector": "기타",
       "net": 1,
-      "price": 17340,
-      "changePct": 15.22
+      "price": 17400,
+      "changePct": 15.61
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "기타",
+      "net": 1,
+      "price": 919000,
+      "changePct": 10.46
     },
     {
       "code": "062040",
       "name": "산일전기",
       "sector": "기타",
       "net": 1,
-      "price": 328000,
-      "changePct": 23.31
+      "price": 328500,
+      "changePct": 23.5
     },
     {
       "code": "018880",
       "name": "한온시스템",
       "sector": "기타",
       "net": 1,
-      "price": 4980,
-      "changePct": 17.73
+      "price": 5050,
+      "changePct": 19.39
     },
     {
       "code": "016360",
       "name": "삼성증권",
       "sector": "기타",
       "net": 1,
-      "price": 138500,
-      "changePct": 28.84
+      "price": 139400,
+      "changePct": 29.67
     },
     {
       "code": "102970",
       "name": "KODEX 증권",
       "sector": "기타",
       "net": 1,
-      "price": 29815,
-      "changePct": 11.33
+      "price": 29890,
+      "changePct": 11.61
     },
     {
       "code": "103590",
       "name": "일진전기",
       "sector": "기타",
       "net": 1,
-      "price": 143300,
-      "changePct": 16.98
+      "price": 142600,
+      "changePct": 16.41
     },
     {
       "code": "066970",
       "name": "엘앤에프",
       "sector": "2차전지",
       "net": 1,
-      "price": 217750,
-      "changePct": 11.61
-    },
-    {
-      "code": "006260",
-      "name": "LS",
-      "sector": "기타",
-      "net": 1,
-      "price": 502000,
-      "changePct": 10.82
+      "price": 217500,
+      "changePct": 11.48
     }
   ],
   "foreignSell": [
@@ -267,8 +263,8 @@
       "name": "대우건설",
       "sector": "기타",
       "net": -1,
-      "price": 32100,
-      "changePct": -8.29
+      "price": 32000,
+      "changePct": -8.57
     },
     {
       "code": "252670",
@@ -299,32 +295,32 @@
       "name": "쏘카",
       "sector": "기타",
       "net": -1,
-      "price": 16200,
-      "changePct": -9.04
+      "price": 16080,
+      "changePct": -9.71
     },
     {
       "code": "001390",
       "name": "KG케미칼",
       "sector": "기타",
       "net": -1,
-      "price": 6530,
-      "changePct": -7.64
+      "price": 6520,
+      "changePct": -7.78
     },
     {
       "code": "012750",
       "name": "에스원",
       "sector": "기타",
       "net": -1,
-      "price": 78300,
-      "changePct": -9.06
+      "price": 78400,
+      "changePct": -8.94
     },
     {
       "code": "018670",
       "name": "SK가스",
       "sector": "기타",
       "net": -1,
-      "price": 265500,
-      "changePct": -8.13
+      "price": 265000,
+      "changePct": -8.3
     },
     {
       "code": "252710",
@@ -348,43 +344,50 @@
       "code": "000660",
       "name": "SK하이닉스",
       "amount": 0,
-      "price": 1438000,
-      "changePct": 11.82
+      "price": 1437000,
+      "changePct": 11.74
     },
     {
       "code": "402340",
       "name": "SK스퀘어",
       "amount": 0,
-      "price": 976000,
-      "changePct": 16.05
+      "price": 983000,
+      "changePct": 16.88
     },
     {
       "code": "047040",
       "name": "대우건설",
       "amount": 0,
-      "price": 32100,
-      "changePct": -8.29
+      "price": 32000,
+      "changePct": -8.57
     },
     {
       "code": "006340",
       "name": "대원전선",
       "amount": 0,
-      "price": 17340,
-      "changePct": 15.22
+      "price": 17400,
+      "changePct": 15.61
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "amount": 0,
+      "price": 919000,
+      "changePct": 10.46
     },
     {
       "code": "062040",
       "name": "산일전기",
       "amount": 0,
-      "price": 328000,
-      "changePct": 23.31
+      "price": 328500,
+      "changePct": 23.5
     },
     {
       "code": "018880",
       "name": "한온시스템",
       "amount": 0,
-      "price": 4980,
-      "changePct": 17.73
+      "price": 5050,
+      "changePct": 19.39
     },
     {
       "code": "252670",
@@ -397,22 +400,15 @@
       "code": "016360",
       "name": "삼성증권",
       "amount": 0,
-      "price": 138500,
-      "changePct": 28.84
+      "price": 139400,
+      "changePct": 29.67
     },
     {
       "code": "102970",
       "name": "KODEX 증권",
       "amount": 0,
-      "price": 29815,
-      "changePct": 11.33
-    },
-    {
-      "code": "103590",
-      "name": "일진전기",
-      "amount": 0,
-      "price": 143300,
-      "changePct": 16.98
+      "price": 29890,
+      "changePct": 11.61
     }
   ],
   "specialStocks": {
@@ -430,40 +426,40 @@
         "price": 10980
       },
       {
-        "code": "015860",
-        "name": "일진홀딩스",
-        "changePct": 29.75,
-        "price": 13390
-      },
-      {
         "code": "016360",
         "name": "삼성증권",
-        "changePct": 28.84,
-        "price": 138500
+        "changePct": 29.67,
+        "price": 139400
+      },
+      {
+        "code": "015860",
+        "name": "일진홀딩스",
+        "changePct": 29.65,
+        "price": 13380
       },
       {
         "code": "062040",
         "name": "산일전기",
-        "changePct": 23.31,
-        "price": 328000
-      },
-      {
-        "code": "550043",
-        "name": "N2 인버스 레버리지 WTI원유 선물 ETN(H)",
-        "changePct": 20.0,
-        "price": 12
+        "changePct": 23.5,
+        "price": 328500
       },
       {
         "code": "021050",
         "name": "서원",
-        "changePct": 20.0,
-        "price": 1860
+        "changePct": 19.61,
+        "price": 1854
+      },
+      {
+        "code": "003470",
+        "name": "유안타증권",
+        "changePct": 19.43,
+        "price": 6270
       },
       {
         "code": "178920",
         "name": "PI첨단소재",
-        "changePct": 19.61,
-        "price": 30800
+        "changePct": 19.42,
+        "price": 30750
       }
     ],
     "upperLimit": [
@@ -484,8 +480,15 @@
       {
         "code": "015860",
         "name": "일진홀딩스",
-        "changePct": 29.75,
-        "price": 13390,
+        "changePct": 29.65,
+        "price": 13380,
+        "reason": "상한가 도달"
+      },
+      {
+        "code": "016360",
+        "name": "삼성증권",
+        "changePct": 29.67,
+        "price": 139400,
         "reason": "상한가 도달"
       }
     ],
@@ -495,7 +498,7 @@
     {
       "name": "HBM/AI 반도체",
       "heat": 100,
-      "changePct": 11.82,
+      "changePct": 11.74,
       "stocks": [
         "SK하이닉스",
         "한미반도체",
@@ -508,24 +511,9 @@
       ]
     },
     {
-      "name": "K-뷰티",
-      "heat": 100,
-      "changePct": 10.24,
-      "stocks": [
-        "아모레퍼시픽",
-        "코스맥스",
-        "한국콜마"
-      ],
-      "codes": [
-        "090430",
-        "192820",
-        "161890"
-      ]
-    },
-    {
       "name": "2차전지",
       "heat": 100,
-      "changePct": 11.61,
+      "changePct": 11.48,
       "stocks": [
         "LG에너지솔루션",
         "에코프로비엠",
@@ -565,6 +553,21 @@
         "034020",
         "052690",
         "105840"
+      ]
+    },
+    {
+      "name": "K-뷰티",
+      "heat": 50,
+      "changePct": 0.0,
+      "stocks": [
+        "아모레퍼시픽",
+        "코스맥스",
+        "한국콜마"
+      ],
+      "codes": [
+        "090430",
+        "192820",
+        "161890"
       ]
     },
     {
@@ -615,10 +618,10 @@
   ],
   "news": [
     {
-      "time": "13:16",
+      "time": "13:19",
       "source": "시스템",
       "sentiment": "neutral",
-      "headline": "실시간 뉴스 수집 일시 중단 — 2026-05-04 13:16 KST 기준",
+      "headline": "실시간 뉴스 수집 일시 중단 — 2026-05-04 13:19 KST 기준",
       "tags": [
         "시스템"
       ]
@@ -631,5 +634,145 @@
     "nonArbSell": 0,
     "netTotal": 0
   },
-  "_source": "naver-only"
+  "_source": "naver-only",
+  "_debug": {
+    "index_kospi": {
+      "stockEndType": "index",
+      "itemCode": "KOSPI",
+      "reutersCode": "KOSPI",
+      "symbolCode": "KOSPI",
+      "stockName": "코스피",
+      "itemLogoUrl": "https://ssl.pstatic.net/imgstock/fn/real/logo/index/IndexKOSPI.svg",
+      "itemLogoPngUrl": "https://ssl.pstatic.net/imgstock/fn/real/logo/png/index/IndexKOSPI.png",
+      "closePrice": "6,909.11",
+      "compareToPreviousClosePrice": "310.24",
+      "compareToPreviousPrice": {
+        "code": "2",
+        "text": "상승",
+        "name": "RISING"
+      },
+      "fluctuationsRatio": "4.70",
+      "marketStatus": "OPEN",
+      "localTradedAt": "2026-05-04T13:19:00+09:00",
+      "stockExchangeType": {
+        "code": "KS",
+        "zoneId": "Asia/Seoul",
+        "nationType": "KOR",
+        "delayTime": 0,
+        "startTime": "0900",
+        "endTime": "1530",
+        "closePriceSendTime": "1630",
+        "nameKor": "코스피",
+        "nameEng": "KOSPI",
+        "stockType": "domestic",
+        "nationCode": "KOR",
+        "nationName": "대한민국",
+        "name": "KOSPI"
+      },
+      "imageCharts": {
+        "areaYearThree": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year3/KOSPI_end.png?1777868340000",
+        "day_up_tablet": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_end_up_tablet.png?1777868340000",
+        "day": "https://ssl.pstatic.net/imgfinance/chart/mobile/day/KOSPI_end.png?1777868340000",
+        "areaYear": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year/KOSPI_end.png?1777868340000",
+        "areaYearTen": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year10/KOSPI_end.png?1777868340000",
+        "candleWeek": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/KOSPI_end.png?1777868340000",
+        "candleDay": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/KOSPI_end.png?1777868340000",
+        "transparent": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_transparent.png?1777868340000",
+        "day_up": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_end_up.png?1777868340000",
+        "candleMonth": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/KOSPI_end.png?1777868340000",
+        "areaMonthThree": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/month3/KOSPI_end.png?1777868340000"
+      },
+      "scriptChartTypes": [
+        "candleMinuteFive",
+        "candleDay",
+        "candleWeek",
+        "candleMonth",
+        "day",
+        "areaMonthThree",
+        "areaYear",
+        "areaYearThree",
+        "areaYearTen"
+      ],
+      "delayTime": 0,
+      "delayTimeName": "실시간",
+      "endUrl": "https://m.stock.naver.com/domestic/index/KOSPI",
+      "chartIqEndUrl": "https://m.stock.naver.com/fchart/domestic/index/KOSPI",
+      "nationType": "KOR",
+      "nationName": "대한민국",
+      "imageChartUrlInfo": {
+        "line": {
+          "day": "https://ssl.pstatic.net/imgfinance/chart/mobile/day/KOSPI_end.png?177786834",
+          "month3": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/month3/KOSPI_end.png?177786834",
+          "year": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year/KOSPI_end.png?177786834",
+          "year3": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year3/KOSPI_end.png?177786834",
+          "year5": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year5/KOSPI_end.png?177786834",
+          "year10": "https://ssl.pstatic.net/imgfinance/chart/mobile/area/year10/KOSPI_end.png?177786834"
+        },
+        "candle": {
+          "day": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/day/KOSPI_end.png?177786834",
+          "week": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/week/KOSPI_end.png?177786834",
+          "month": "https://ssl.pstatic.net/imgfinance/chart/mobile/candle/month/KOSPI_end.png?177786834"
+        },
+        "mini": {
+          "transparent": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_transparent.png?177786834",
+          "dayUp": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_end_up.png?177786834",
+          "dayUpTablet": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/KOSPI_end_up_tablet.png?177786834"
+        }
+      }
+    },
+    "stock_list_first": {
+      "stockType": "domestic",
+      "stockEndType": "stock",
+      "itemCode": "006345",
+      "reutersCode": "006345",
+      "stockName": "대원전선우",
+      "sosok": "0",
+      "closePrice": "12,920",
+      "compareToPreviousClosePrice": "2,980",
+      "compareToPreviousPrice": {
+        "code": "1",
+        "text": "상한",
+        "name": "UPPER_LIMIT"
+      },
+      "fluctuationsRatio": "29.98",
+      "accumulatedTradingVolume": "2,764,130",
+      "accumulatedTradingValue": "35,087",
+      "accumulatedTradingValueKrwHangeul": "351억원",
+      "localTradedAt": "2026-05-04T13:19:22+09:00",
+      "marketValue": "339",
+      "marketValueHangeul": "339억원",
+      "nav": "N/A",
+      "threeMonthEarningRate": "N/A",
+      "marketStatus": "OPEN",
+      "tradeStopType": {
+        "code": "1",
+        "text": "운영.Trading",
+        "name": "TRADING"
+      },
+      "stockExchangeType": {
+        "code": "KS",
+        "zoneId": "Asia/Seoul",
+        "nationType": "KOR",
+        "delayTime": 0,
+        "startTime": "0900",
+        "endTime": "1530",
+        "closePriceSendTime": "1630",
+        "nameKor": "코스피",
+        "nameEng": "KOSPI",
+        "stockType": "domestic",
+        "nationCode": "KOR",
+        "nationName": "대한민국",
+        "name": "KOSPI"
+      },
+      "endUrl": "https://m.stock.naver.com/domestic/stock/006345",
+      "stockMiniImageChart": "https://ssl.pstatic.net/imgfinance/chart/mobile/mini/006345_interest.png?1777868362000",
+      "itemLogoUrl": "https://ssl.pstatic.net/imgstock/fn/real/logo/stock/Stock006345.svg",
+      "itemLogoPngUrl": "https://ssl.pstatic.net/imgstock/fn/real/logo/png/stock/Stock006345.png",
+      "closePriceRaw": "12920",
+      "compareToPreviousClosePriceRaw": "2980",
+      "accumulatedTradingVolumeRaw": "2764130",
+      "accumulatedTradingValueRaw": "35087000000",
+      "marketValueRaw": "33900000000"
+    }
+  }
 }
