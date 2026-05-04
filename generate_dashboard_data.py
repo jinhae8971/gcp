@@ -260,7 +260,51 @@ def fetch_naver_news_v2():
     except Exception as e:
         print(f"  [news] mobile API failed: {e}")
 
-    # 2. Naver Finance HTML 페이지
+    # 2. Google News RSS — 가장 안정적인 글로벌 RSS
+    try:
+        r = requests.get(
+            "https://news.google.com/rss/search?q=%EC%BD%94%EC%8A%A4%ED%94%BC&hl=ko&gl=KR&ceid=KR:ko",
+            headers=headers, timeout=10,
+        )
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, "xml")
+            items = soup.find_all("item")[:10]
+            for item in items:
+                title = item.find("title")
+                pub = item.find("pubDate")
+                src = item.find("source")
+                if not title:
+                    continue
+                headline = title.get_text(strip=True)
+                # Google News headline format: "headline - source"
+                if " - " in headline:
+                    parts = headline.rsplit(" - ", 1)
+                    headline = parts[0]
+                    source = parts[1] if len(parts) > 1 else "Google News"
+                else:
+                    source = src.get_text(strip=True) if src else "Google News"
+                # pub format: "Mon, 04 May 2026 13:25:00 GMT" → HH:MM (KST)
+                t = NOW.strftime("%H:%M")
+                if pub:
+                    try:
+                        from email.utils import parsedate_to_datetime
+                        dt = parsedate_to_datetime(pub.get_text(strip=True))
+                        dt_kst = dt.astimezone(KST)
+                        t = dt_kst.strftime("%H:%M")
+                    except Exception:
+                        pass
+                out.append({
+                    "time": t, "source": source, "headline": headline,
+                    "sentiment": classify_sentiment(headline),
+                    "tags": extract_tags(headline),
+                })
+            if out:
+                print(f"  [news] Google RSS: {len(out)} items")
+                return out
+    except Exception as e:
+        print(f"  [news] Google RSS failed: {e}")
+
+    # 3. Naver Finance HTML 페이지
     try:
         r = requests.get(
             "https://finance.naver.com/news/mainnews.naver",
