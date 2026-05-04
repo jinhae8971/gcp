@@ -1110,32 +1110,51 @@ function PanelAssetRotation({ periodFactor }){
   );
 }
 
-function PanelM2(){
+function PanelM2({ feedStatus }){
   const W=480, H=180, padL=44, padR=12, padT=16, padB=22;
   const innerW = W-padL-padR, innerH=H-padT-padB;
-  const all = Object.values(M2_DATA).flatMap(d=>d.series);
+  const dataset = (feedStatus && feedStatus.data && feedStatus.source !== "sample" && !feedStatus.error)
+    ? feedStatus.data : M2_DATA;
+  const all = Object.values(dataset).flatMap(d=>d.series);
+  const seriesLen = Math.max(...Object.values(dataset).map(d=>d.series.length), 1);
   const yMin = Math.floor(Math.min(...all)-1);
   const yMax = Math.ceil(Math.max(...all)+1);
-  const sx = i => padL + (i/(M2_LABELS.length-1))*innerW;
+  const sx = i => padL + (i/(Math.max(seriesLen-1,1)))*innerW;
   const sy = v => padT + (1-(v-yMin)/(yMax-yMin))*innerH;
   const [active, setActive] = useState(null);
   const [hoverIdx, setHoverIdx] = useState(null);
-  const codes = Object.keys(M2_DATA);
+  const codes = Object.keys(dataset);
+
+  const sourceBadge = feedStatus && (() => {
+    let label = "샘플", color = "var(--text-3)";
+    if (feedStatus.loading)     { label = "로딩"; color = "var(--accent-amber)"; }
+    else if (feedStatus.error)  { label = "FRED 키 없음/실패"; color = feedStatus.error.includes("키") ? "var(--text-3)" : "var(--down)"; }
+    else if (feedStatus.source && feedStatus.source !== "sample") { label = "실시간 · FRED"; color = "var(--up)"; }
+    return (
+      <span title={feedStatus.error || (feedStatus.asOf ? "기준 "+feedStatus.asOf : "")}
+        className="mono"
+        style={{display:"inline-flex", alignItems:"center", gap:5, fontSize:9.5, color, padding:"3px 8px", border:`1px solid ${color}55`, borderRadius:6}}>
+        <span style={{width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 6px ${color}`}}/>
+        {label}
+      </span>
+    );
+  })();
 
   const onMove = (e) => {
     const svg = e.currentTarget;
     const r = svg.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width * W;
-    const i = Math.round((px - padL) / innerW * (M2_LABELS.length-1));
-    if (i>=0 && i<M2_LABELS.length) setHoverIdx(i); else setHoverIdx(null);
+    const i = Math.round((px - padL) / innerW * (seriesLen-1));
+    if (i>=0 && i<seriesLen) setHoverIdx(i); else setHoverIdx(null);
   };
 
   return (
     <Card id="m2-supply" title="M2 통화량 증가율 (전년대비)" subtitle="M2 MONEY SUPPLY · YoY % · 24M" accent="var(--accent-lime)"
       right={
-        <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
+        <div style={{display:"flex", gap:6, flexWrap:"wrap", alignItems:"center"}}>
+          {sourceBadge}
           {codes.map(c => {
-            const d = M2_DATA[c];
+            const d = dataset[c];
             const isMuted = active!==null && active!==c;
             return (
               <Chip key={c} color={`var(--accent-${d.color})`} active={active===c}
@@ -1157,11 +1176,14 @@ function PanelM2(){
             </text>
           </g>
         ))}
-        {M2_LABELS.map((l,i)=> l && (
+        {(feedStatus && feedStatus.source!=="sample" && !feedStatus.error
+          ? Array.from({length:seriesLen}, (_,i)=> i===0 ? "'Y-2" : i===Math.floor(seriesLen/2) ? "'Y-1" : i===seriesLen-1 ? "현재" : "")
+          : M2_LABELS
+        ).map((l,i)=> l && (
           <text key={i} x={sx(i)} y={H-6} textAnchor="middle" style={{fontSize:9, fill:"var(--text-3)", fontFamily:"JetBrains Mono", letterSpacing:"0.06em"}}>{l}</text>
         ))}
         {codes.map(c => {
-          const d = M2_DATA[c];
+          const d = dataset[c];
           const colorVar = `var(--accent-${d.color})`;
           const isMuted = active!==null && active!==c;
           const path = d.series.map((v,i)=> (i===0?"M":"L")+sx(i)+" "+sy(v)).join(" ");
@@ -1193,14 +1215,18 @@ function PanelM2(){
           background:"rgba(8,12,24,0.6)", border:"1px solid var(--line)",
           borderRadius:8, fontSize:11, display:"flex", gap:14, flexWrap:"wrap",
         }}>
-          <span className="mono" style={{color:"var(--text-3)"}}>월 {String(hoverIdx+1).padStart(2,"0")}</span>
-          {codes.map(c => (
-            <span key={c} style={{display:"flex", alignItems:"center", gap:5}}>
-              <span style={{width:6, height:6, borderRadius:3, background:`var(--accent-${M2_DATA[c].color})`}}/>
-              <span style={{color:"var(--text-2)"}}>{c}</span>
-              <span className="num" style={{color:"var(--text-0)", fontWeight:600}}>{M2_DATA[c].series[hoverIdx]>=0?"+":""}{M2_DATA[c].series[hoverIdx].toFixed(1)}%</span>
-            </span>
-          ))}
+          <span className="mono" style={{color:"var(--text-3)"}}>지점 {String(hoverIdx+1).padStart(2,"0")} / {seriesLen}</span>
+          {codes.map(c => {
+            const v = dataset[c]?.series?.[hoverIdx];
+            if (v == null) return null;
+            return (
+              <span key={c} style={{display:"flex", alignItems:"center", gap:5}}>
+                <span style={{width:6, height:6, borderRadius:3, background:`var(--accent-${dataset[c].color})`}}/>
+                <span style={{color:"var(--text-2)"}}>{c}</span>
+                <span className="num" style={{color:"var(--text-0)", fontWeight:600}}>{v>=0?"+":""}{v.toFixed(1)}%</span>
+              </span>
+            );
+          })}
         </div>
       )}
       <div style={{marginTop:8, paddingTop:8, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)", display:"flex", justifyContent:"space-between"}}>
@@ -1258,18 +1284,36 @@ function PanelLeaderboard({ periodFactor }){
   );
 }
 
-function PanelCurrency(){
+function PanelCurrency({ feedStatus }){
   const [sortKey, setSortKey] = useState("chg30");
   const [sortDir, setSortDir] = useState("desc");
+  const dataset = (feedStatus && feedStatus.rows && feedStatus.source !== "sample" && !feedStatus.error)
+    ? feedStatus.rows : CURRENCY_DATA;
   const sorted = useMemo(()=>{
-    const arr = [...CURRENCY_DATA];
+    const arr = [...dataset];
     arr.sort((a,b) => {
       const av = a[sortKey], bv = b[sortKey];
       if (typeof av === "string") return sortDir==="desc" ? bv.localeCompare(av) : av.localeCompare(bv);
       return sortDir==="desc" ? bv-av : av-bv;
     });
     return arr;
-  }, [sortKey, sortDir]);
+  }, [sortKey, sortDir, dataset]);
+
+  // Compact source badge for the right slot of the card
+  const sourceBadge = feedStatus && (() => {
+    let label = "샘플", color = "var(--text-3)";
+    if (feedStatus.loading)     { label = "로딩"; color = "var(--accent-amber)"; }
+    else if (feedStatus.error)  { label = "실패"; color = "var(--down)"; }
+    else if (feedStatus.source && feedStatus.source !== "sample") { label = "실시간"; color = "var(--up)"; }
+    return (
+      <span title={feedStatus.error || (feedStatus.asOf ? "기준 "+feedStatus.asOf : "")}
+        className="mono"
+        style={{display:"inline-flex", alignItems:"center", gap:5, fontSize:9.5, color, padding:"3px 8px", border:`1px solid ${color}55`, borderRadius:6}}>
+        <span style={{width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 6px ${color}`}}/>
+        {label}{feedStatus.asOf ? ` · ${feedStatus.asOf.slice(5,10)}` : ""}
+      </span>
+    );
+  })();
 
   const HCell = ({k, label, align}) => (
     <button onClick={()=>{
@@ -1287,7 +1331,8 @@ function PanelCurrency(){
   );
 
   return (
-    <Card id="currency" title="통화 강도" subtitle="CURRENCY STRENGTH · 30D vs USD" accent="var(--accent-purple)">
+    <Card id="currency" title="통화 강도" subtitle="CURRENCY STRENGTH · 30D vs USD" accent="var(--accent-purple)"
+      right={sourceBadge}>
       <div style={{display:"grid", gridTemplateColumns:"40px 1fr 60px 70px 60px", gap:"8px 12px", alignItems:"center"}}>
         <HCell k="code" label=""/>
         <HCell k="kr" label="통화"/>
@@ -1394,7 +1439,249 @@ function smoothScrollTo(id){
   window.scrollTo({ top:y, behavior:"smooth" });
 }
 
-function Header({ activeNav, onNav, period, onOpenSettings }){
+// =====================================================================
+// Live data feed — Frankfurter (currencies/DXY), FRED (M2), Alpha Vantage (VIX)
+// Keys persisted to localStorage; never sent anywhere except the API itself.
+// =====================================================================
+const KEYS_LS = "gmm.apiKeys.v1";
+function loadKeys(){
+  try { return JSON.parse(localStorage.getItem(KEYS_LS) || "{}"); }
+  catch { return {}; }
+}
+function saveKeys(k){
+  try { localStorage.setItem(KEYS_LS, JSON.stringify(k)); } catch {}
+}
+function fmtISO(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+// Standard ICE DXY weights (as of 1999): EUR -57.6%, JPY +13.6%, GBP -11.9%,
+// CAD +9.1%, SEK +4.2%, CHF +3.6%. Frankfurter quotes all rates as "X per 1 USD",
+// so for inverse-quoted EUR/GBP we convert via 1/rate inside the same formula:
+//   DXY = 50.14348112 × EUR^0.576 × JPY^0.136 × GBP^0.119 × CAD^0.091 × SEK^0.042 × CHF^0.036
+function calcDXY(rates){
+  if (!rates || !rates.EUR || !rates.JPY || !rates.GBP || !rates.CAD || !rates.SEK || !rates.CHF) return null;
+  return 50.14348112
+    * Math.pow(rates.EUR, 0.576)
+    * Math.pow(rates.JPY, 0.136)
+    * Math.pow(rates.GBP, 0.119)
+    * Math.pow(rates.CAD, 0.091)
+    * Math.pow(rates.SEK, 0.042)
+    * Math.pow(rates.CHF, 0.036);
+}
+
+async function fetchCurrencyData(){
+  const symbols = "EUR,JPY,CNY,KRW,INR,GBP,AUD,SEK,CHF,CAD";
+  const end = new Date();
+  const start = new Date(); start.setDate(start.getDate() - 45);
+  const url = `https://api.frankfurter.app/${fmtISO(start)}..${fmtISO(end)}?base=USD&symbols=${symbols}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("Frankfurter HTTP "+r.status);
+  const j = await r.json();
+  const dates = Object.keys(j.rates).sort();
+  if (dates.length < 2) throw new Error("Frankfurter returned no rates");
+  const N = dates.length;
+  const rateOn = (i) => j.rates[dates[Math.max(0, Math.min(N-1, i))]];
+  const latest = rateOn(N-1);
+  const prev30 = rateOn(N-1-22);  // ~30 calendar days ≈ 22 trading days
+  const prev5  = rateOn(N-1-5);
+
+  const sparkRange = dates.slice(-20);
+  const seriesFor = (mapper) => sparkRange.map(d => mapper(j.rates[d]));
+
+  // DXY computed from basket
+  const dxyLatest = calcDXY(latest);
+  const dxy30 = calcDXY(prev30);
+  const dxy5  = calcDXY(prev5);
+  const dxySpark = seriesFor(r => calcDXY(r));
+
+  // Per-currency rows. Direction convention: chg > 0 means foreign currency
+  // strengthened vs USD. DXY chg > 0 means USD strengthened.
+  const inverseDir = (latest, prev) => ((latest - prev) / prev) * 100;          // EUR-style ("USD per X")
+  const normalDir  = (latest, prev) => -((latest - prev) / prev) * 100;          // JPY-style ("X per USD")
+  const ccy = (code, kr, mode) => {
+    const lat  = mode==="inverse" ? 1/latest[code] : latest[code];
+    const p30  = mode==="inverse" ? 1/prev30[code] : prev30[code];
+    const p5   = mode==="inverse" ? 1/prev5[code]  : prev5[code];
+    const spark = mode==="inverse" ? seriesFor(r => 1/r[code]) : seriesFor(r => r[code]);
+    const dir = mode==="inverse" ? inverseDir : normalDir;
+    return {
+      code, kr,
+      level: Math.round(lat * (mode==="inverse"?10000:100)) / (mode==="inverse"?10000:100),
+      chg30: Math.round(dir(lat, p30) * 100) / 100,
+      chg5d: Math.round(dir(lat, p5) * 100) / 100,
+      spark,
+    };
+  };
+
+  const out = [
+    { code:"DXY", kr:"달러지수",
+      level: Math.round(dxyLatest*100)/100,
+      chg30: Math.round(((dxyLatest - dxy30) / dxy30) * 10000)/100,
+      chg5d: Math.round(((dxyLatest - dxy5)  / dxy5 ) * 10000)/100,
+      spark: dxySpark },
+    ccy("EUR","유로","inverse"),
+    ccy("JPY","엔","normal"),
+    ccy("CNY","위안","normal"),
+    ccy("KRW","원","normal"),
+    ccy("INR","루피","normal"),
+    ccy("GBP","파운드","inverse"),
+    ccy("AUD","호주달러","inverse"),
+  ];
+  return { rows: out, asOf: dates[dates.length-1] };
+}
+
+// FRED series for M2 / monetary aggregates by country
+const FRED_SERIES = {
+  US: { id:"M2SL",                kr:"미국 M2",  color:"cyan"   },
+  EU: { id:"MABMM301EZM189S",     kr:"유로존 M3",color:"purple" },
+  CN: { id:"MYAGM2CNM189N",       kr:"중국 M2",  color:"mag"    },
+  JP: { id:"MYAGM2JPM189S",       kr:"일본 M2",  color:"amber"  },
+  IN: { id:"MYAGM2INM189N",       kr:"인도 M2",  color:"lime"   },
+};
+async function fetchFREDSeries(seriesId, fredKey, limit=36){
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${encodeURIComponent(fredKey)}&file_type=json&sort_order=desc&limit=${limit}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("FRED HTTP "+r.status);
+  const j = await r.json();
+  if (j.error_message) throw new Error("FRED: "+j.error_message);
+  // Reverse to chronological order
+  return j.observations.slice().reverse().map(o => ({ date:o.date, value: parseFloat(o.value) }));
+}
+async function fetchM2Data(fredKey){
+  const result = {};
+  const errors = [];
+  for (const [code, meta] of Object.entries(FRED_SERIES)){
+    try {
+      const obs = await fetchFREDSeries(meta.id, fredKey, 36);
+      // Compute YoY % for last 24 months
+      const yoy = [];
+      for (let i = 12; i < obs.length; i++){
+        const cur = obs[i].value, yr = obs[i-12].value;
+        if (Number.isFinite(cur) && Number.isFinite(yr) && yr !== 0){
+          yoy.push(Math.round((cur - yr) / yr * 10000) / 100);
+        } else {
+          yoy.push(null);
+        }
+      }
+      const cleaned = yoy.filter(v => v != null);
+      if (cleaned.length > 0){
+        result[code] = {
+          kr: meta.kr,
+          color: meta.color,
+          latest: Math.round(cleaned[cleaned.length-1] * 10) / 10,
+          series: cleaned,
+        };
+      }
+    } catch(e){
+      errors.push(`${code}: ${e.message}`);
+    }
+  }
+  if (Object.keys(result).length === 0) throw new Error(errors.join(" / ") || "FRED: 데이터 없음");
+  return result;
+}
+async function fetchVIX(alphaKey){
+  const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=^VIX&apikey=${encodeURIComponent(alphaKey)}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("Alpha Vantage HTTP "+r.status);
+  const j = await r.json();
+  if (j.Note) throw new Error("Alpha Vantage 호출 한도 초과 (분당/일별)");
+  if (j["Error Message"]) throw new Error("Alpha Vantage: "+j["Error Message"]);
+  const q = j["Global Quote"];
+  if (!q || !q["05. price"]) throw new Error("Alpha Vantage: 빈 응답");
+  return {
+    value: parseFloat(q["05. price"]),
+    chg: parseFloat(q["09. change"]),
+    chgPct: parseFloat(String(q["10. change percent"]).replace("%","")),
+  };
+}
+
+function useDataFeed(){
+  const [keys, setKeysState] = useState(loadKeys);
+  const [feed, setFeed] = useState({
+    currency: { rows: window.CURRENCY_DATA, source:"sample", error:null, asOf:null, loading:false },
+    m2:       { data: window.M2_DATA,       source:"sample", error:null, asOf:null, loading:false },
+    vix:      { value: 14.82, chg:-2.4,     source:"sample", error:null, asOf:null, loading:false },
+    dxy:      { value: 99.84, chg:-2.84,    source:"sample", error:null, asOf:null, loading:false },
+  });
+
+  const setKeys = useCallback((next) => {
+    saveKeys(next);
+    setKeysState(next);
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setFeed(f => ({
+      currency: {...f.currency, loading:true},
+      m2:       {...f.m2,       loading:true},
+      vix:      {...f.vix,      loading:true},
+      dxy:      {...f.dxy,      loading:true},
+    }));
+
+    // Currency + DXY (Frankfurter, no key)
+    fetchCurrencyData().then(({ rows, asOf }) => {
+      const dxyRow = rows.find(r => r.code === "DXY");
+      setFeed(f => ({
+        ...f,
+        currency: { rows, source:"frankfurter", error:null, asOf, loading:false },
+        dxy: dxyRow
+          ? { value: dxyRow.level, chg: dxyRow.chg30, source:"frankfurter (계산)", error:null, asOf, loading:false }
+          : f.dxy,
+      }));
+    }).catch(e => {
+      setFeed(f => ({
+        ...f,
+        currency: {...f.currency, error: e.message, loading:false},
+        dxy:      {...f.dxy,      error: e.message, loading:false},
+      }));
+    });
+
+    // M2 (FRED, requires key)
+    const k = loadKeys();
+    if (k.fred){
+      fetchM2Data(k.fred).then(data => {
+        setFeed(f => ({...f, m2: { data, source:"fred", error:null, asOf:new Date().toISOString().slice(0,10), loading:false }}));
+      }).catch(e => {
+        setFeed(f => ({...f, m2: {...f.m2, error: e.message, loading:false}}));
+      });
+    } else {
+      setFeed(f => ({...f, m2: {...f.m2, loading:false}}));
+    }
+
+    // VIX (Alpha Vantage, requires key)
+    if (k.alpha){
+      fetchVIX(k.alpha).then(d => {
+        setFeed(f => ({...f, vix: { value: d.value, chg: d.chgPct, source:"alpha", error:null, asOf:new Date().toISOString(), loading:false }}));
+      }).catch(e => {
+        setFeed(f => ({...f, vix: {...f.vix, error: e.message, loading:false}}));
+      });
+    } else {
+      setFeed(f => ({...f, vix: {...f.vix, loading:false}}));
+    }
+  }, []);
+
+  useEffect(() => { refresh(); /* run once on mount */ }, []);
+
+  return { feed, keys, setKeys, refresh };
+}
+
+function SourceDot({ status, requiresKey, keyLabel }){
+  let label = "샘플", color = "var(--text-3)", bg = "transparent";
+  if (status?.loading)         { label = "로딩"; color = "var(--accent-amber)"; }
+  else if (status?.error)      { label = "실패"; color = "var(--down)"; }
+  else if (status?.source && status.source !== "sample") { label = "실시간"; color = "var(--up)"; }
+  else if (requiresKey)        { label = `${keyLabel} 키 필요`; color = "var(--text-3)"; }
+  return (
+    <span title={status?.error || (status?.asOf ? "기준 "+status.asOf : "")}
+      style={{display:"inline-flex", alignItems:"center", gap:5, fontSize:9.5, color, letterSpacing:"0.06em"}}
+      className="mono">
+      <span style={{width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 6px ${color}`}}/>
+      {label}
+    </span>
+  );
+}
+
+function Header({ activeNav, onNav, period, onOpenSettings, feed, onRefresh }){
   return (
     <header style={{
       display:"flex", alignItems:"center", justifyContent:"space-between",
@@ -1438,6 +1725,15 @@ function Header({ activeNav, onNav, period, onOpenSettings }){
         </nav>
       </div>
       <div style={{display:"flex", alignItems:"center", gap:14}}>
+        <div style={{display:"flex", alignItems:"center", gap:8, padding:"3px 10px", border:"1px solid var(--line-strong)", borderRadius:14}} title="데이터 소스 상태">
+          <span style={{fontSize:9, color:"var(--text-3)", letterSpacing:"0.12em"}} className="mono">DATA</span>
+          <SourceDot status={feed?.currency} />
+          <span style={{color:"var(--text-3)"}}>·</span>
+          <SourceDot status={feed?.m2} requiresKey={feed?.m2?.source==="sample" && !feed?.m2?.error} keyLabel="FRED" />
+          <button onClick={onRefresh} title="실시간 데이터 새로고침"
+            style={{padding:"2px 6px", fontSize:11, color:"var(--text-1)", borderRadius:4}}>↻</button>
+        </div>
+        <div style={{height:18, width:1, background:"var(--line)"}}/>
         <span className="mono" style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.12em"}}>VIEW · {period}</span>
         <div style={{height:18, width:1, background:"var(--line)"}}/>
         <LiveTick/>
@@ -1464,19 +1760,27 @@ function Header({ activeNav, onNav, period, onOpenSettings }){
   );
 }
 
-function KpiStrip({ periodFactor, period, onJump }){
+function KpiStrip({ periodFactor, period, onJump, feed }){
   return (
     <div style={{
       display:"flex", borderBottom:"1px solid var(--line)",
       background:"rgba(10,15,28,0.4)", backdropFilter:"blur(8px)",
     }}>
       {KPIS.map((k,i) => {
-        // Scale dollar/percent values; keep DXY/VIX as-is (level metrics)
-        let val = k.val;
-        if (k.unit==="$B") val = k.val * periodFactor;
-        else if (k.unit==="%") val = k.val * (period==="1D"?0.05:period==="1W"?0.3:period==="1M"?1:period==="3M"?1.4:period==="1Y"?1.8:2.2);
+        // Scale dollar/percent values; keep DXY/VIX as-is (level metrics) and override with live data when available
+        let val = k.val, chg = k.chg, up = k.up;
+        if (k.en === "DXY" && feed?.dxy && feed.dxy.source !== "sample" && !feed.dxy.error){
+          val = feed.dxy.value;
+          chg = (feed.dxy.chg>=0?"+":"") + feed.dxy.chg.toFixed(2) + "%";
+          up = feed.dxy.chg >= 0;
+        } else if (k.en === "VIX" && feed?.vix && feed.vix.source !== "sample" && !feed.vix.error){
+          val = feed.vix.value;
+          chg = (feed.vix.chg>=0?"+":"") + feed.vix.chg.toFixed(2) + "%";
+          up = feed.vix.chg >= 0;
+        } else if (k.unit==="$B") val = k.val * periodFactor;
+        else if (k.unit==="%")    val = k.val * (period==="1D"?0.05:period==="1W"?0.3:period==="1M"?1:period==="3M"?1.4:period==="1Y"?1.8:2.2);
         return (
-          <KPI key={i} {...k} val={val}
+          <KPI key={i} {...k} val={val} chg={chg} up={up}
             accent={`var(--accent-${k.accent})`}
             onClick={()=>k.anchor && onJump(k.anchor)}/>
         );
@@ -1658,7 +1962,98 @@ function Hero({ view, scrub, filter, setFilter, periodFactor }){
   );
 }
 
-function SettingsDrawer({ open, onClose, period, setPeriod, heroView, setHeroView, filter, setFilter, scrub, setScrub, density, setDensity }){
+function ApiKeysSection({ keys, setKeys, feed, refresh }){
+  const [draft, setDraft] = useState(keys);
+  useEffect(()=>{ setDraft(keys); }, [keys]);
+  const apply = () => { setKeys(draft); setTimeout(refresh, 80); };
+  const inputStyle = {
+    width:"100%", padding:"6px 10px", fontSize:11,
+    background:"rgba(120,150,210,0.06)", color:"var(--text-0)",
+    border:"1px solid var(--line-strong)", borderRadius:6, fontFamily:"inherit",
+  };
+  const linkStyle = {color:"var(--accent-cyan)", textDecoration:"underline"};
+  return (
+    <>
+      <div style={{padding:"14px 18px", borderBottom:"1px solid var(--line)"}}>
+        <div style={{
+          fontSize:10, fontWeight:600, letterSpacing:"0.14em",
+          color:"var(--text-2)", textTransform:"uppercase", marginBottom:8,
+        }}>API 키</div>
+        <div style={{fontSize:10, color:"var(--text-3)", marginBottom:12, lineHeight:1.55}}>
+          키를 넣으면 해당 데이터가 실시간으로 갱신됩니다. 빈 값이면 큐레이션 샘플 데이터로 표시됩니다.<br/>
+          <b style={{color:"var(--text-2)"}}>키는 이 브라우저의 localStorage 에만 저장</b>되며, 외부로 전송되지 않고 직접 해당 API 로만 호출됩니다.
+        </div>
+
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex", justifyContent:"space-between", fontSize:11, color:"var(--text-1)", marginBottom:5}}>
+            <span>FRED · M2 통화량</span>
+            <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank" rel="noopener" style={linkStyle}>키 발급 ↗</a>
+          </div>
+          <input type="password" value={draft.fred||""} onChange={e=>setDraft({...draft, fred: e.target.value})}
+            placeholder="FRED API key" style={inputStyle}/>
+        </div>
+
+        <div style={{marginBottom:10}}>
+          <div style={{display:"flex", justifyContent:"space-between", fontSize:11, color:"var(--text-1)", marginBottom:5}}>
+            <span>Alpha Vantage · VIX 변동성</span>
+            <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener" style={linkStyle}>키 발급 ↗</a>
+          </div>
+          <input type="password" value={draft.alpha||""} onChange={e=>setDraft({...draft, alpha: e.target.value})}
+            placeholder="Alpha Vantage API key" style={inputStyle}/>
+        </div>
+
+        <div style={{display:"flex", gap:6, marginTop:8}}>
+          <button onClick={apply} style={{
+            flex:1, padding:"7px 10px", fontSize:11, fontWeight:600,
+            color:"var(--bg-0)", background:"var(--accent-cyan)",
+            border:"1px solid var(--accent-cyan)",
+            borderRadius:6, cursor:"pointer",
+          }}>저장 후 새로고침</button>
+          <button onClick={refresh} title="키는 그대로 두고 데이터만 다시 받기" style={{
+            padding:"7px 12px", fontSize:11,
+            color:"var(--text-1)", border:"1px solid var(--line-strong)",
+            borderRadius:6, cursor:"pointer",
+          }}>↻</button>
+        </div>
+
+        <div style={{marginTop:12, padding:"10px 12px", background:"rgba(120,150,210,0.04)", borderRadius:6, border:"1px solid var(--line)"}}>
+          <div style={{fontSize:10, color:"var(--text-2)", marginBottom:6, fontWeight:600, letterSpacing:"0.06em"}}>현재 데이터 소스</div>
+          <SrcLine label="통화 (Frankfurter, 키 불필요)"  status={feed.currency} />
+          <SrcLine label="DXY 달러지수 (Frankfurter 계산)" status={feed.dxy} />
+          <SrcLine label="M2 통화량 (FRED)"               status={feed.m2}  needs={!keys.fred}  needsLabel="FRED" />
+          <SrcLine label="VIX 변동성 (Alpha Vantage)"     status={feed.vix} needs={!keys.alpha} needsLabel="Alpha Vantage" />
+          <div style={{marginTop:8, paddingTop:8, borderTop:"1px dashed var(--line)", fontSize:9.5, color:"var(--text-3)", lineHeight:1.5}}>
+            자금흐름 / 자산회전 / 리더보드 / ETF / Sankey / Chord / Bubble 은
+            무료 실시간 소스가 없어 큐레이션 샘플 데이터로 표시됩니다.
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SrcLine({ label, status, needs, needsLabel }){
+  let badge = "샘플", color = "var(--text-3)", note = "";
+  if (status?.loading)        { badge = "로딩…"; color = "var(--accent-amber)"; }
+  else if (status?.error)     { badge = "실패"; color = "var(--down)"; note = status.error; }
+  else if (status?.source && status.source !== "sample") {
+    badge = "실시간"; color = "var(--up)";
+    if (status.asOf) note = String(status.asOf).slice(0,10);
+  }
+  else if (needs)             { badge = `${needsLabel} 키 입력 필요`; }
+  return (
+    <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"3px 0", fontSize:10}}>
+      <span style={{color:"var(--text-1)"}}>{label}</span>
+      <span className="mono" title={note}
+        style={{color, fontWeight:600, display:"inline-flex", alignItems:"center", gap:5}}>
+        <span style={{width:5, height:5, borderRadius:3, background:color}}/>
+        {badge}
+      </span>
+    </div>
+  );
+}
+
+function SettingsDrawer({ open, onClose, period, setPeriod, heroView, setHeroView, filter, setFilter, scrub, setScrub, density, setDensity, keys, setKeys, feed, refresh }){
   const Section = ({title, children}) => (
     <div style={{padding:"14px 18px", borderBottom:"1px solid var(--line)"}}>
       <div style={{
@@ -1692,6 +2087,7 @@ function SettingsDrawer({ open, onClose, period, setPeriod, heroView, setHeroVie
           }}>✕</button>
         </div>
         <div style={{flex:1, overflowY:"auto"}}>
+          <ApiKeysSection keys={keys} setKeys={setKeys} feed={feed} refresh={refresh}/>
           <Section title="Hero 시각화">
             <Group label="시각화 모드">
               <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:6}}>
@@ -1775,6 +2171,7 @@ function App(){
   const [activeNav, setActiveNav] = useState("top");
   const [density, setDensity] = useState("regular");
 
+  const { feed, keys, setKeys, refresh } = useDataFeed();
   const periodFactor = PERIOD_FACTOR[period] || 1;
 
   const onNav = (id) => {
@@ -1813,8 +2210,9 @@ function App(){
   return (
     <div style={{minHeight:"100vh"}}>
       <Header activeNav={activeNav} onNav={onNav} period={period}
-        onOpenSettings={()=>setSettingsOpen(true)}/>
-      <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav}/>
+        onOpenSettings={()=>setSettingsOpen(true)}
+        feed={feed} onRefresh={refresh}/>
+      <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav} feed={feed}/>
       <TimeControls period={period} setPeriod={setPeriod} scrub={scrub} setScrub={setScrub}/>
 
       <div id="flow-tracking" style={{
@@ -1836,13 +2234,13 @@ function App(){
           <div style={{height:heroH, minHeight:heroH}}>
             <Hero view={heroView} scrub={scrub} filter={filter} setFilter={setFilter} periodFactor={periodFactor}/>
           </div>
-          <div id="currency-m2"><PanelM2/></div>
+          <div id="currency-m2"><PanelM2 feedStatus={feed.m2}/></div>
         </div>
 
         <div style={{display:"flex", flexDirection:"column", gap, minWidth:0}}>
           <PanelAssetRotation periodFactor={periodFactor}/>
           <div id="reports"><PanelLeaderboard periodFactor={periodFactor}/></div>
-          <PanelCurrency/>
+          <PanelCurrency feedStatus={feed.currency}/>
           <PanelETF periodFactor={periodFactor}/>
         </div>
       </div>
@@ -1865,6 +2263,7 @@ function App(){
         filter={filter} setFilter={setFilter}
         scrub={scrub} setScrub={setScrub}
         density={density} setDensity={setDensity}
+        keys={keys} setKeys={setKeys} feed={feed} refresh={refresh}
       />
     </div>
   );
