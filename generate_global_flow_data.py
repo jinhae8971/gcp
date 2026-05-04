@@ -78,6 +78,31 @@ SCHEMA = """{
     }
     // 8-15 entries based on the most recent IIF Capital Flows Tracker / BIS quarterly / IMF prints
   ],
+  "assetRotation": [
+    {
+      "id":    "<one of: equities|bonds|gold|commodities|cash>",
+      "kr":    "<Korean label: 주식|채권|금|원자재|현금성자산>",
+      "en":    "<English: Equities|Bonds|Gold|Commodities|Cash & MM>",
+      "flow":  <signed $B, last 30 days NET into this asset class — sum across all relevant ETF categories>,
+      "prev":  <signed $B, prior 30-day window for comparison>,
+      "share": <% of total absolute flow across all 5 classes, integer 0-100>,
+      "color": "<one of: cyan|purple|amber|lime|mag — per dashboard convention: equities=cyan, bonds=purple, gold=amber, commodities=lime, cash=mag>",
+      "source":"<short source + URL>"
+    }
+    // EXACTLY 5 entries — one per asset class. Aggregate from etfFlows + ICI weekly fund flows.
+  ],
+  "bubble": [
+    {
+      "id":    "<short stable id, e.g. us_eq, in_eq, jp_eq, gold, copper>",
+      "kr":    "<Korean label, e.g. 미국주식, 인도주식>",
+      "ret":   <YTD return %, signed>,
+      "flow":  <30-day net flow $B, signed>,
+      "aum":   <AUM in $B>,
+      "color": "<cyan|purple|amber|lime|mag — same convention as assetRotation>",
+      "source":"<short source + URL — Yahoo Finance / ETF.com>"
+    }
+    // 10-13 representative ETFs spanning: US/EU/JP/CN/IN/SEA/KR equities, US/EM bonds, gold, oil, copper, money market
+  ],
   "narratives": {
     "hero":          "<one-line Korean macro narrative, ≤100 chars>",
     "assetRotation": "<one-line Korean for asset-rotation panel, ≤80 chars, end with ↗ ↘ or →>",
@@ -122,9 +147,11 @@ USER_PROMPT_TEMPLATE = """Today is {today_iso} UTC. Build the global_flow_data.j
 Workflow:
 1. web_search this week's ETF flow leaderboard (ETF.com / ICI / Reuters).
 2. web_search the last 30 days of cross-border capital flow figures (IIF Capital Flows Tracker / BIS / IMF).
-3. Cross-reference at least 2 sources for headline leaderboard items.
-4. Compose Korean narratives that reflect the figures you found.
-5. Assemble the JSON. Mentally validate it parses before returning.
+3. web_search YTD returns + 30D net flows + AUM for ~12 representative ETFs spanning US/EU/JP/CN/IN/SEA/KR equities, US/EM bonds, gold, oil, copper, money market (Yahoo Finance, ETF.com).
+4. Aggregate the etfFlows you collected by asset class to derive the 5-row assetRotation table. Use sign convention: positive = net into that class.
+5. Cross-reference at least 2 sources for headline leaderboard items.
+6. Compose Korean narratives that reflect the figures you found.
+7. Assemble the JSON. Mentally validate it parses before returning.
 
 Return ONLY the JSON object."""
 
@@ -253,9 +280,9 @@ def main() -> int:
             return 10
 
     # geoFlows is optional but if present must be well-formed
-    geo_flows = data.get("geoFlows") or []
     valid_assets = {"equities", "bonds", "gold", "commodities", "cash"}
     valid_nodes = {"US","EU","CN","JP","IN","KR","SEA","ME","CH","UK","CA","AU","BR"}
+    geo_flows = data.get("geoFlows") or []
     if isinstance(geo_flows, list):
         cleaned = []
         for row in geo_flows:
@@ -267,6 +294,41 @@ def main() -> int:
             else:
                 print(f"WARN: dropping invalid geoFlow: {row}", file=sys.stderr)
         data["geoFlows"] = cleaned
+
+    # assetRotation: drop malformed rows; warn if fewer than 4 of the 5 classes
+    valid_class_ids = {"equities", "bonds", "gold", "commodities", "cash"}
+    asset_rotation = data.get("assetRotation") or []
+    if isinstance(asset_rotation, list):
+        cleaned = []
+        for row in asset_rotation:
+            if (isinstance(row, dict)
+                and row.get("id") in valid_class_ids
+                and row.get("color") in valid_colors
+                and isinstance(row.get("flow"), (int, float))):
+                cleaned.append(row)
+            else:
+                print(f"WARN: dropping invalid assetRotation row: {row}", file=sys.stderr)
+        if len(cleaned) < 4:
+            print(f"WARN: assetRotation has only {len(cleaned)}/5 classes — panel will fall back to sample", file=sys.stderr)
+        data["assetRotation"] = cleaned
+
+    # bubble: drop malformed rows; warn if fewer than 6 entries
+    bubble = data.get("bubble") or []
+    if isinstance(bubble, list):
+        cleaned = []
+        for row in bubble:
+            if (isinstance(row, dict)
+                and row.get("color") in valid_colors
+                and isinstance(row.get("ret"), (int, float))
+                and isinstance(row.get("flow"), (int, float))
+                and isinstance(row.get("aum"), (int, float))
+                and row.get("kr") and row.get("id")):
+                cleaned.append(row)
+            else:
+                print(f"WARN: dropping invalid bubble row: {row}", file=sys.stderr)
+        if len(cleaned) < 6:
+            print(f"WARN: bubble has only {len(cleaned)} rows — chart will fall back to sample", file=sys.stderr)
+        data["bubble"] = cleaned
 
     # Stamp metadata for the dashboard's status badges
     data["_generatedAt"] = datetime.now(timezone.utc).isoformat()
