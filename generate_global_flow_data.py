@@ -226,13 +226,47 @@ def main() -> int:
 
     # Validate the parts the dashboard depends on
     leaderboard = data.get("leaderboard")
-    if not isinstance(leaderboard, dict) or not leaderboard.get("inflows") or not leaderboard.get("outflows"):
-        print("ERROR: leaderboard missing inflows/outflows", file=sys.stderr)
+    if not isinstance(leaderboard, dict):
+        print("ERROR: leaderboard missing", file=sys.stderr)
         return 9
+    inflows  = leaderboard.get("inflows")  or []
+    outflows = leaderboard.get("outflows") or []
+    if not isinstance(inflows, list) or not isinstance(outflows, list):
+        print("ERROR: leaderboard.inflows/outflows must be arrays", file=sys.stderr)
+        return 9
+    if len(inflows) < 3 or len(outflows) < 3:
+        print(f"ERROR: leaderboard too thin (in={len(inflows)} out={len(outflows)}; need ≥3 each)", file=sys.stderr)
+        return 9
+    for row in inflows + outflows:
+        if not isinstance(row, dict) or "value" not in row or "name" not in row:
+            print(f"ERROR: malformed leaderboard row: {row}", file=sys.stderr)
+            return 9
 
-    if not data.get("etfFlows"):
-        print("ERROR: etfFlows missing or empty", file=sys.stderr)
+    etf_flows = data.get("etfFlows") or []
+    if not isinstance(etf_flows, list) or len(etf_flows) < 3:
+        print(f"ERROR: etfFlows too thin (n={len(etf_flows) if isinstance(etf_flows, list) else 'invalid'}; need ≥3)", file=sys.stderr)
         return 10
+    valid_colors = {"cyan", "purple", "amber", "lime", "mag"}
+    for row in etf_flows:
+        if not isinstance(row, dict) or row.get("color") not in valid_colors:
+            print(f"ERROR: malformed etf row (bad color): {row}", file=sys.stderr)
+            return 10
+
+    # geoFlows is optional but if present must be well-formed
+    geo_flows = data.get("geoFlows") or []
+    valid_assets = {"equities", "bonds", "gold", "commodities", "cash"}
+    valid_nodes = {"US","EU","CN","JP","IN","KR","SEA","ME","CH","UK","CA","AU","BR"}
+    if isinstance(geo_flows, list):
+        cleaned = []
+        for row in geo_flows:
+            if (isinstance(row, dict)
+                and row.get("from") in valid_nodes
+                and row.get("to") in valid_nodes
+                and row.get("asset") in valid_assets):
+                cleaned.append(row)
+            else:
+                print(f"WARN: dropping invalid geoFlow: {row}", file=sys.stderr)
+        data["geoFlows"] = cleaned
 
     # Stamp metadata for the dashboard's status badges
     data["_generatedAt"] = datetime.now(timezone.utc).isoformat()
