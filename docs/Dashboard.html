@@ -1680,9 +1680,11 @@ function NavIcon({ name }) {
   }
 }
 
-function Sidebar({ active, onChange, data, isMac }) {
+function Sidebar({ active, onChange, data, isMac, dataSource }) {
   const marketStatus = useMarketStatus();
   const tickCountdown = useTickCountdown(30);
+  const sourceLabel = dataSource === 'live' ? 'LIVE DATA' : dataSource === 'fetching' ? 'FETCHING...' : 'SAMPLE DATA';
+  const sourceColor = dataSource === 'live' ? 'var(--pos-green)' : dataSource === 'fetching' ? 'var(--accent)' : 'var(--ink-4)';
   return (
     <aside style={{
       width: 232, flexShrink: 0,
@@ -1780,6 +1782,11 @@ function Sidebar({ active, onChange, data, isMac }) {
           <span>NEXT TICK</span>
           <span className="tnum" style={{ color: tickCountdown <= 5 ? 'var(--accent-bright)' : 'var(--ink-3)' }}>{String(tickCountdown).padStart(2, '0')}s</span>
         </div>
+        <div className="mono" style={{ fontSize: 9, marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--line-soft)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 4, height: 4, borderRadius: 999, background: sourceColor, boxShadow: `0 0 4px ${sourceColor}` }} />
+          <span style={{ color: sourceColor, fontWeight: 700, letterSpacing: '0.06em' }}>{sourceLabel}</span>
+          <span className="tnum" style={{ color: 'var(--ink-4)', marginLeft: 'auto' }} title={`데이터 기준: ${data.asOf}`}>{(data.asOf || '').slice(11, 16)}</span>
+        </div>
       </div>
     </aside>
   );
@@ -1790,10 +1797,53 @@ function Sidebar({ active, onChange, data, isMac }) {
 =================================================================== */
 function DashboardApp() {
   const [active, setActive] = useState('overview');
-  const data = window.MARKET_DATA;
+  const [data, setData] = useState(window.MARKET_DATA);
+  const [dataSource, setDataSource] = useState('inline'); // 'inline' | 'live' | 'fetching'
   const [selectedSector, setSelectedSector] = useState('semi');
   const [runTrigger, setRunTrigger] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Fetch live data from generated JSON, fall back to inline mock if unavailable
+  useEffect(() => {
+    let cancelled = false;
+    const loadLiveData = async () => {
+      setDataSource('fetching');
+      try {
+        const r = await fetch('dashboard_data.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const live = await r.json();
+        if (cancelled) return;
+        if (live._error) {
+          console.warn('[data] live JSON has error flag:', live._error, '— using inline mock');
+          setDataSource('inline');
+          return;
+        }
+        // Validate minimum shape
+        if (!live.kospi || !live.sectors || live.sectors.length === 0) {
+          console.warn('[data] live JSON incomplete — using inline mock');
+          setDataSource('inline');
+          return;
+        }
+        setData(live);
+        setDataSource('live');
+        console.log('[data] live JSON loaded · asOf', live.asOf);
+      } catch (e) {
+        console.warn('[data] fetch failed:', e.message, '— using inline mock');
+        if (!cancelled) setDataSource('inline');
+      }
+    };
+    loadLiveData();
+    // Auto-refresh every 5 minutes during market hours
+    const id = setInterval(loadLiveData, 5 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  // Safety: if active selectedSector doesn't exist in current data, pick first
+  useEffect(() => {
+    if (data.sectors && data.sectors.length > 0 && !data.sectors.find(s => s.id === selectedSector)) {
+      setSelectedSector(data.sectors[0].id);
+    }
+  }, [data, selectedSector]);
 
   // Detect Mac for ⌘ vs Ctrl key hint
   const isMac = useMemo(() => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform), []);
@@ -1839,7 +1889,7 @@ function DashboardApp() {
       display: 'flex',
       fontFamily: 'var(--font)',
     }}>
-      <Sidebar active={active} onChange={setActive} data={data} isMac={isMac} />
+      <Sidebar active={active} onChange={setActive} data={data} isMac={isMac} dataSource={dataSource} />
       <main style={{
         flex: 1,
         padding: '24px 28px 36px',
