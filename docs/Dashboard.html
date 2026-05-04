@@ -74,7 +74,9 @@ body {
   background: var(--bg);
   font-feature-settings: 'tnum' on, 'ss01' on, 'cv11' on;
   letter-spacing: -0.01em;
-  min-width: 1500px;
+}
+@media (min-width: 1500px) {
+  body { min-width: 1500px; }
 }
 
 button { font-family: inherit; cursor: pointer; }
@@ -524,10 +526,10 @@ function MarketHeader({ data, onRun, loading, runLabel = 'RUN ANALYSIS' }) {
             </div>
           </div>
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 14 }}>
-            <Sparkline data={k.intraday.map(p => p[1])} width={180} height={32} color={colorFor(k.change)} strokeWidth={1.5} />
+            <Sparkline data={(k.intraday || []).map(p => p[1])} width={180} height={32} color={colorFor(k.change)} strokeWidth={1.5} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 9, color: 'var(--ink-3)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              <span className="mono">H {k.high.toFixed(2)}</span>
-              <span className="mono">L {k.low.toFixed(2)}</span>
+              <span className="mono">H {k.high > 0 ? k.high.toFixed(2) : '—'}</span>
+              <span className="mono">L {k.low > 0 ? k.low.toFixed(2) : '—'}</span>
             </div>
           </div>
         </div>
@@ -546,10 +548,10 @@ function MarketHeader({ data, onRun, loading, runLabel = 'RUN ANALYSIS' }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-        <FlowCell label="거래대금" value={k.volume > 0 ? `₩${(k.volume / 1e12).toFixed(2)}T` : 'N/A'} sub={k.volume > 0 ? '누적' : '데이터 제한'} />
-        <FlowCell label="외국인" value={k.foreignNet ? fmtEok(k.foreignNet / 1e8) : 'N/A'} sub={k.foreignNet ? 'NET BUY' : 'KRX 필요'} pct={k.foreignNet ? (k.foreignNet > 0 ? +1 : -1) : null} />
-        <FlowCell label="기관" value={k.instNet ? fmtEok(k.instNet / 1e8) : 'N/A'} sub={k.instNet ? 'NET BUY' : 'KRX 필요'} pct={k.instNet ? (k.instNet > 0 ? +1 : -1) : null} />
-        <FlowCell label="개인" value={k.indivNet ? fmtEok(k.indivNet / 1e8) : 'N/A'} sub={k.indivNet ? 'NET BUY' : 'KRX 필요'} pct={k.indivNet ? (k.indivNet > 0 ? +1 : -1) : null} />
+        <FlowCell label="거래대금" value={k.volume > 0 ? `${(k.volume / 1e12).toFixed(2)}조원` : '—'} sub={k.volume > 0 ? '누적' : '데이터 제한'} />
+        <FlowCell label="외국인" value={k.foreignNet ? fmtEok(k.foreignNet / 1e8) : '—'} sub={k.foreignNet ? '순매수' : 'KRX 필요'} pct={k.foreignNet ? (k.foreignNet > 0 ? +1 : -1) : null} />
+        <FlowCell label="기관" value={k.instNet ? fmtEok(k.instNet / 1e8) : '—'} sub={k.instNet ? '순매수' : 'KRX 필요'} pct={k.instNet ? (k.instNet > 0 ? +1 : -1) : null} />
+        <FlowCell label="개인" value={k.indivNet ? fmtEok(k.indivNet / 1e8) : '—'} sub={k.indivNet ? '순매수' : 'KRX 필요'} pct={k.indivNet ? (k.indivNet > 0 ? +1 : -1) : null} />
       </div>
     </div>
   );
@@ -596,16 +598,18 @@ function SectorHeatmap({ sectors, onSelect, selectedId }) {
   sectors = sectors || [];
   const total = Math.max(1, sectors.reduce((s, x) => s + (x.weight || 0), 0));
   // 비중 데이터가 부족하면(naver 폴백) 균등 분포로 폴백
-  const useEqual = sectors.every(s => !s.weight) || total <= 1;
+  // OR: 한 섹터가 50% 이상 점유하면 시각적으로 너무 치우쳐서 균등 분포 적용
+  const maxWeight = Math.max(0, ...sectors.map(s => s.weight || 0));
+  const useEqual = sectors.every(s => !s.weight) || total <= 1 || maxWeight > 35;
   return (
     <div className="dash-card">
-      <CardHead title="Sector Heatmap · 주도섹터" subtitle={useEqual ? '균등 분포 (시총 데이터 제한)' : '시총 비중 × 등락률'} right={<LegendInline />} live />
+      <CardHead title="Sector Heatmap · 주도섹터" subtitle={useEqual ? '균등 분포 (시각화 모드)' : '시총 비중 × 등락률'} right={<LegendInline />} live />
       <div style={{ padding: '0 14px 14px 14px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '74px', gap: 4 }}>
           {sectors.map((s) => {
             const w = s.weight || 0;
             const span = useEqual ? Math.max(2, Math.floor(12 / sectors.length)) : Math.max(2, Math.round((w / total) * 12));
-            const rowSpan = w > 12 ? 2 : 1;
+            const rowSpan = (!useEqual && w > 12) ? 2 : 1;
             const intensity = Math.min(1, Math.abs(s.changePct) / 4);
             const isUp = s.changePct >= 0;
             const baseUp = [255, 93, 108];
@@ -737,11 +741,16 @@ function SupplyDemand({ data }) {
   const list = lists[tab];
   const isVolume = tab === 'volume';
   const max = Math.max(1, ...list.map(x => Math.abs(x.net || x.amount || 0)));
+  // proxy 데이터 여부 (외인 NET이 추정값인지)
+  const hasProxy = !isVolume && list.some(r => r._proxy);
 
   return (
     <div className="dash-card" style={{ height: '100%' }}>
       <CardHead
-        title="Order Flow · 실시간 수급" live
+        title={<span style={{display:'flex', alignItems:'center', gap:8}}>
+          Order Flow · 실시간 수급
+          {hasProxy && <span className="mono" style={{fontSize:9, fontWeight:700, color:'var(--accent-bright)', border:'1px solid var(--accent-soft)', padding:'1px 5px', borderRadius:2, letterSpacing:'0.06em'}}>추정</span>}
+        </span>} live
         right={
           <div style={{ display: 'flex', gap: 0, border: '1px solid var(--line)', borderRadius: 5, overflow: 'hidden' }}>
             {tabs.map((t, i) => (
@@ -1350,6 +1359,7 @@ function InvestorCard({ label, net, streak, highlight }) {
 function RankList({ title, rows, field, positive }) {
   rows = rows || [];
   const max = Math.max(1, ...rows.map(r => Math.abs(r[field] || 0)));
+  const hasProxy = rows.some(r => r._proxy);
   if (rows.length === 0) {
     return (
       <div className="dash-card">
@@ -1360,7 +1370,10 @@ function RankList({ title, rows, field, positive }) {
   }
   return (
     <div className="dash-card">
-      <CardHead title={title} />
+      <CardHead title={<span style={{display:'flex', alignItems:'center', gap:8}}>
+        {title}
+        {hasProxy && <span className="mono" style={{fontSize:9, fontWeight:700, color:'var(--accent-bright)', border:'1px solid var(--accent-soft)', padding:'1px 5px', borderRadius:2, letterSpacing:'0.06em'}}>추정</span>}
+      </span>} />
       <div style={{ padding: '0 0 4px' }}>
         {rows.map((r, i) => {
           const w = (Math.abs(r[field]) / max) * 100;
@@ -1421,17 +1434,26 @@ function OverviewPage({ ctx }) {
 
 function SectorsPage({ ctx }) {
   const { data, sector, selectedSector, setSelectedSector, goHome } = ctx;
-  const sorted = [...(data.sectors || [])].sort((a, b) => b.changePct - a.changePct);
-  const upCount = (data.sectors || []).filter(s => s.changePct > 0).length;
-  const downCount = (data.sectors || []).length - upCount;
-  const breadthPct = data.sectors?.length ? (upCount / data.sectors.length) * 100 : 0;
-  const hasFlowData = (data.sectors || []).some(s => s.foreignNet || s.instNet);
+  const sectorsList = data.sectors || [];
+  if (sectorsList.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <PageHead title="주도섹터 분석" breadcrumb="대시보드 · 주도섹터" onBreadcrumbHome={goHome} />
+        <div className="dash-card" style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 12 }}>섹터 데이터가 아직 수집되지 않았습니다.</div>
+      </div>
+    );
+  }
+  const sorted = [...sectorsList].sort((a, b) => b.changePct - a.changePct);
+  const upCount = sectorsList.filter(s => s.changePct > 0).length;
+  const downCount = sectorsList.length - upCount;
+  const breadthPct = (upCount / sectorsList.length) * 100;
+  const hasFlowData = sectorsList.some(s => s.foreignNet || s.instNet);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <PageHead title="주도섹터 분석" subtitle="시가총액 비중과 등락률, 외국인·기관 자금 흐름을 종합한 섹터 리더보드" breadcrumb="대시보드 · 주도섹터" onBreadcrumbHome={goHome} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <StatCard label="상승 섹터" value={`${upCount}/${data.sectors.length}`} sub={`시장 폭 ${breadthPct.toFixed(0)}%`} delta={+1} />
-        <StatCard label="하락 섹터" value={`${downCount}/${data.sectors.length}`} sub="조정 진행" delta={-1} />
+        <StatCard label="상승 섹터" value={`${upCount}/${sectorsList.length}`} sub={`시장 폭 ${breadthPct.toFixed(0)}%`} delta={+1} />
+        <StatCard label="하락 섹터" value={`${downCount}/${sectorsList.length}`} sub="조정 진행" delta={-1} />
         <StatCard label="최강 섹터" value={sorted[0].name} sub={fmtPct(sorted[0].changePct)} delta={sorted[0].changePct} />
         <StatCard label="최약 섹터" value={sorted[sorted.length - 1].name} sub={fmtPct(sorted[sorted.length - 1].changePct)} delta={sorted[sorted.length - 1].changePct} />
       </div>
@@ -1453,7 +1475,7 @@ function SectorsPage({ ctx }) {
               </thead>
               <tbody>
                 {sorted.map((s, i) => {
-                  const total = s.foreignNet + s.instNet;
+                  const total = (s.foreignNet ?? 0) + (s.instNet ?? 0);
                   const isSel = selectedSector === s.id;
                   return (
                     <tr key={s.id}
@@ -1494,13 +1516,17 @@ function SectorsPage({ ctx }) {
 
 function SupplyPage({ ctx }) {
   const { data, goHome } = ctx;
+  const k = data.kospi || {};
+  const hasKrxFlow = k.foreignNet || k.instNet || k.indivNet;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <PageHead title="수급 분석" subtitle="투자주체별 매매 동향과 종목별 자금 흐름" breadcrumb="대시보드 · 수급" onBreadcrumbHome={goHome} />
+      <PageHead title="수급 분석"
+        subtitle={hasKrxFlow ? "투자주체별 매매 동향과 종목별 자금 흐름" : "투자주체 합계는 KRX 자격증명 시 표시 · 종목 랭킹은 거래대금 기반 추정"}
+        breadcrumb="대시보드 · 수급" onBreadcrumbHome={goHome} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-        <InvestorCard label="외국인" net={data.kospi.foreignNet/1e8} streak="8거래일 연속 순매수" highlight />
-        <InvestorCard label="기관" net={data.kospi.instNet/1e8} streak="3일 연속 순매수" />
-        <InvestorCard label="개인" net={data.kospi.indivNet/1e8} streak="외국인 매물 받아냄" />
+        <InvestorCard label="외국인" net={k.foreignNet ? k.foreignNet/1e8 : null} streak="KOSPI 합계" highlight />
+        <InvestorCard label="기관" net={k.instNet ? k.instNet/1e8 : null} streak="KOSPI 합계" />
+        <InvestorCard label="개인" net={k.indivNet ? k.indivNet/1e8 : null} streak="KOSPI 합계" />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <RankList title="외국인 순매수 TOP 10" rows={data.foreignBuy} field="net" positive />
@@ -1513,17 +1539,26 @@ function SupplyPage({ ctx }) {
 
 function ThemesPage({ ctx }) {
   const { data, goHome } = ctx;
+  const themes = data.themes || [];
+  if (themes.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <PageHead title="테마주 · 특징주" breadcrumb="대시보드 · 테마" onBreadcrumbHome={goHome} />
+        <div className="dash-card" style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 12 }}>테마 데이터가 아직 수집되지 않았습니다.</div>
+      </div>
+    );
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <PageHead title="테마주 · 특징주" subtitle="실시간 검색·거래 열기 지수와 시장의 주목 종목" breadcrumb="대시보드 · 테마" onBreadcrumbHome={goHome} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-        <ThemeTrends themes={data.themes} />
+        <ThemeTrends themes={themes} />
         <SpecialStocks data={data} />
       </div>
       <div className="dash-card">
         <CardHead title="테마별 구성 종목" subtitle="히트맵 강도순" />
         <div style={{ padding: '0 20px 18px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-          {data.themes.map(t => (
+          {themes.map(t => (
             <div key={t.name} style={{
               border: '1px solid var(--line)', borderRadius: 6,
               padding: '12px 14px', background: 'var(--surface-2)',
@@ -1869,7 +1904,7 @@ function installClaudeShim(apiKey) {
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
+          model: 'claude-sonnet-4-5',
           max_tokens: 1024,
           messages: [{ role: 'user', content: prompt }],
         }),
@@ -1889,13 +1924,21 @@ function SettingsModal({ open, onClose }) {
   const [refreshMin, setRefreshMin] = useState(loadSetting(SETTINGS_KEYS.REFRESH_INTERVAL, '5'));
   const [showKey, setShowKey] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [validationError, setValidationError] = useState('');
 
   if (!open) return null;
 
   const handleSave = () => {
-    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, anthropicKey.trim());
+    const k = anthropicKey.trim();
+    // Anthropic 키 형식 검증 (있는 경우)
+    if (k && !k.startsWith('sk-ant-')) {
+      setValidationError('Anthropic API 키는 "sk-ant-" 로 시작해야 합니다.');
+      return;
+    }
+    setValidationError('');
+    saveSetting(SETTINGS_KEYS.ANTHROPIC_KEY, k);
     saveSetting(SETTINGS_KEYS.REFRESH_INTERVAL, refreshMin);
-    installClaudeShim(anthropicKey.trim());
+    installClaudeShim(k);
     setSaved(true);
     setTimeout(() => { setSaved(false); onClose(); }, 800);
   };
@@ -1955,6 +1998,11 @@ function SettingsModal({ open, onClose }) {
                 {showKey ? 'HIDE' : 'SHOW'}
               </button>
             </div>
+            {validationError && (
+              <div className="mono" style={{ fontSize: 10, color: 'var(--down)', marginTop: 6, fontWeight: 700 }}>
+                ⚠ {validationError}
+              </div>
+            )}
             <div className="mono" style={{ fontSize: 9, color: 'var(--ink-4)', marginTop: 6, lineHeight: 1.5 }}>
               ⚠ 키는 브라우저 localStorage에만 저장됩니다 (서버로 전송 안 함). Claude API는 직접 호출됩니다.
             </div>

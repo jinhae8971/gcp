@@ -1,1 +1,8 @@
 __pycache__/
+*.pyc
+
+# Local environment (Docker)
+.env
+
+# OS
+.DS_Store
