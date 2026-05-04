@@ -1,0 +1,52 @@
+# KOSPI Intel Dashboard — 로컬 Docker 환경
+#
+# 사용법:
+#   docker compose up -d         # 백그라운드 시작 (data 5분마다 갱신, web 8080 포트)
+#   docker compose logs -f data  # 데이터 생성 로그 보기
+#   docker compose down          # 중단
+#   docker compose restart data  # 데이터만 즉시 재생성
+#
+# 접속: http://localhost:8080/Dashboard.html
+#
+# (선택) KRX 자격증명 / Anthropic 키 설정:
+#   .env.example을 .env로 복사 후 값 입력 → docker compose up -d로 재시작
+services:
+
+  # 데이터 생성 — 5분마다 generate_dashboard_data.py 실행 → docs/dashboard_data.json 갱신
+  data:
+    build: .
+    container_name: kospi-intel-data
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ: Asia/Seoul
+      # PYTHONUNBUFFERED=1로 print 즉시 출력 (logs -f 시 실시간)
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./docs:/app/docs
+    command:
+      - sh
+      - -c
+      - |
+        echo "[$$(date '+%H:%M:%S')] kospi-intel-data 시작 — 5분 주기 갱신"
+        while true; do
+          echo "[$$(date '+%H:%M:%S')] 데이터 생성 시작..."
+          python generate_dashboard_data.py || echo "[$$(date '+%H:%M:%S')] 생성 실패 (다음 주기 재시도)"
+          echo "[$$(date '+%H:%M:%S')] 5분 대기..."
+          sleep 300
+        done
+
+  # 정적 파일 서버 — docs/ 폴더를 nginx로 서빙
+  web:
+    image: nginx:alpine
+    container_name: kospi-intel-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+      - ./.docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - data

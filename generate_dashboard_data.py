@@ -26,11 +26,11 @@ ASOF = NOW.strftime("%Y-%m-%d %H:%M:%S")
 DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 OUT_PATH = os.path.join(DOCS_DIR, "dashboard_data.json")
 
-# 큐레이션된 11개 섹터 (한국 증시의 주요 테마 그룹)
+# 큐레이션된 12개 섹터 (한국 증시의 주요 테마 그룹)
 # 각 섹터의 대표 종목 코드를 직접 매핑 — 시총 큰 종목 위주로 확장
 SECTOR_DEFS = [
     {"id": "semi",      "name": "반도체",         "theme": "주도",
-     "tickers": ["005930", "000660", "042700", "039030", "240810", "058470", "095340"]},
+     "tickers": ["005930", "000660", "042700", "039030", "240810", "058470", "095340", "009150"]},  # +삼성전기
     {"id": "bio",       "name": "바이오/제약",    "theme": "회복",
      "tickers": ["207940", "068270", "000100", "069620", "326030", "196170", "302440", "001060"]},
     {"id": "battery",   "name": "2차전지",        "theme": "조정",
@@ -44,11 +44,13 @@ SECTOR_DEFS = [
     {"id": "shipbuild", "name": "조선",           "theme": "주도",
      "tickers": ["329180", "010140", "042660", "010620", "272210"]},
     {"id": "steel",     "name": "철강/소재",      "theme": "약세",
-     "tickers": ["005490", "004020", "010130", "010120", "001230"]},
+     "tickers": ["005490", "004020", "010130", "001230", "104700"]},
     {"id": "cosmetic",  "name": "화장품/소비재",  "theme": "강세",
      "tickers": ["090430", "051900", "192820", "161890", "271560", "097950", "035250"]},
     {"id": "energy",    "name": "정유/에너지",    "theme": "조정",
-     "tickers": ["096770", "010950", "015760", "267260", "010120"]},
+     "tickers": ["096770", "010950", "015760"]},
+    {"id": "power_eq",  "name": "전력기기",       "theme": "신규",
+     "tickers": ["267260", "010120", "298040", "006340", "062040", "267290", "001440"]},  # 현대일렉/LS일렉/효성중공업/대원전선/산일전기/경동도시가스/대한전선
     {"id": "holding",   "name": "지주/기타대형",  "theme": "안정",
      "tickers": ["402340", "034730", "028260", "003550", "000880", "001040", "047040", "375500", "006360", "047810", "011200"]},
 ]
@@ -179,44 +181,67 @@ def naver_index_basic(market="KOSPI"):
 
 
 def naver_stock_basic(code):
-    """Naver: 개별 종목 기본 시세 — 여러 endpoint 시도"""
-    candidates = [
-        f"https://m.stock.naver.com/api/stock/{code}/basic",          # 단수형
-        f"https://m.stock.naver.com/api/stocks/{code}/basic",         # 복수형 (실패 가능)
-        f"https://m.stock.naver.com/api/stocks/{code}/integration",   # 통합 데이터
-    ]
-    last_err = None
-    for url in candidates:
-        try:
-            r = requests.get(url, headers=NAVER_HEADERS, timeout=6)
-            if r.status_code != 200:
-                last_err = f"HTTP {r.status_code}"
-                continue
-            d = r.json()
+    """Naver: 개별 종목 기본 시세 — basic + integration 합쳐서 marketCap 누락 방지"""
+    basic_url = f"https://m.stock.naver.com/api/stock/{code}/basic"
+    integration_url = f"https://m.stock.naver.com/api/stocks/{code}/integration"
+
+    # 1차: basic endpoint
+    basic_data = None
+    try:
+        r = requests.get(basic_url, headers=NAVER_HEADERS, timeout=6)
+        if r.status_code == 200:
+            basic_data = r.json()
             if not _NAVER_LOGGED_KEYS["stock_basic"]:
-                print(f"  [naver-debug] stock_basic({url.split('/')[-1]}) raw: {json.dumps(d, ensure_ascii=False)[:400]}")
-                _NAVER_RAW_SAMPLES["stock_basic"] = {"url": url, "data": d}
+                print(f"  [naver-debug] stock basic({code}) keys: {list(basic_data.keys())[:25]}")
                 _NAVER_LOGGED_KEYS["stock_basic"] = True
-            # integration endpoint은 stockBasic 또는 별도 객체로 감쌀 수 있음
-            stock = d.get("stockBasic") or d.get("basic") or d
-            # value 단위: accumulatedTradingValue는 백만원 → 원으로 변환
-            tv_million = _first_present(stock, ["accumulatedTradingValue", "tradingValue"])
-            mv_eok = _first_present(stock, ["marketValue", "marketCap"])
-            return {
-                "code": code,
-                "name":      stock.get("stockName") or stock.get("itemName") or stock.get("name") or code,
-                "price":     int(_first_present(stock, ["closePriceRaw", "closePrice", "lastPrice", "currentPrice"])),
-                "changePct": _first_present(stock, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
-                "change":    _first_present(stock, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
-                "volume_won": int(tv_million * 1_000_000),  # 백만원 → 원
-                "volume":    int(_first_present(stock, ["accumulatedTradingVolume", "tradingVolume"])),
-                "marketCap": int(mv_eok * 100_000_000),  # 억원 → 원
-            }
-        except Exception as e:
-            last_err = str(e)
-            continue
-    print(f"  [naver-stock-basic] {code} failed all endpoints: {last_err}")
-    return None
+    except Exception as e:
+        print(f"  [naver-stock-basic] {code} basic failed: {e}")
+
+    # marketValue 누락 시 integration endpoint도 가져와서 보강
+    needs_integration = (
+        not basic_data
+        or _first_present(basic_data, ["marketValue", "marketCap"]) == 0
+    )
+    integration_data = None
+    if needs_integration:
+        try:
+            r = requests.get(integration_url, headers=NAVER_HEADERS, timeout=6)
+            if r.status_code == 200:
+                integration_data = r.json()
+        except Exception:
+            pass
+
+    # 데이터 소스 우선순위: basic > integration > 둘 다 없으면 None
+    src = basic_data or integration_data
+    if not src:
+        return None
+
+    # integration은 totalInfos 배열을 갖는 경우가 많음 — marketValue 추출
+    mv_from_total = 0
+    if integration_data:
+        total_infos = integration_data.get("totalInfos") or []
+        for it in total_infos:
+            code_field = it.get("code", "")
+            if "marketValue" in code_field or "시가총액" in (it.get("key") or ""):
+                mv_from_total = _parse_naver_num(it.get("value"))
+                break
+
+    # stock 객체 — integration이 stockBasic으로 감싸는 경우도 처리
+    stock = src.get("stockBasic") or src.get("basic") or src
+
+    tv_million = _first_present(stock, ["accumulatedTradingValue", "tradingValue"])
+    mv_eok = _first_present(stock, ["marketValue", "marketCap"]) or mv_from_total
+
+    return {
+        "code": code,
+        "name":      stock.get("stockName") or stock.get("itemName") or stock.get("name") or code,
+        "price":     int(_first_present(stock, ["closePriceRaw", "closePrice", "lastPrice", "currentPrice"])),
+        "changePct": _first_present(stock, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
+        "change":    _first_present(stock, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
+        "volume_won": int(tv_million * 1_000_000),
+        "volume":    int(_first_present(stock, ["accumulatedTradingVolume", "tradingVolume"])),
+        "marketCap": int(mv_eok * 100_000_000),  # 억원 → 원
+    }
 
 
 def naver_index_intraday(market="KOSPI"):
