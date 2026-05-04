@@ -600,7 +600,7 @@ function SectorHeatmap({ sectors, onSelect, selectedId }) {
   // 비중 데이터가 부족하면(naver 폴백) 균등 분포로 폴백
   // OR: 한 섹터가 50% 이상 점유하면 시각적으로 너무 치우쳐서 균등 분포 적용
   const maxWeight = Math.max(0, ...sectors.map(s => s.weight || 0));
-  const useEqual = sectors.every(s => !s.weight) || total <= 1 || maxWeight > 50;
+  const useEqual = sectors.every(s => !s.weight) || total <= 1 || maxWeight > 35;
   return (
     <div className="dash-card">
       <CardHead title="Sector Heatmap · 주도섹터" subtitle={useEqual ? '균등 분포 (시각화 모드)' : '시총 비중 × 등락률'} right={<LegendInline />} live />
