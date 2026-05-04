@@ -1052,14 +1052,19 @@ window.HeroBubble = HeroBubble;
 // =====================================================================
 // Side panels — Asset Rotation, M2 Supply, Leaderboard, Currency, ETF
 // =====================================================================
-function PanelAssetRotation({ periodFactor }){
+function PanelAssetRotation({ periodFactor, ai }){
   const [highlight, setHighlight] = useState(null);
   const data = ASSET_ROTATION.map(a => ({ ...a, flowScaled: a.flow*periodFactor, prevScaled: a.prev*periodFactor }));
   const max = Math.max(...data.map(a=>Math.abs(a.flowScaled))) || 1;
   const total = data.reduce((s,a)=>s+Math.abs(a.flowScaled),0);
   return (
     <Card id="asset-rotation" title="자산 클래스 회전" subtitle="ASSET CLASS ROTATION · NET" accent="var(--accent-cyan)"
-      right={<Chip color="var(--accent-cyan)">${total.toFixed(0)}B 총거래</Chip>}>
+      right={
+        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
+          <AISourceBadge ai={ai}/>
+          <Chip color="var(--accent-cyan)">${total.toFixed(0)}B 총거래</Chip>
+        </div>
+      }>
       <div style={{display:"flex", flexDirection:"column", gap:14}}>
         {data.map(a => {
           const series = ROTATION_HISTORY[a.id];
@@ -1103,14 +1108,14 @@ function PanelAssetRotation({ periodFactor }){
         })}
       </div>
       <div style={{marginTop:16, paddingTop:12, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)", display:"flex", justifyContent:"space-between"}}>
-        <span>채권에서 위험자산으로 회전 가속화 <span style={{color:"var(--accent-amber)"}}>↗</span></span>
+        <span>{ai?.data?.narratives?.assetRotation || "채권에서 위험자산으로 회전 가속화 ↗"}</span>
         <span className="mono" style={{color:"var(--text-3)"}}>26W</span>
       </div>
     </Card>
   );
 }
 
-function PanelM2({ feedStatus }){
+function PanelM2({ feedStatus, ai }){
   const W=480, H=180, padL=44, padR=12, padT=16, padB=22;
   const innerW = W-padL-padR, innerH=H-padT-padB;
   const dataset = (feedStatus && feedStatus.data && feedStatus.source !== "sample" && !feedStatus.error)
@@ -1230,25 +1235,53 @@ function PanelM2({ feedStatus }){
         </div>
       )}
       <div style={{marginTop:8, paddingTop:8, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)", display:"flex", justifyContent:"space-between"}}>
-        <span>인도·중국 통화공급 확장세 → 유동성 신흥아시아로 이동</span>
+        <span>{ai?.data?.narratives?.m2 || "인도·중국 통화공급 확장세 → 유동성 신흥아시아로 이동"}</span>
         <span className="mono" style={{color:"var(--text-3)"}}>SOURCE · CB DATA</span>
       </div>
     </Card>
   );
 }
 
-function PanelLeaderboard({ periodFactor }){
+function AISourceBadge({ ai, kind }){
+  // kind: "live" / "missing" — controls label text
+  if (!ai) return null;
+  let label = "샘플", color = "var(--text-3)";
+  if (ai.loading)        { label = "로딩"; color = "var(--accent-amber)"; }
+  else if (ai.data && !ai.error) {
+     label = "AI · " + (ai.data._model || "claude").replace("claude-","");
+     color = "var(--accent-cyan)";
+  }
+  else if (ai.error)     { label = "샘플 (워크플로우 대기)"; color = "var(--text-3)"; }
+  const tip = ai.error || (ai.asOf ? "기준 "+String(ai.asOf).slice(0,16).replace("T"," ") : "");
+  return (
+    <span title={tip} className="mono"
+      style={{display:"inline-flex", alignItems:"center", gap:5, fontSize:9.5, color, padding:"3px 8px", border:`1px solid ${color}55`, borderRadius:6}}>
+      <span style={{width:6, height:6, borderRadius:3, background:color, boxShadow:`0 0 6px ${color}`}}/>
+      {label}
+    </span>
+  );
+}
+
+function PanelLeaderboard({ periodFactor, ai }){
   const [tab, setTab] = useState("inflows");
   const [hoverRow, setHoverRow] = useState(null);
-  const list = FLOW_LEADERBOARD[tab].map(item => ({ ...item, scaled: item.value * periodFactor }));
+  const aiRows = ai?.data?.leaderboard?.[tab];
+  const usingAI = Array.isArray(aiRows) && aiRows.length > 0;
+  // AI bundle is already a real-world 7D value — don't multiply by period factor
+  const list = usingAI
+    ? aiRows.map(item => ({ ...item, scaled: Number(item.value) || 0 }))
+    : FLOW_LEADERBOARD[tab].map(item => ({ ...item, scaled: item.value * periodFactor }));
   const max = Math.max(...list.map(x=>Math.abs(x.scaled))) || 1;
   return (
-    <Card id="leaderboard" title="자금흐름 리더보드" subtitle="TOP FLOWS"
+    <Card id="leaderboard" title="자금흐름 리더보드" subtitle={usingAI ? "TOP FLOWS · 7D · AI-CURATED" : "TOP FLOWS · SAMPLE"}
       accent={tab==="inflows"?"var(--up)":"var(--down)"}
       right={
-        <div style={{display:"flex", gap:4, padding:2, background:"rgba(120,150,210,0.08)", borderRadius:6}}>
-          <Chip onClick={()=>setTab("inflows")} active={tab==="inflows"} color="var(--up)" style={{border:"none", padding:"4px 10px"}}>유입 ▲</Chip>
-          <Chip onClick={()=>setTab("outflows")} active={tab==="outflows"} color="var(--down)" style={{border:"none", padding:"4px 10px"}}>유출 ▼</Chip>
+        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
+          <AISourceBadge ai={ai}/>
+          <div style={{display:"flex", gap:4, padding:2, background:"rgba(120,150,210,0.08)", borderRadius:6}}>
+            <Chip onClick={()=>setTab("inflows")} active={tab==="inflows"} color="var(--up)" style={{border:"none", padding:"4px 10px"}}>유입 ▲</Chip>
+            <Chip onClick={()=>setTab("outflows")} active={tab==="outflows"} color="var(--down)" style={{border:"none", padding:"4px 10px"}}>유출 ▼</Chip>
+          </div>
         </div>
       }>
       <div style={{display:"flex", flexDirection:"column", gap:10}}>
@@ -1280,11 +1313,16 @@ function PanelLeaderboard({ periodFactor }){
           </div>
         ))}
       </div>
+      {usingAI && ai.data?.narratives?.leaderboard && (
+        <div style={{marginTop:12, paddingTop:10, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)"}}>
+          {ai.data.narratives.leaderboard}
+        </div>
+      )}
     </Card>
   );
 }
 
-function PanelCurrency({ feedStatus }){
+function PanelCurrency({ feedStatus, ai }){
   const [sortKey, setSortKey] = useState("chg30");
   const [sortDir, setSortDir] = useState("desc");
   const dataset = (feedStatus && feedStatus.rows && feedStatus.source !== "sample" && !feedStatus.error)
@@ -1366,23 +1404,30 @@ function PanelCurrency({ feedStatus }){
   );
 }
 
-function PanelETF({ periodFactor }){
+function PanelETF({ periodFactor, ai }){
   const [filter, setFilter] = useState("all");
-  const filtered = ETF_FLOWS.filter(e => {
+  const aiRows = ai?.data?.etfFlows;
+  const usingAI = Array.isArray(aiRows) && aiRows.length > 0;
+  const source = usingAI ? aiRows : ETF_FLOWS;
+  const filtered = source.filter(e => {
     if (filter==="all") return true;
     if (filter==="in")  return e.value>0;
     if (filter==="out") return e.value<0;
     return e.color===filter;
-  }).map(e => ({ ...e, scaled: e.value * periodFactor }));
+  }).map(e => ({ ...e, scaled: usingAI ? (Number(e.value)||0) : e.value * periodFactor }));
   const max = Math.max(...filtered.map(e=>Math.abs(e.scaled)), 1);
 
   return (
-    <Card id="etf" title="ETF 자금흐름" subtitle="ETF FLOWS BY CATEGORY" accent="var(--accent-amber)"
+    <Card id="etf" title="ETF 자금흐름" subtitle={usingAI ? "ETF FLOWS · 7D · AI-CURATED" : "ETF FLOWS BY CATEGORY · SAMPLE"}
+      accent="var(--accent-amber)"
       right={
-        <div style={{display:"flex", gap:4}}>
-          <Chip active={filter==="all"} color="var(--text-1)" onClick={()=>setFilter("all")}>전체</Chip>
-          <Chip active={filter==="in"} color="var(--up)" onClick={()=>setFilter("in")}>유입</Chip>
-          <Chip active={filter==="out"} color="var(--down)" onClick={()=>setFilter("out")}>유출</Chip>
+        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
+          <AISourceBadge ai={ai}/>
+          <div style={{display:"flex", gap:4}}>
+            <Chip active={filter==="all"} color="var(--text-1)" onClick={()=>setFilter("all")}>전체</Chip>
+            <Chip active={filter==="in"} color="var(--up)" onClick={()=>setFilter("in")}>유입</Chip>
+            <Chip active={filter==="out"} color="var(--down)" onClick={()=>setFilter("out")}>유출</Chip>
+          </div>
         </div>
       }>
       <div style={{display:"flex", flexDirection:"column", gap:7}}>
@@ -1410,10 +1455,16 @@ function PanelETF({ periodFactor }){
           </div>
         )}
       </div>
+      {usingAI && ai.data?.narratives?.etf && (
+        <div style={{marginTop:12, paddingTop:10, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)"}}>
+          {ai.data.narratives.etf}
+        </div>
+      )}
     </Card>
   );
 }
 
+window.AISourceBadge = AISourceBadge;
 window.PanelAssetRotation = PanelAssetRotation;
 window.PanelM2 = PanelM2;
 window.PanelLeaderboard = PanelLeaderboard;
@@ -1596,6 +1647,18 @@ async function fetchVIX(alphaKey){
   };
 }
 
+// AI-curated bundle generated daily by .github/workflows/global_flow_data.yml
+// (Claude Opus 4.7 + web_search). Same-origin, served by GitHub Pages.
+async function fetchAIData(){
+  const url = "global_flow_data.json?t=" + Math.floor(Date.now() / (10*60*1000)); // 10-min cache buster
+  const r = await fetch(url, { cache: "no-cache" });
+  if (!r.ok) throw new Error("AI bundle HTTP "+r.status+" (워크플로우 첫 실행 전이거나 실패)");
+  const j = await r.json();
+  if (!j || typeof j !== "object") throw new Error("AI bundle: invalid JSON");
+  if (!j.leaderboard || !j.etfFlows) throw new Error("AI bundle: 필수 필드 누락");
+  return j;
+}
+
 function useDataFeed(){
   const [keys, setKeysState] = useState(loadKeys);
   const [feed, setFeed] = useState({
@@ -1603,6 +1666,7 @@ function useDataFeed(){
     m2:       { data: window.M2_DATA,       source:"sample", error:null, asOf:null, loading:false },
     vix:      { value: 14.82, chg:-2.4,     source:"sample", error:null, asOf:null, loading:false },
     dxy:      { value: 99.84, chg:-2.84,    source:"sample", error:null, asOf:null, loading:false },
+    ai:       { data: null,                 source:"sample", error:null, asOf:null, loading:false },
   });
 
   const setKeys = useCallback((next) => {
@@ -1616,6 +1680,7 @@ function useDataFeed(){
       m2:       {...f.m2,       loading:true},
       vix:      {...f.vix,      loading:true},
       dxy:      {...f.dxy,      loading:true},
+      ai:       {...f.ai,       loading:true},
     }));
 
     // Currency + DXY (Frankfurter, no key)
@@ -1658,6 +1723,13 @@ function useDataFeed(){
     } else {
       setFeed(f => ({...f, vix: {...f.vix, loading:false}}));
     }
+
+    // AI bundle (Claude Opus 4.7, no client key — pre-generated by GH Actions)
+    fetchAIData().then(data => {
+      setFeed(f => ({...f, ai: { data, source: data._model || "claude", error:null, asOf: data._generatedAt || data.asOf || null, loading:false }}));
+    }).catch(e => {
+      setFeed(f => ({...f, ai: {...f.ai, error: e.message, loading:false}}));
+    });
   }, []);
 
   useEffect(() => { refresh(); /* run once on mount */ }, []);
@@ -1730,6 +1802,8 @@ function Header({ activeNav, onNav, period, onOpenSettings, feed, onRefresh }){
           <SourceDot status={feed?.currency} />
           <span style={{color:"var(--text-3)"}}>·</span>
           <SourceDot status={feed?.m2} requiresKey={feed?.m2?.source==="sample" && !feed?.m2?.error} keyLabel="FRED" />
+          <span style={{color:"var(--text-3)"}}>·</span>
+          <SourceDot status={feed?.ai} requiresKey={false} keyLabel="" />
           <button onClick={onRefresh} title="실시간 데이터 새로고침"
             style={{padding:"2px 6px", fontSize:11, color:"var(--text-1)", borderRadius:4}}>↻</button>
         </div>
@@ -2022,9 +2096,12 @@ function ApiKeysSection({ keys, setKeys, feed, refresh }){
           <SrcLine label="DXY 달러지수 (Frankfurter 계산)" status={feed.dxy} />
           <SrcLine label="M2 통화량 (FRED)"               status={feed.m2}  needs={!keys.fred}  needsLabel="FRED" />
           <SrcLine label="VIX 변동성 (Alpha Vantage)"     status={feed.vix} needs={!keys.alpha} needsLabel="Alpha Vantage" />
+          <SrcLine label="ETF 흐름·리더보드 (Claude Opus 4.7)" status={feed.ai} />
           <div style={{marginTop:8, paddingTop:8, borderTop:"1px dashed var(--line)", fontSize:9.5, color:"var(--text-3)", lineHeight:1.5}}>
-            자금흐름 / 자산회전 / 리더보드 / ETF / Sankey / Chord / Bubble 은
-            무료 실시간 소스가 없어 큐레이션 샘플 데이터로 표시됩니다.
+            ETF 흐름과 리더보드는 GitHub Actions 가 매일 Claude Opus 4.7 + web_search 로
+            ETF.com / IIF / Reuters 를 검색해서 <code>docs/global_flow_data.json</code> 으로 갱신합니다.
+            Anthropic API 키는 <code>ANTHROPIC_API_KEY</code> GitHub Secret 으로 서버 측에 보관되며 브라우저로 노출되지 않습니다.
+            <br/>Sankey / Chord / Bubble / Geo 흐름은 큐레이션 샘플로 유지됩니다.
           </div>
         </div>
       </div>
@@ -2234,14 +2311,14 @@ function App(){
           <div style={{height:heroH, minHeight:heroH}}>
             <Hero view={heroView} scrub={scrub} filter={filter} setFilter={setFilter} periodFactor={periodFactor}/>
           </div>
-          <div id="currency-m2"><PanelM2 feedStatus={feed.m2}/></div>
+          <div id="currency-m2"><PanelM2 feedStatus={feed.m2} ai={feed.ai}/></div>
         </div>
 
         <div style={{display:"flex", flexDirection:"column", gap, minWidth:0}}>
-          <PanelAssetRotation periodFactor={periodFactor}/>
-          <div id="reports"><PanelLeaderboard periodFactor={periodFactor}/></div>
-          <PanelCurrency feedStatus={feed.currency}/>
-          <PanelETF periodFactor={periodFactor}/>
+          <PanelAssetRotation periodFactor={periodFactor} ai={feed.ai}/>
+          <div id="reports"><PanelLeaderboard periodFactor={periodFactor} ai={feed.ai}/></div>
+          <PanelCurrency feedStatus={feed.currency} ai={feed.ai}/>
+          <PanelETF periodFactor={periodFactor} ai={feed.ai}/>
         </div>
       </div>
 

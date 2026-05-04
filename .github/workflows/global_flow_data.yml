@@ -1,0 +1,47 @@
+name: 🌐 Global Money Flow Data Refresh
+
+on:
+  schedule:
+    # Daily 22:00 UTC = 07:00 KST (after Asia close, before US open the next day)
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    # Manual run for first-time deploy / debugging
+
+permissions:
+  contents: write
+
+concurrency:
+  group: global-flow-data
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        # Use latest anthropic — output_config.effort + web_search_20260209 require a recent SDK
+        run: pip install --upgrade anthropic
+
+      - name: 🌐 Generate global flow data via Claude Opus 4.7
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python generate_global_flow_data.py
+
+      - name: 💾 Commit & push if changed
+        run: |
+          git config user.name  "Winter Bot"
+          git config user.email "winter-bot@github-actions"
+          git add docs/global_flow_data.json
+          git diff --staged --quiet || git commit -m "🌐 Refresh global flow data $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
