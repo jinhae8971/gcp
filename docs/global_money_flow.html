@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Money MOVE — 글로벌 자금흐름 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#05080F; --bg-1:#0A0F1C; --bg-2:#0F162A; --bg-3:#141C36;
+    --line:rgba(120,150,210,0.10); --line-strong:rgba(120,150,210,0.22);
+    --text-0:#E8EEFC; --text-1:#B8C2DB; --text-2:#6B7794; --text-3:#3F4865;
+    --accent-cyan:#00E5FF; --accent-mag:#FF3DA1; --accent-lime:#B6FF3A;
+    --accent-amber:#FFB23A; --accent-purple:#8B6CFF;
+    --up:#25E08A; --down:#FF5470; --grid:rgba(120,150,210,0.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    background:var(--bg-0); color:var(--text-0);
+    font-family:'Pretendard','Space Grotesk',-apple-system,sans-serif;
+    font-size:13px; letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    scroll-behavior:smooth;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum';letter-spacing:0;}
+  .num{font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum';letter-spacing:-0.01em;}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--accent-cyan);color:var(--bg-0)}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(1200px 800px at 15% 10%, rgba(0,229,255,0.06), transparent 60%),
+      radial-gradient(1000px 700px at 85% 90%, rgba(139,108,255,0.05), transparent 60%),
+      radial-gradient(800px 500px at 50% 50%, rgba(255,61,161,0.025), transparent 70%);
+  }
+  #root{position:relative;z-index:1}
+  /* Settings drawer */
+  .settings-fab{
+    position:fixed; right:18px; bottom:18px; z-index:90;
+    width:46px; height:46px; border-radius:23px;
+    background:linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    color:var(--bg-0); font-size:20px; font-weight:700;
+    box-shadow:0 8px 24px rgba(0,229,255,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.15s;
+  }
+  .settings-fab:hover{transform:translateY(-2px) scale(1.05)}
+  .settings-drawer{
+    position:fixed; right:0; top:0; bottom:0; width:340px; z-index:95;
+    background:linear-gradient(180deg, rgba(15,22,42,0.98), rgba(10,15,28,0.98));
+    border-left:1px solid var(--line-strong);
+    backdrop-filter:blur(16px);
+    box-shadow:-12px 0 40px rgba(0,0,0,0.5);
+    transform:translateX(100%); transition:transform 0.25s ease;
+    display:flex; flex-direction:column;
+  }
+  .settings-drawer.open{transform:translateX(0)}
+  .settings-backdrop{
+    position:fixed; inset:0; z-index:94;
+    background:rgba(0,0,0,0.35); backdrop-filter:blur(2px);
+    opacity:0; pointer-events:none; transition:opacity 0.2s;
+  }
+  .settings-backdrop.open{opacity:1; pointer-events:auto}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react" id="app-data">
+// =====================================================================
+// Realistic-ish 2025 macro flow data (snapshot context)
+// =====================================================================
+// Expose React hooks across all <script type="text/babel"> blocks via window
+var { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+var GEO_NODES = {
+  US:  { kr:"미국",       en:"United States", x:22, y:42, region:"NA" },
+  CA:  { kr:"캐나다",     en:"Canada",        x:20, y:30, region:"NA" },
+  EU:  { kr:"유럽연합",   en:"European Union",x:48, y:35, region:"EU" },
+  UK:  { kr:"영국",       en:"United Kingdom",x:44, y:32, region:"EU" },
+  CH:  { kr:"스위스",     en:"Switzerland",   x:48, y:38, region:"EU" },
+  ME:  { kr:"중동",       en:"Middle East",   x:58, y:48, region:"ME" },
+  IN:  { kr:"인도",       en:"India",         x:68, y:52, region:"AS" },
+  CN:  { kr:"중국",       en:"China",         x:78, y:42, region:"AS" },
+  JP:  { kr:"일본",       en:"Japan",         x:86, y:44, region:"AS" },
+  KR:  { kr:"한국",       en:"South Korea",   x:83, y:46, region:"AS" },
+  SEA: { kr:"동남아시아", en:"SE Asia",       x:78, y:60, region:"AS" },
+  AU:  { kr:"호주",       en:"Australia",     x:84, y:78, region:"OC" },
+  BR:  { kr:"브라질",     en:"Brazil",        x:32, y:70, region:"LA" },
+};
+const GEO_FLOWS = [
+  { from:"US", to:"IN",  value:47.3, asset:"equities",    color:"cyan" },
+  { from:"US", to:"SEA", value:31.8, asset:"equities",    color:"cyan" },
+  { from:"US", to:"JP",  value:28.4, asset:"equities",    color:"cyan" },
+  { from:"US", to:"KR",  value:12.6, asset:"equities",    color:"cyan" },
+  { from:"EU", to:"IN",  value:18.2, asset:"bonds",       color:"purple" },
+  { from:"EU", to:"US",  value:22.7, asset:"equities",    color:"cyan" },
+  { from:"CN", to:"ME",  value:15.4, asset:"commodities", color:"amber" },
+  { from:"ME", to:"US",  value:38.6, asset:"bonds",       color:"purple" },
+  { from:"ME", to:"IN",  value:11.9, asset:"equities",    color:"cyan" },
+  { from:"JP", to:"US",  value:41.2, asset:"bonds",       color:"purple" },
+  { from:"CN", to:"KR",  value: 8.4, asset:"equities",    color:"cyan" },
+  { from:"US", to:"EU",  value:19.8, asset:"bonds",       color:"purple" },
+  { from:"CH", to:"US",  value:14.3, asset:"gold",        color:"amber" },
+  { from:"BR", to:"US",  value: 6.2, asset:"commodities", color:"amber" },
+  { from:"AU", to:"CN",  value: 9.7, asset:"commodities", color:"amber" },
+];
+const ASSET_ROTATION = [
+  { id:"equities",   kr:"주식",       en:"Equities",    flow:+184.2, prev:+92.1,  share:38, color:"cyan"   },
+  { id:"bonds",      kr:"채권",       en:"Bonds",       flow: -62.4, prev:+128.3, share:24, color:"purple" },
+  { id:"gold",       kr:"금",         en:"Gold",        flow: +47.8, prev:+18.2,  share:12, color:"amber"  },
+  { id:"commodities",kr:"원자재",     en:"Commodities", flow: +28.6, prev:+9.4,   share: 9, color:"lime"   },
+  { id:"cash",       kr:"현금성자산", en:"Cash & MM",   flow: -38.2, prev:+44.7,  share:17, color:"mag"    },
+];
+const ROTATION_HISTORY = {
+  equities:    [22,18,12,-4,-18,-28,-12,8,24,38,42,28,18,32,48,62,78,92,88,102,124,148,156,168,178,184],
+  bonds:       [88,92,102,118,132,128,118,102,88,72,54,38,24,12,-4,-18,-28,-38,-42,-52,-58,-62,-68,-72,-68,-62],
+  gold:        [4,6,8,12,18,14,10,8,12,18,22,28,24,18,12,18,24,32,38,42,46,44,46,48,47,47.8],
+  commodities: [-8,-4,-2,4,8,6,4,2,8,12,14,18,16,12,18,22,24,26,28,24,26,28,30,28,28,28.6],
+  cash:        [42,48,56,68,78,84,88,92,88,78,62,48,32,18,8,-4,-12,-18,-24,-28,-32,-36,-38,-40,-38,-38.2],
+};
+const M2_DATA = {
+  US:{ kr:"미국 M2", color:"cyan",   latest:4.2,  series:[7.8,7.2,6.4,5.1,3.2,1.4,-0.8,-2.4,-3.8,-4.2,-3.6,-2.4,-1.2,0.4,1.8,2.6,3.2,3.8,4.0,4.1,4.2,4.2,4.1,4.2] },
+  EU:{ kr:"유럽 M2", color:"purple", latest:2.8,  series:[6.2,5.8,5.2,4.4,3.2,2.1,1.4,0.8,0.4,0.2,0.4,0.8,1.2,1.6,1.9,2.2,2.4,2.6,2.7,2.8,2.8,2.7,2.8,2.8] },
+  CN:{ kr:"중국 M2", color:"mag",    latest:8.4,  series:[11.2,11.4,11.8,12.2,11.8,11.2,10.4,9.8,9.2,8.8,8.4,8.6,8.8,9.0,8.8,8.4,8.2,8.0,8.2,8.4,8.6,8.4,8.2,8.4] },
+  JP:{ kr:"일본 M2", color:"amber",  latest:1.8,  series:[3.2,3.0,2.8,2.6,2.2,1.8,1.4,1.2,1.0,0.8,1.0,1.2,1.4,1.6,1.7,1.8,1.9,2.0,1.9,1.8,1.7,1.8,1.8,1.8] },
+  IN:{ kr:"인도 M2", color:"lime",   latest:11.2, series:[9.4,9.8,10.2,10.6,10.8,11.0,10.8,10.4,10.2,10.4,10.8,11.2,11.4,11.6,11.4,11.2,11.0,11.2,11.4,11.2,11.0,11.2,11.2,11.2] },
+};
+const M2_LABELS = ["'24Q1","","","","","","","","","","","","'25Q1","","","","","","","","","","","'26Q2"];
+const FLOW_LEADERBOARD = {
+  inflows: [
+    { name:"인도 주식 ETF",     en:"India Equity ETF", ticker:"INDA", value: 8.42, pct:+12.4 },
+    { name:"미국 단기국채",     en:"US Short T-Bills", ticker:"BIL",  value: 6.18, pct:+8.2  },
+    { name:"금 ETF (글로벌)",   en:"Gold ETF (Global)",ticker:"GLD",  value: 5.74, pct:+18.6 },
+    { name:"베트남·인도네시아", en:"VN/ID Equity",     ticker:"VNM+", value: 3.92, pct:+22.1 },
+    { name:"우라늄·구리 광산",  en:"Uranium & Copper", ticker:"URA",  value: 2.84, pct:+14.8 },
+    { name:"일본 대형주",       en:"Japan Large-Cap",  ticker:"EWJ",  value: 2.41, pct:+4.2  },
+  ],
+  outflows: [
+    { name:"미국 장기국채",    en:"US Long Bonds",      ticker:"TLT",  value:-7.84, pct:-9.2 },
+    { name:"유럽 회사채",      en:"EU Corporate Bonds", ticker:"IEAC", value:-4.62, pct:-6.4 },
+    { name:"미국 대형 기술주", en:"US Mega-Cap Tech",   ticker:"QQQ",  value:-3.18, pct:-2.8 },
+    { name:"중국 본토 A주",    en:"China A-Shares",     ticker:"ASHR", value:-2.94, pct:-7.4 },
+    { name:"머니마켓 펀드",    en:"Money Market Funds", ticker:"MMF",  value:-2.41, pct:-1.2 },
+    { name:"독일 국채",        en:"German Bunds",       ticker:"BUND", value:-1.86, pct:-3.6 },
+  ]
+};
+const CURRENCY_DATA = [
+  { code:"DXY", kr:"달러지수", chg30:-2.84, chg5d:-0.42, level:99.84,  spark:[104,103.8,103.2,102.8,102.4,102.1,101.8,101.4,100.8,100.4,100.1,99.8,99.4,99.2,99.0,99.2,99.4,99.6,99.8,99.84] },
+  { code:"EUR", kr:"유로",     chg30:+3.12, chg5d:+0.62, level:1.0942, spark:[1.06,1.062,1.064,1.068,1.072,1.076,1.078,1.080,1.082,1.084,1.086,1.088,1.090,1.092,1.094,1.094,1.093,1.094,1.094,1.0942] },
+  { code:"JPY", kr:"엔",       chg30:+1.84, chg5d:+0.18, level:148.32, spark:[151.2,151,150.8,150.4,150,149.8,149.6,149.4,149.2,149,148.8,148.6,148.4,148.4,148.3,148.4,148.3,148.32,148.34,148.32] },
+  { code:"CNY", kr:"위안",     chg30:+0.92, chg5d:-0.08, level:7.1842, spark:[7.24,7.236,7.232,7.228,7.224,7.220,7.216,7.212,7.208,7.204,7.200,7.196,7.192,7.188,7.184,7.182,7.184,7.186,7.184,7.1842] },
+  { code:"KRW", kr:"원",       chg30:+1.42, chg5d:+0.24, level:1342.8, spark:[1362,1360,1358,1356,1354,1352,1350,1348,1346,1344,1346,1344,1343,1342,1342,1343,1342,1343,1342.8,1342.8] },
+  { code:"INR", kr:"루피",     chg30:-0.84, chg5d:-0.12, level:84.12,  spark:[83.4,83.5,83.6,83.7,83.8,83.9,83.94,83.98,84.02,84.04,84.06,84.08,84.10,84.12,84.14,84.12,84.10,84.12,84.14,84.12] },
+  { code:"GBP", kr:"파운드",   chg30:+2.42, chg5d:+0.38, level:1.2842, spark:[1.254,1.256,1.258,1.260,1.262,1.266,1.268,1.270,1.272,1.274,1.276,1.278,1.280,1.282,1.284,1.284,1.283,1.284,1.284,1.2842] },
+  { code:"AUD", kr:"호주달러", chg30:+1.08, chg5d:+0.14, level:0.6584, spark:[0.652,0.653,0.654,0.655,0.656,0.657,0.658,0.658,0.659,0.659,0.658,0.658,0.658,0.658,0.658,0.658,0.658,0.658,0.658,0.6584] },
+];
+const ETF_FLOWS = [
+  { cat:"주식 — 신흥아시아", en:"EM Asia Eq",   value:+12.84, color:"cyan",   aum: 284 },
+  { cat:"주식 — 미국 대형",  en:"US Large Cap", value: -3.18, color:"cyan",   aum:1842 },
+  { cat:"주식 — 미국 소형",  en:"US Small Cap", value: +1.42, color:"cyan",   aum: 184 },
+  { cat:"주식 — 일본",       en:"Japan Eq",     value: +2.41, color:"cyan",   aum: 142 },
+  { cat:"채권 — 단기",       en:"ST Bonds",     value: +6.18, color:"purple", aum: 412 },
+  { cat:"채권 — 장기",       en:"LT Bonds",     value: -7.84, color:"purple", aum: 384 },
+  { cat:"채권 — 회사채",     en:"Corp Bonds",   value: -4.62, color:"purple", aum: 248 },
+  { cat:"금 / 귀금속",       en:"Gold/PM",      value: +5.74, color:"amber",  aum: 168 },
+  { cat:"원자재 — 에너지",   en:"Energy Cmdty", value: +0.94, color:"lime",   aum:  84 },
+  { cat:"원자재 — 산업금속", en:"Ind. Metals",  value: +2.84, color:"lime",   aum:  62 },
+  { cat:"머니마켓",          en:"Money Market", value: -2.41, color:"mag",    aum: 624 },
+];
+const SANKEY_NODES = [
+  { id:"bonds_lt", kr:"장기채권", side:0, color:"purple" },
+  { id:"bonds_st", kr:"단기채권", side:0, color:"purple" },
+  { id:"cash",     kr:"현금성",   side:0, color:"mag"    },
+  { id:"us_tech",  kr:"미국 기술",side:0, color:"cyan"   },
+  { id:"gold",     kr:"금",       side:1, color:"amber"  },
+  { id:"em_asia",  kr:"신흥아시아",side:1,color:"cyan"   },
+  { id:"jp_eq",    kr:"일본주식", side:1, color:"cyan"   },
+  { id:"commod",   kr:"원자재",   side:1, color:"lime"   },
+  { id:"crypto",   kr:"암호화폐", side:1, color:"mag"    },
+];
+const SANKEY_LINKS = [
+  { from:"bonds_lt", to:"gold",    value:28 },
+  { from:"bonds_lt", to:"em_asia", value:22 },
+  { from:"bonds_lt", to:"jp_eq",   value:14 },
+  { from:"bonds_st", to:"em_asia", value:18 },
+  { from:"bonds_st", to:"commod",  value: 8 },
+  { from:"cash",     to:"em_asia", value:24 },
+  { from:"cash",     to:"gold",    value:12 },
+  { from:"cash",     to:"crypto",  value: 9 },
+  { from:"us_tech",  to:"em_asia", value:16 },
+  { from:"us_tech",  to:"jp_eq",   value: 8 },
+  { from:"us_tech",  to:"gold",    value: 6 },
+];
+const CHORD_CLASSES = [
+  { id:"equities", kr:"주식",   color:"cyan"   },
+  { id:"bonds",    kr:"채권",   color:"purple" },
+  { id:"gold",     kr:"금",     color:"amber"  },
+  { id:"commod",   kr:"원자재", color:"lime"   },
+  { id:"cash",     kr:"현금",   color:"mag"    },
+];
+const CHORD_MATRIX = [
+  [0,12,22,8,4],[62,0,38,18,24],[4,2,0,3,1],[2,3,4,0,2],[38,0,12,6,0]
+];
+const BUBBLE_DATA = [
+  { id:"us_eq",  kr:"미국주식",   ret:+8.4,  flow:-3.2, aum:1842, color:"cyan"   },
+  { id:"us_bond",kr:"미국채권",   ret:-2.4,  flow:-7.8, aum:1242, color:"purple" },
+  { id:"in_eq",  kr:"인도주식",   ret:+18.4, flow:+8.4, aum: 284, color:"cyan"   },
+  { id:"jp_eq",  kr:"일본주식",   ret:+12.2, flow:+2.4, aum: 412, color:"cyan"   },
+  { id:"cn_eq",  kr:"중국주식",   ret:-3.8,  flow:-2.9, aum: 684, color:"cyan"   },
+  { id:"sea_eq", kr:"동남아주식", ret:+14.6, flow:+3.9, aum: 148, color:"cyan"   },
+  { id:"kr_eq",  kr:"한국주식",   ret:+9.2,  flow:+1.4, aum: 184, color:"cyan"   },
+  { id:"gold",   kr:"금",         ret:+24.8, flow:+5.7, aum: 168, color:"amber"  },
+  { id:"oil",    kr:"원유",       ret:-4.2,  flow:+0.9, aum:  84, color:"lime"   },
+  { id:"copper", kr:"구리",       ret:+12.4, flow:+2.8, aum:  62, color:"lime"   },
+  { id:"eu_eq",  kr:"유럽주식",   ret:+6.2,  flow:+1.8, aum: 524, color:"cyan"   },
+  { id:"em_bd",  kr:"신흥채권",   ret:+4.8,  flow:+2.2, aum: 184, color:"purple" },
+  { id:"cash",   kr:"머니마켓",   ret:+5.2,  flow:-2.4, aum: 624, color:"mag"    },
+];
+const KPIS = [
+  { kr:"글로벌 자금이동",      en:"Global flow",         val:842,   unit:"$B", chg:"+18.4%", up:true,  accent:"cyan",   anchor:"flow-tracking" },
+  { kr:"채권 → 위험자산 회전", en:"Bonds → Risk",        val:246,   unit:"$B", chg:"+204%",  up:true,  accent:"amber",  anchor:"asset-rotation" },
+  { kr:"미국 → 아시아",        en:"US → Asia inflow",    val:120,   unit:"$B", chg:"+42.8%", up:true,  accent:"cyan",   anchor:"flow-tracking" },
+  { kr:"M2 글로벌 가중평균",   en:"Global M2 YoY",       val:5.6,   unit:"%",  chg:"+1.2pp", up:true,  accent:"lime",   anchor:"m2-supply",     pct:true },
+  { kr:"달러지수 DXY",         en:"DXY",                 val:99.84, unit:"",   chg:"-2.84%", up:false, accent:"mag",    anchor:"currency" },
+  { kr:"VIX 변동성",           en:"VIX",                 val:14.82, unit:"",   chg:"-2.4",   up:false, accent:"purple", anchor:"flow-tracking" },
+];
+const TIME_PERIODS = ["1D","1W","1M","3M","1Y","5Y"];
+// Period scaling factor — multiplies flow values to reflect cumulative period
+const PERIOD_FACTOR = { "1D":0.05, "1W":0.30, "1M":1.0, "3M":2.6, "1Y":8.4, "5Y":34.0 };
+const PERIOD_DAYS = { "1D":1, "1W":7, "1M":30, "3M":90, "1Y":365, "5Y":1825 };
+const ASSET_COLOR = {
+  equities:"var(--accent-cyan)", bonds:"var(--accent-purple)",
+  gold:"var(--accent-amber)", commodities:"var(--accent-lime)", cash:"var(--accent-mag)",
+  cyan:"var(--accent-cyan)", purple:"var(--accent-purple)",
+  amber:"var(--accent-amber)", lime:"var(--accent-lime)", mag:"var(--accent-mag)",
+};
+Object.assign(window, {
+  GEO_NODES, GEO_FLOWS, ASSET_ROTATION, ROTATION_HISTORY,
+  M2_DATA, M2_LABELS, FLOW_LEADERBOARD, CURRENCY_DATA, ETF_FLOWS,
+  SANKEY_NODES, SANKEY_LINKS, CHORD_CLASSES, CHORD_MATRIX, BUBBLE_DATA,
+  KPIS, TIME_PERIODS, PERIOD_FACTOR, PERIOD_DAYS, ASSET_COLOR,
+});
+</script>
+<script type="text/babel" data-presets="react" id="app-primitives">
+// =====================================================================
+// UI primitives — Card, Sparkline, Bar, KPI, Chip, LiveTick, Tooltip
+// =====================================================================
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+function Card({ title, subtitle, right, children, padding=true, style, accent, id }){
+  return (
+    <div id={id} style={{
+      background:"linear-gradient(180deg, rgba(20,28,54,0.55), rgba(15,22,42,0.55))",
+      border:"1px solid var(--line)", borderRadius:14,
+      backdropFilter:"blur(8px)", display:"flex", flexDirection:"column",
+      position:"relative", overflow:"hidden",
+      scrollMarginTop:120,
+      ...style,
+    }}>
+      {accent && (
+        <div style={{
+          position:"absolute", top:0, left:0, right:0, height:1,
+          background:`linear-gradient(90deg, transparent, ${accent}, transparent)`,
+          opacity:0.5,
+        }}/>
+      )}
+      {(title || right) && (
+        <div style={{
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          padding:"14px 18px 10px",
+          borderBottom:"1px solid var(--line)",
+        }}>
+          <div>
+            {title && <div style={{
+              fontSize:11, fontWeight:600, letterSpacing:"0.12em",
+              color:"var(--text-1)", textTransform:"uppercase",
+            }}>{title}</div>}
+            {subtitle && <div style={{fontSize:11, color:"var(--text-2)", marginTop:3}}>{subtitle}</div>}
+          </div>
+          {right}
+        </div>
+      )}
+      <div style={{padding: padding ? "14px 18px 16px" : 0, flex:1, minHeight:0}}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Sparkline({ data, color="var(--accent-cyan)", height=28, width=100, fill=true, strokeWidth=1.5 }){
+  if (!data || data.length<2) return null;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max-min || 1;
+  const pts = data.map((v,i)=>{
+    const x = (i/(data.length-1))*width;
+    const y = height - ((v-min)/range) * (height-2) - 1;
+    return [x,y];
+  });
+  const path = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const fillPath = path + ` L ${width} ${height} L 0 ${height} Z`;
+  const gid = "spark-"+Math.abs(color.split("").reduce((a,c)=>a+c.charCodeAt(0),0))+"-"+width+"-"+height;
+  return (
+    <svg width={width} height={height} style={{display:"block",overflow:"visible"}}>
+      {fill && (
+        <>
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.35"/>
+              <stop offset="100%" stopColor={color} stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d={fillPath} fill={`url(#${gid})`} />
+        </>
+      )}
+      <path d={path} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Bar({ value, max, color, height=4, bg="rgba(120,150,210,0.10)" }){
+  const pct = Math.max(0, Math.min(100, Math.abs(value)/max*100));
+  return (
+    <div style={{position:"relative", height, background:bg, borderRadius:height/2, overflow:"hidden"}}>
+      <div style={{
+        position:"absolute", left:0, top:0, bottom:0, width:`${pct}%`,
+        background:`linear-gradient(90deg, ${color}66, ${color})`,
+        boxShadow:`0 0 8px ${color}`,
+      }}/>
+    </div>
+  );
+}
+
+function DivergingBar({ value, max, posColor="var(--up)", negColor="var(--down)", height=4 }){
+  const pct = Math.max(0, Math.min(50, Math.abs(value)/max*50));
+  const isPos = value>=0;
+  return (
+    <div style={{position:"relative", height, background:"rgba(120,150,210,0.06)", borderRadius:height/2}}>
+      <div style={{position:"absolute", left:"50%", top:0, bottom:0, width:1, background:"var(--line-strong)"}}/>
+      <div style={{
+        position:"absolute", top:0, bottom:0,
+        ...(isPos ? {left:"50%", width:`${pct}%`} : {right:"50%", width:`${pct}%`}),
+        background: isPos
+          ? `linear-gradient(90deg, ${posColor}40, ${posColor})`
+          : `linear-gradient(270deg, ${negColor}40, ${negColor})`,
+        boxShadow: `0 0 8px ${isPos?posColor:negColor}`,
+        borderRadius:height/2,
+      }}/>
+    </div>
+  );
+}
+
+function formatKpiVal(val, unit, pct){
+  if (typeof val !== "number") return val;
+  const sign = val>=0 ? "" : "-";
+  const abs = Math.abs(val);
+  if (pct) return `${val>=0?"+":""}${val.toFixed(1)}%`;
+  if (unit==="$B") return `${sign}$${abs>=100?abs.toFixed(0):abs.toFixed(1)}B`;
+  if (unit==="%") return `${val>=0?"+":""}${val.toFixed(1)}%`;
+  return `${val.toFixed(2)}`;
+}
+
+function KPI({ kr, en, val, unit, pct, chg, up, accent, onClick, dim }){
+  return (
+    <button onClick={onClick} style={{
+      flex:1, padding:"14px 18px",
+      borderRight:"1px solid var(--line)",
+      position:"relative", minWidth:0,
+      textAlign:"left", cursor:onClick?"pointer":"default",
+      transition:"background 0.15s",
+      opacity: dim ? 0.45 : 1,
+      background:"transparent",
+    }} onMouseEnter={e=>{ if(onClick) e.currentTarget.style.background="rgba(0,229,255,0.04)"; }}
+       onMouseLeave={e=>{ e.currentTarget.style.background="transparent"; }}>
+      <div style={{
+        position:"absolute", left:0, top:14, bottom:14, width:2,
+        background:accent, opacity:0.7,
+      }}/>
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline", gap:8, marginBottom:6}}>
+        <div style={{fontSize:10.5, color:"var(--text-2)", letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+          {kr} <span style={{color:"var(--text-3)"}}>· {en}</span>
+        </div>
+      </div>
+      <div style={{display:"flex", alignItems:"baseline", gap:10, flexWrap:"wrap"}}>
+        <div className="num" style={{fontSize:22, fontWeight:600, color:"var(--text-0)"}}>
+          {formatKpiVal(val, unit, pct)}
+        </div>
+        <div className="num" style={{fontSize:12, color: up ? "var(--up)" : "var(--down)", fontWeight:500}}>
+          {up ? "▲" : "▼"} {chg}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function Chip({ children, color="var(--text-2)", active=false, onClick, style }){
+  return (
+    <button onClick={onClick} style={{
+      padding:"5px 10px", fontSize:11, letterSpacing:"0.04em",
+      borderRadius:6,
+      border:`1px solid ${active ? color : "var(--line-strong)"}`,
+      background: active ? `${color}1A` : "transparent",
+      color: active ? "var(--text-0)" : "var(--text-1)",
+      cursor: onClick ? "pointer" : "default",
+      transition:"all 0.15s", whiteSpace:"nowrap",
+      fontFamily:"inherit",
+      ...style,
+    }}>
+      {children}
+    </button>
+  );
+}
+
+function LiveTick(){
+  const [now, setNow] = useState(new Date());
+  useEffect(()=>{
+    const id = setInterval(()=>setNow(new Date()), 1000);
+    return ()=>clearInterval(id);
+  },[]);
+  const pad = n=>String(n).padStart(2,"0");
+  const t = `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+  return (
+    <div style={{display:"flex", alignItems:"center", gap:8, fontSize:11, color:"var(--text-1)"}} className="mono">
+      <span style={{
+        width:6, height:6, borderRadius:3, background:"var(--up)",
+        boxShadow:"0 0 8px var(--up)", animation:"pulse 2s ease-in-out infinite",
+      }}/>
+      <span>LIVE</span>
+      <span style={{color:"var(--text-3)"}}>·</span>
+      <span style={{color:"var(--text-1)"}}>{t}</span>
+    </div>
+  );
+}
+
+(function injectKeyframes(){
+  if (document.getElementById("__gmm-keyframes")) return;
+  const s = document.createElement("style");
+  s.id = "__gmm-keyframes";
+  s.textContent = `
+    @keyframes pulse { 0%,100% {opacity:1; transform:scale(1)} 50% {opacity:0.4; transform:scale(0.8)} }
+    @keyframes flowDash { to { stroke-dashoffset: -200; } }
+    @keyframes glowPulse { 0%,100% {opacity:0.4} 50% {opacity:1} }
+  `;
+  document.head.appendChild(s);
+})();
+
+Object.assign(window, { Card, Sparkline, Bar, DivergingBar, KPI, Chip, LiveTick, formatKpiVal });
+</script>
+<script type="text/babel" data-presets="react" id="app-hero-map">
+// =====================================================================
+// Hero map — stylized world map with animated flow arcs
+// =====================================================================
+const CONTINENT_PATHS = [
+  "M 8 22 L 14 18 L 22 19 L 28 25 L 30 32 L 28 38 L 24 44 L 22 50 L 18 52 L 14 50 L 12 44 L 8 38 L 6 30 Z",
+  "M 24 56 L 28 54 L 32 58 L 33 66 L 30 76 L 28 82 L 26 80 L 24 72 L 23 64 Z",
+  "M 42 26 L 50 24 L 54 28 L 56 34 L 52 38 L 48 36 L 44 34 L 42 30 Z",
+  "M 46 42 L 54 40 L 58 46 L 58 56 L 56 64 L 52 72 L 48 70 L 46 60 L 44 50 Z",
+  "M 56 38 L 62 38 L 64 44 L 60 48 L 56 46 Z",
+  "M 56 18 L 70 16 L 84 18 L 88 22 L 86 28 L 76 30 L 64 28 L 56 24 Z",
+  "M 64 44 L 70 44 L 72 50 L 70 56 L 66 54 L 64 50 Z",
+  "M 72 30 L 82 30 L 86 36 L 84 42 L 78 44 L 74 40 Z",
+  "M 76 50 L 82 50 L 84 56 L 80 62 L 78 60 L 76 56 Z",
+  "M 86 38 L 90 36 L 92 42 L 90 46 L 86 44 Z",
+  "M 78 70 L 86 70 L 90 76 L 88 82 L 80 82 L 78 76 Z",
+];
+function parsePathToPoly(d){
+  const tokens = d.match(/[MLZ]|-?\d+(\.\d+)?/g);
+  const pts = []; let i = 0;
+  while (i < tokens.length){
+    const t = tokens[i];
+    if (t==="M" || t==="L"){ pts.push([parseFloat(tokens[i+1]), parseFloat(tokens[i+2])]); i+=3; }
+    else if (t==="Z"){ i++; } else { i++; }
+  }
+  return pts;
+}
+function pointInPoly(x,y,poly){
+  let inside=false;
+  for (let i=0,j=poly.length-1; i<poly.length; j=i++){
+    const xi=poly[i][0], yi=poly[i][1], xj=poly[j][0], yj=poly[j][1];
+    const intersect = ((yi>y)!=(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi+1e-9)+xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+const CONTINENT_POLYS = CONTINENT_PATHS.map(parsePathToPoly);
+const DOT_GRID = (function(){
+  const dots = []; const step = 1.6;
+  for (let y = 12; y < 90; y += step){
+    for (let x = 4; x < 96; x += step){
+      const offX = (Math.floor(y/step)%2===0) ? 0 : step/2;
+      const px = x + offX;
+      for (let p of CONTINENT_POLYS){
+        if (pointInPoly(px, y, p)){ dots.push([px, y]); break; }
+      }
+    }
+  }
+  return dots;
+})();
+function arcPath(x1,y1,x2,y2,curve=0.3){
+  const mx = (x1+x2)/2, my = (y1+y2)/2;
+  const dx = x2-x1, dy = y2-y1;
+  const dist = Math.hypot(dx,dy);
+  const nx = -dy/dist, ny=dx/dist;
+  const cx = mx + nx * dist * curve;
+  const cy = my + ny * dist * curve - dist*0.15;
+  return { d:`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`, cx, cy };
+}
+
+function HeroMap({ scrub, filterAsset, periodFactor }){
+  const [hover, setHover] = useState(null);
+  const [hoverFlow, setHoverFlow] = useState(null);
+  const containerRef = useRef(null);
+
+  const flows = useMemo(()=>{
+    return GEO_FLOWS.filter(f => filterAsset==="all" || f.asset===filterAsset);
+  }, [filterAsset]);
+
+  const W = 100, H = 100;
+
+  return (
+    <div ref={containerRef} style={{
+      position:"relative", width:"100%", height:"100%",
+      background:"radial-gradient(ellipse at center, rgba(0,229,255,0.04), transparent 60%)",
+    }}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" style={{
+        width:"100%", height:"100%", display:"block",
+      }}>
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="0.6" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glowStrong" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="1.4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="grat" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--grid)" strokeWidth="0.08"/>
+          </pattern>
+        </defs>
+
+        <rect x="0" y="0" width={W} height={H} fill="url(#grat)" opacity="0.6"/>
+        <line x1="0" y1="50" x2={W} y2="50" stroke="rgba(120,150,210,0.10)" strokeWidth="0.08" strokeDasharray="0.6 0.6"/>
+        <line x1="0" y1="35" x2={W} y2="35" stroke="rgba(120,150,210,0.06)" strokeWidth="0.06" strokeDasharray="0.4 0.6"/>
+        <line x1="0" y1="65" x2={W} y2="65" stroke="rgba(120,150,210,0.06)" strokeWidth="0.06" strokeDasharray="0.4 0.6"/>
+
+        <g>{DOT_GRID.map(([x,y], i) => (
+          <circle key={i} cx={x} cy={y} r="0.32" fill="rgba(120,150,210,0.32)"/>
+        ))}</g>
+
+        <g>
+          {flows.map((f,i)=>{
+            const from = GEO_NODES[f.from], to = GEO_NODES[f.to];
+            if (!from || !to) return null;
+            const { d } = arcPath(from.x, from.y, to.x, to.y);
+            const colorVar = `var(--accent-${f.color})`;
+            const scaledValue = f.value * periodFactor;
+            const strokeW = 0.08 + Math.min(0.45, scaledValue/100);
+            const isHover = hoverFlow===i;
+            // scrub-driven dash phase: makes the line "fill in" as scrub progresses
+            const dashLen = 200;
+            const dashOffset = (1 - (scrub ?? 0)) * dashLen;
+            return (
+              <g key={i}>
+                <path d={d} fill="none" stroke={colorVar}
+                  strokeWidth={strokeW}
+                  opacity={isHover ? 0.95 : 0.32}
+                  filter="url(#glow)"
+                  strokeDasharray={`${dashLen}`}
+                  strokeDashoffset={dashOffset}
+                  style={{transition:"stroke-dashoffset 0.15s linear"}}
+                />
+                <circle r={0.4 + Math.min(0.6, scaledValue/120)} fill={colorVar} filter="url(#glowStrong)">
+                  <animateMotion dur={`${3 + (i%4)*0.5}s`} repeatCount="indefinite" path={d}/>
+                  <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur={`${3 + (i%4)*0.5}s`} repeatCount="indefinite"/>
+                </circle>
+                <circle r={0.3 + Math.min(0.4, scaledValue/200)} fill={colorVar} filter="url(#glow)" opacity="0.7">
+                  <animateMotion dur={`${3 + (i%4)*0.5}s`} repeatCount="indefinite" begin={`${1.5 + (i%3)*0.2}s`} path={d}/>
+                </circle>
+                <path d={d} fill="none" stroke="transparent" strokeWidth="2"
+                  style={{cursor:"pointer", pointerEvents:"stroke"}}
+                  onMouseEnter={()=>setHoverFlow(i)}
+                  onMouseLeave={()=>setHoverFlow(null)}
+                />
+              </g>
+            );
+          })}
+        </g>
+
+        <g>
+          {Object.entries(GEO_NODES).map(([id, n]) => {
+            const inflow = GEO_FLOWS.filter(f=>f.to===id).reduce((s,f)=>s+f.value,0);
+            const outflow = GEO_FLOWS.filter(f=>f.from===id).reduce((s,f)=>s+f.value,0);
+            const total = (inflow + outflow) * periodFactor;
+            const r = 0.6 + Math.min(1.6, total/120);
+            const isMajor = total > 30;
+            const isHover = hover===id;
+            return (
+              <g key={id} style={{cursor:"pointer"}}
+                 onMouseEnter={()=>setHover(id)} onMouseLeave={()=>setHover(null)}>
+                {isMajor && (
+                  <circle cx={n.x} cy={n.y} r={r*2.4} fill="none" stroke="var(--accent-cyan)" strokeWidth="0.06" opacity="0.35"/>
+                )}
+                {isMajor && (
+                  <circle cx={n.x} cy={n.y} r="0.6" fill="none" stroke="var(--accent-cyan)" strokeWidth="0.12" opacity="0">
+                    <animate attributeName="r" values="0.6;3" dur="2.4s" repeatCount="indefinite" begin={`${(parseInt(n.x)%5)*0.4}s`}/>
+                    <animate attributeName="opacity" values="0.7;0" dur="2.4s" repeatCount="indefinite" begin={`${(parseInt(n.x)%5)*0.4}s`}/>
+                  </circle>
+                )}
+                <circle cx={n.x} cy={n.y} r={r} fill="var(--bg-0)" stroke="var(--accent-cyan)" strokeWidth="0.18" filter="url(#glow)"/>
+                <circle cx={n.x} cy={n.y} r={r*0.4} fill="var(--accent-cyan)" filter="url(#glow)"/>
+                {isHover && <circle cx={n.x} cy={n.y} r={r*1.8} fill="none" stroke="var(--accent-cyan)" strokeWidth="0.15" opacity="0.6"/>}
+                {(isMajor || isHover) && (
+                  <text x={n.x} y={n.y - r - 0.8} textAnchor="middle"
+                    style={{fontSize:1.6, fill:isHover?"var(--text-0)":"var(--text-1)", fontWeight:600, fontFamily:"Pretendard, sans-serif", letterSpacing:"0.02em"}}>
+                    {n.kr}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+
+      {hover && (() => {
+        const n = GEO_NODES[hover];
+        const inflows = GEO_FLOWS.filter(f=>f.to===hover);
+        const outflows = GEO_FLOWS.filter(f=>f.from===hover);
+        const inSum = inflows.reduce((s,f)=>s+f.value,0) * periodFactor;
+        const outSum = outflows.reduce((s,f)=>s+f.value,0) * periodFactor;
+        return (
+          <div style={{
+            position:"absolute", left:`${n.x}%`, top:`${n.y}%`,
+            transform:"translate(20px, -50%)",
+            background:"rgba(8,12,24,0.96)", border:"1px solid var(--line-strong)",
+            borderRadius:10, padding:"12px 14px", minWidth:200,
+            backdropFilter:"blur(12px)",
+            boxShadow:"0 12px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,229,255,0.15)",
+            pointerEvents:"none", zIndex:50,
+          }}>
+            <div style={{fontSize:13, fontWeight:600, color:"var(--text-0)", marginBottom:2}}>
+              {n.kr} <span style={{color:"var(--text-3)", fontWeight:400, fontSize:11}}>· {n.en}</span>
+            </div>
+            <div style={{height:1, background:"var(--line)", margin:"8px 0"}}/>
+            <div style={{display:"grid", gridTemplateColumns:"1fr auto", gap:"4px 12px", fontSize:11}}>
+              <span style={{color:"var(--text-2)"}}>유입 (Inflow)</span>
+              <span className="num" style={{color:"var(--up)", fontWeight:600}}>+${inSum.toFixed(1)}B</span>
+              <span style={{color:"var(--text-2)"}}>유출 (Outflow)</span>
+              <span className="num" style={{color:"var(--down)", fontWeight:600}}>-${outSum.toFixed(1)}B</span>
+              <span style={{color:"var(--text-2)"}}>순흐름 (Net)</span>
+              <span className="num" style={{color: inSum-outSum>=0?"var(--up)":"var(--down)", fontWeight:600}}>
+                {inSum-outSum>=0?"+":""}${(inSum-outSum).toFixed(1)}B
+              </span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {hoverFlow!==null && flows[hoverFlow] && (() => {
+        const f = flows[hoverFlow];
+        const from = GEO_NODES[f.from], to = GEO_NODES[f.to];
+        const midX = (from.x+to.x)/2;
+        const midY = (from.y+to.y)/2 - 6;
+        const ASSET_KR = {equities:"주식", bonds:"채권", gold:"금", commodities:"원자재", cash:"현금"};
+        const v = f.value * periodFactor;
+        return (
+          <div style={{
+            position:"absolute", left:`${midX}%`, top:`${midY}%`,
+            transform:"translate(-50%, -100%)",
+            background:"rgba(8,12,24,0.96)", border:"1px solid var(--line-strong)",
+            borderRadius:8, padding:"8px 12px", backdropFilter:"blur(12px)",
+            pointerEvents:"none", whiteSpace:"nowrap", zIndex:50,
+            boxShadow:"0 8px 24px rgba(0,0,0,0.6)",
+          }}>
+            <div style={{fontSize:11, color:"var(--text-1)", marginBottom:2}}>
+              <span style={{color:"var(--text-0)", fontWeight:600}}>{from.kr}</span>
+              <span style={{margin:"0 6px", color:`var(--accent-${f.color})`}}>→</span>
+              <span style={{color:"var(--text-0)", fontWeight:600}}>{to.kr}</span>
+            </div>
+            <div className="num" style={{fontSize:13, fontWeight:600, color:`var(--accent-${f.color})`}}>
+              ${v.toFixed(1)}B <span style={{fontSize:10, color:"var(--text-2)", fontWeight:400}}>· {ASSET_KR[f.asset]}</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      <div style={{
+        position:"absolute", bottom:14, left:16,
+        display:"flex", flexDirection:"column", gap:6,
+        fontSize:10, color:"var(--text-2)", letterSpacing:"0.06em",
+      }} className="mono">
+        <div style={{display:"flex", alignItems:"center", gap:6}}>
+          <div style={{width:10, height:1.5, background:"var(--accent-cyan)", boxShadow:"0 0 8px var(--accent-cyan)"}}/>
+          <span>주식 EQUITIES</span>
+        </div>
+        <div style={{display:"flex", alignItems:"center", gap:6}}>
+          <div style={{width:10, height:1.5, background:"var(--accent-purple)", boxShadow:"0 0 8px var(--accent-purple)"}}/>
+          <span>채권 BONDS</span>
+        </div>
+        <div style={{display:"flex", alignItems:"center", gap:6}}>
+          <div style={{width:10, height:1.5, background:"var(--accent-amber)", boxShadow:"0 0 8px var(--accent-amber)"}}/>
+          <span>금/원자재 GOLD/CMDTY</span>
+        </div>
+      </div>
+
+      <div style={{
+        position:"absolute", bottom:14, right:16,
+        fontSize:10, color:"var(--text-2)", letterSpacing:"0.08em", textAlign:"right",
+      }} className="mono">
+        <div style={{color:"var(--text-3)", marginBottom:3}}>SCALE · NOTIONAL</div>
+        <div style={{display:"flex", gap:10, justifyContent:"flex-end", alignItems:"center"}}>
+          <div style={{display:"flex", alignItems:"center", gap:4}}>
+            <div style={{width:6, height:1, background:"var(--text-2)"}}/><span>$10B</span>
+          </div>
+          <div style={{display:"flex", alignItems:"center", gap:4}}>
+            <div style={{width:14, height:2, background:"var(--text-1)"}}/><span>$50B+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+window.HeroMap = HeroMap;
+</script>
+<script type="text/babel" data-presets="react" id="app-hero-other">
+// =====================================================================
+// Hero — Sankey, Chord, Bubble
+// =====================================================================
+function HeroSankey({ periodFactor }){
+  const W = 100, H = 100;
+  const left = SANKEY_NODES.filter(n=>n.side===0);
+  const right = SANKEY_NODES.filter(n=>n.side===1);
+  const totalsBySide = (side, nodes) => nodes.map(n => {
+    const total = (side===0
+      ? SANKEY_LINKS.filter(l=>l.from===n.id).reduce((s,l)=>s+l.value,0)
+      : SANKEY_LINKS.filter(l=>l.to===n.id).reduce((s,l)=>s+l.value,0)) * periodFactor;
+    return { ...n, total };
+  });
+  const leftSized = totalsBySide(0, left);
+  const rightSized = totalsBySide(1, right);
+  const totalLeft = leftSized.reduce((s,n)=>s+n.total,0) || 1;
+  const totalRight = rightSized.reduce((s,n)=>s+n.total,0) || 1;
+  const padY = 6, gap = 1.4;
+  const usableH = 100 - padY*2 - gap*Math.max(leftSized.length, rightSized.length);
+
+  let yL = padY;
+  const leftLayout = leftSized.map(n => {
+    const h = (n.total/totalLeft) * usableH;
+    const y = yL; yL += h + gap;
+    return { ...n, y, h };
+  });
+  let yR = padY;
+  const rightLayout = rightSized.map(n => {
+    const h = (n.total/totalRight) * usableH;
+    const y = yR; yR += h + gap;
+    return { ...n, y, h };
+  });
+
+  const leftOffsets = {}, rightOffsets = {};
+  leftLayout.forEach(n=>leftOffsets[n.id]=0);
+  rightLayout.forEach(n=>rightOffsets[n.id]=0);
+
+  const linkPaths = SANKEY_LINKS.map((l, idx) => {
+    const ln = leftLayout.find(n=>n.id===l.from);
+    const rn = rightLayout.find(n=>n.id===l.to);
+    if (!ln || !rn || ln.total===0 || rn.total===0) return null;
+    const v = l.value * periodFactor;
+    const lh = (v/ln.total) * ln.h;
+    const rh = (v/rn.total) * rn.h;
+    const ly1 = ln.y + leftOffsets[l.from];
+    const ly2 = ly1 + lh;
+    const ry1 = rn.y + rightOffsets[l.to];
+    const ry2 = ry1 + rh;
+    leftOffsets[l.from] += lh;
+    rightOffsets[l.to] += rh;
+    const x1 = 22, x2 = 78;
+    const cx = (x1+x2)/2;
+    const d = `M ${x1} ${ly1} C ${cx} ${ly1}, ${cx} ${ry1}, ${x2} ${ry1} L ${x2} ${ry2} C ${cx} ${ry2}, ${cx} ${ly2}, ${x1} ${ly2} Z`;
+    return { d, color: ln.color, value: v, from: ln.kr, to: rn.kr, idx };
+  });
+
+  const [hover, setHover] = useState(null);
+
+  return (
+    <div style={{position:"relative", width:"100%", height:"100%"}}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{width:"100%", height:"100%"}}>
+        <defs>
+          {["cyan","purple","amber","lime","mag"].map(c => (
+            <linearGradient key={c} id={`sk-${c}`} x1="0" x2="1">
+              <stop offset="0%" stopColor={`var(--accent-${c})`} stopOpacity="0.45"/>
+              <stop offset="100%" stopColor={`var(--accent-${c})`} stopOpacity="0.18"/>
+            </linearGradient>
+          ))}
+        </defs>
+        <text x="22" y="3.5" textAnchor="middle" style={{fontSize:1.6, fill:"var(--text-2)", letterSpacing:"0.15em", fontWeight:600}}>FROM · 매도자산</text>
+        <text x="78" y="3.5" textAnchor="middle" style={{fontSize:1.6, fill:"var(--text-2)", letterSpacing:"0.15em", fontWeight:600}}>TO · 매수자산</text>
+
+        {linkPaths.map(l => l && (
+          <path key={l.idx} d={l.d} fill={`url(#sk-${l.color})`}
+            stroke={`var(--accent-${l.color})`} strokeWidth="0.05"
+            opacity={hover===null || hover===l.idx ? 1 : 0.25}
+            style={{cursor:"pointer", transition:"opacity 0.15s"}}
+            onMouseEnter={()=>setHover(l.idx)} onMouseLeave={()=>setHover(null)}
+          />
+        ))}
+
+        {leftLayout.map(n => (
+          <g key={n.id}>
+            <rect x="20.5" y={n.y} width="1.5" height={n.h}
+              fill={`var(--accent-${n.color})`} filter="drop-shadow(0 0 1px currentColor)"/>
+            <text x="19" y={n.y + n.h/2} textAnchor="end" dominantBaseline="middle"
+              style={{fontSize:1.7, fill:"var(--text-0)", fontWeight:500}}>{n.kr}</text>
+            <text x="19" y={n.y + n.h/2 + 2.2} textAnchor="end" dominantBaseline="middle"
+              style={{fontSize:1.3, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>${n.total.toFixed(0)}B</text>
+          </g>
+        ))}
+        {rightLayout.map(n => (
+          <g key={n.id}>
+            <rect x="78" y={n.y} width="1.5" height={n.h}
+              fill={`var(--accent-${n.color})`} filter="drop-shadow(0 0 1px currentColor)"/>
+            <text x="80" y={n.y + n.h/2} textAnchor="start" dominantBaseline="middle"
+              style={{fontSize:1.7, fill:"var(--text-0)", fontWeight:500}}>{n.kr}</text>
+            <text x="80" y={n.y + n.h/2 + 2.2} textAnchor="start" dominantBaseline="middle"
+              style={{fontSize:1.3, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>${n.total.toFixed(0)}B</text>
+          </g>
+        ))}
+      </svg>
+      {hover!==null && linkPaths[hover] && (
+        <div style={{
+          position:"absolute", left:"50%", top:"50%",
+          transform:"translate(-50%,-50%)",
+          background:"rgba(8,12,24,0.96)", border:"1px solid var(--line-strong)",
+          borderRadius:8, padding:"10px 14px", fontSize:12, pointerEvents:"none",
+          boxShadow:"0 8px 24px rgba(0,0,0,0.6)",
+        }}>
+          <div style={{color:"var(--text-1)"}}>
+            <b style={{color:"var(--text-0)"}}>{linkPaths[hover].from}</b>
+            <span style={{margin:"0 6px"}}>→</span>
+            <b style={{color:"var(--text-0)"}}>{linkPaths[hover].to}</b>
+          </div>
+          <div className="num" style={{fontSize:14, fontWeight:600, color:`var(--accent-${linkPaths[hover].color})`, marginTop:3}}>
+            ${linkPaths[hover].value.toFixed(1)}B
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HeroChord({ periodFactor }){
+  const cx=50, cy=50, R=34, ringW=2;
+  const n = CHORD_CLASSES.length;
+  const totals = CHORD_CLASSES.map((_,i)=>{
+    let s=0;
+    for(let j=0;j<n;j++){ s += CHORD_MATRIX[i][j] + CHORD_MATRIX[j][i]; }
+    return s * periodFactor;
+  });
+  const grandTotal = totals.reduce((a,b)=>a+b,0) || 1;
+  const gap = 0.04;
+  const arcs = [];
+  let cur = -Math.PI/2;
+  for (let i=0;i<n;i++){
+    const span = (totals[i]/grandTotal) * (Math.PI*2 - gap*n);
+    arcs.push({ start: cur, end: cur+span, mid: cur+span/2 });
+    cur += span + gap;
+  }
+  function thickArcD(a0,a1,rOut,rIn){
+    const x0o=cx+rOut*Math.cos(a0), y0o=cy+rOut*Math.sin(a0);
+    const x1o=cx+rOut*Math.cos(a1), y1o=cy+rOut*Math.sin(a1);
+    const x0i=cx+rIn*Math.cos(a1), y0i=cy+rIn*Math.sin(a1);
+    const x1i=cx+rIn*Math.cos(a0), y1i=cy+rIn*Math.sin(a0);
+    const large = (a1-a0)>Math.PI?1:0;
+    return `M ${x0o} ${y0o} A ${rOut} ${rOut} 0 ${large} 1 ${x1o} ${y1o} L ${x0i} ${y0i} A ${rIn} ${rIn} 0 ${large} 0 ${x1i} ${y1i} Z`;
+  }
+
+  const offsets = arcs.map(a => a.start);
+  const ribbons = [];
+  for (let i=0;i<n;i++){
+    for (let j=0;j<n;j++){
+      const v = CHORD_MATRIX[i][j] * periodFactor;
+      if (v<=0 || i===j) continue;
+      const span_i = (v/totals[i]) * (arcs[i].end - arcs[i].start);
+      const a0_i = offsets[i]; const a1_i = a0_i + span_i; offsets[i] = a1_i;
+      const span_j = (v/totals[j]) * (arcs[j].end - arcs[j].start);
+      const a0_j = offsets[j]; const a1_j = a0_j + span_j; offsets[j] = a1_j;
+      const r = R - ringW - 0.4;
+      const p0 = [cx+r*Math.cos(a0_i), cy+r*Math.sin(a0_i)];
+      const p1 = [cx+r*Math.cos(a1_i), cy+r*Math.sin(a1_i)];
+      const q0 = [cx+r*Math.cos(a1_j), cy+r*Math.sin(a1_j)];
+      const q1 = [cx+r*Math.cos(a0_j), cy+r*Math.sin(a0_j)];
+      const d = `M ${p0[0]} ${p0[1]} Q ${cx} ${cy} ${q0[0]} ${q0[1]} A ${r} ${r} 0 0 1 ${q1[0]} ${q1[1]} Q ${cx} ${cy} ${p1[0]} ${p1[1]} A ${r} ${r} 0 0 0 ${p0[0]} ${p0[1]} Z`;
+      ribbons.push({ d, color: CHORD_CLASSES[i].color, from:i, to:j, value:v });
+    }
+  }
+  const [hover, setHover] = useState(null);
+
+  return (
+    <div style={{position:"relative", width:"100%", height:"100%", display:"flex", alignItems:"center", justifyContent:"center"}}>
+      <svg viewBox="0 0 100 100" style={{width:"100%", height:"100%"}}>
+        <defs>
+          {CHORD_CLASSES.map(c => (
+            <radialGradient key={c.id} id={`ch-${c.color}`}>
+              <stop offset="0%" stopColor={`var(--accent-${c.color})`} stopOpacity="0.6"/>
+              <stop offset="100%" stopColor={`var(--accent-${c.color})`} stopOpacity="0.2"/>
+            </radialGradient>
+          ))}
+        </defs>
+        {arcs.map((a,i)=>(
+          <g key={i}>
+            <path d={thickArcD(a.start, a.end, R, R-ringW)}
+              fill={`var(--accent-${CHORD_CLASSES[i].color})`}
+              opacity={hover===null || hover?.from===i || hover?.to===i ? 0.95 : 0.35}
+              filter="drop-shadow(0 0 2px currentColor)"
+              style={{transition:"opacity 0.15s"}}
+            />
+            <text x={cx + (R+4)*Math.cos(a.mid)} y={cy + (R+4)*Math.sin(a.mid)}
+              textAnchor="middle" dominantBaseline="middle"
+              style={{fontSize:2.6, fill:"var(--text-0)", fontWeight:600}}>{CHORD_CLASSES[i].kr}</text>
+            <text x={cx + (R+7)*Math.cos(a.mid)} y={cy + (R+7)*Math.sin(a.mid)}
+              textAnchor="middle" dominantBaseline="middle"
+              style={{fontSize:1.7, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>${totals[i].toFixed(0)}B</text>
+          </g>
+        ))}
+        {ribbons.map((r,idx)=>{
+          const isH = hover && (hover.from===r.from && hover.to===r.to);
+          const dim = hover && !isH;
+          return (
+            <path key={idx} d={r.d} fill={`url(#ch-${r.color})`}
+              stroke={`var(--accent-${r.color})`} strokeWidth="0.1"
+              opacity={dim ? 0.1 : 0.7}
+              style={{cursor:"pointer", transition:"opacity 0.15s"}}
+              onMouseEnter={()=>setHover({from:r.from, to:r.to, value:r.value, color:r.color})}
+              onMouseLeave={()=>setHover(null)}
+            />
+          );
+        })}
+        <text x={cx} y={cy-2} textAnchor="middle" style={{fontSize:2.2, fill:"var(--text-2)", letterSpacing:"0.14em"}}>자산회전</text>
+        <text x={cx} y={cy+2} textAnchor="middle" style={{fontSize:1.6, fill:"var(--text-3)", letterSpacing:"0.14em"}}>ASSET ROTATION</text>
+      </svg>
+      {hover && (
+        <div style={{
+          position:"absolute", left:"50%", bottom:14,
+          transform:"translateX(-50%)",
+          background:"rgba(8,12,24,0.96)", border:"1px solid var(--line-strong)",
+          borderRadius:8, padding:"8px 14px", fontSize:12,
+          pointerEvents:"none", whiteSpace:"nowrap",
+        }}>
+          <span style={{color:"var(--text-0)", fontWeight:600}}>{CHORD_CLASSES[hover.from].kr}</span>
+          <span style={{color:`var(--accent-${hover.color})`, margin:"0 6px"}}>→</span>
+          <span style={{color:"var(--text-0)", fontWeight:600}}>{CHORD_CLASSES[hover.to].kr}</span>
+          <span className="num" style={{marginLeft:10, color:`var(--accent-${hover.color})`, fontWeight:600}}>${hover.value.toFixed(1)}B</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HeroBubble({ periodFactor }){
+  const xMin=-6, xMax=28, yMin=-10, yMax=10;
+  const sx = v => 10 + ((v-xMin)/(xMax-xMin))*82;
+  const sy = v => 92 - ((v-yMin)/(yMax-yMin))*82;
+  const sr = aum => 1.2 + Math.sqrt(aum)/8;
+  const [hover, setHover] = useState(null);
+
+  return (
+    <div style={{position:"relative", width:"100%", height:"100%"}}>
+      <svg viewBox="0 0 100 100" style={{width:"100%", height:"100%"}}>
+        <rect x={sx(0)} y="10" width={92-sx(0)} height={sy(0)-10} fill="rgba(37,224,138,0.04)"/>
+        <rect x="10" y={sy(0)} width={sx(0)-10} height={92-sy(0)} fill="rgba(255,84,112,0.04)"/>
+        {[-5,0,5,10,15,20,25].map(v => (
+          <g key={v}>
+            <line x1={sx(v)} y1="10" x2={sx(v)} y2="92" stroke="var(--grid)" strokeWidth="0.06"/>
+            <text x={sx(v)} y="96" textAnchor="middle" style={{fontSize:1.6, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>{v>0?"+":""}{v}%</text>
+          </g>
+        ))}
+        {[-8,-4,0,4,8].map(v => (
+          <g key={v}>
+            <line x1="10" y1={sy(v)} x2="92" y2={sy(v)} stroke="var(--grid)" strokeWidth="0.06"/>
+            <text x="8" y={sy(v)} textAnchor="end" dominantBaseline="middle" style={{fontSize:1.6, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>{v>0?"+":""}{v}</text>
+          </g>
+        ))}
+        <line x1={sx(0)} y1="10" x2={sx(0)} y2="92" stroke="var(--line-strong)" strokeWidth="0.1"/>
+        <line x1="10" y1={sy(0)} x2="92" y2={sy(0)} stroke="var(--line-strong)" strokeWidth="0.1"/>
+        <text x="50" y="99.5" textAnchor="middle" style={{fontSize:1.5, fill:"var(--text-2)", letterSpacing:"0.1em"}}>YTD 수익률 →</text>
+        <g transform="translate(2, 50) rotate(-90)">
+          <text textAnchor="middle" style={{fontSize:1.5, fill:"var(--text-2)", letterSpacing:"0.1em"}}>← 30D 순흐름 ($B) →</text>
+        </g>
+        <text x="88" y="14" textAnchor="end" style={{fontSize:1.6, fill:"var(--up)", opacity:0.7, fontWeight:600}}>인기 ↗</text>
+        <text x="14" y="90" textAnchor="start" style={{fontSize:1.6, fill:"var(--down)", opacity:0.7, fontWeight:600}}>외면 ↙</text>
+        {BUBBLE_DATA.map(b => {
+          const flowScaled = b.flow * periodFactor;
+          const x = sx(b.ret), y = sy(Math.max(yMin, Math.min(yMax, flowScaled))), r = sr(b.aum);
+          const isH = hover===b.id;
+          return (
+            <g key={b.id} style={{cursor:"pointer"}}
+               onMouseEnter={()=>setHover(b.id)} onMouseLeave={()=>setHover(null)}>
+              <circle cx={x} cy={y} r={r}
+                fill={`var(--accent-${b.color})`} opacity={isH?0.45:0.22}
+                stroke={`var(--accent-${b.color})`} strokeWidth={isH?0.2:0.1}
+                filter="drop-shadow(0 0 2px currentColor)"/>
+              <circle cx={x} cy={y} r={r*0.3} fill={`var(--accent-${b.color})`} opacity="0.9"/>
+              {(r>2.4 || isH) && (
+                <text x={x} y={y-r-0.6} textAnchor="middle" style={{fontSize:1.5, fill:"var(--text-0)", fontWeight:500, pointerEvents:"none"}}>{b.kr}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      {hover && (() => {
+        const b = BUBBLE_DATA.find(x=>x.id===hover);
+        const flowScaled = b.flow * periodFactor;
+        return (
+          <div style={{
+            position:"absolute", right:14, top:14,
+            background:"rgba(8,12,24,0.96)", border:"1px solid var(--line-strong)",
+            borderRadius:8, padding:"10px 14px", fontSize:11, minWidth:160,
+            boxShadow:"0 8px 24px rgba(0,0,0,0.6)", pointerEvents:"none",
+          }}>
+            <div style={{fontWeight:600, fontSize:13, color:"var(--text-0)", marginBottom:6}}>{b.kr}</div>
+            <div style={{display:"grid", gridTemplateColumns:"1fr auto", gap:"3px 10px"}} className="num">
+              <span style={{color:"var(--text-2)"}}>YTD 수익률</span>
+              <span style={{color:b.ret>=0?"var(--up)":"var(--down)", fontWeight:600}}>{b.ret>=0?"+":""}{b.ret}%</span>
+              <span style={{color:"var(--text-2)"}}>순흐름 (기간)</span>
+              <span style={{color:flowScaled>=0?"var(--up)":"var(--down)", fontWeight:600}}>{flowScaled>=0?"+":""}${flowScaled.toFixed(1)}B</span>
+              <span style={{color:"var(--text-2)"}}>AUM</span>
+              <span style={{color:"var(--text-0)", fontWeight:600}}>${b.aum}B</span>
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+window.HeroSankey = HeroSankey;
+window.HeroChord = HeroChord;
+window.HeroBubble = HeroBubble;
+</script>
+<script type="text/babel" data-presets="react" id="app-panels">
+// =====================================================================
+// Side panels — Asset Rotation, M2 Supply, Leaderboard, Currency, ETF
+// =====================================================================
+function PanelAssetRotation({ periodFactor }){
+  const [highlight, setHighlight] = useState(null);
+  const data = ASSET_ROTATION.map(a => ({ ...a, flowScaled: a.flow*periodFactor, prevScaled: a.prev*periodFactor }));
+  const max = Math.max(...data.map(a=>Math.abs(a.flowScaled))) || 1;
+  const total = data.reduce((s,a)=>s+Math.abs(a.flowScaled),0);
+  return (
+    <Card id="asset-rotation" title="자산 클래스 회전" subtitle="ASSET CLASS ROTATION · NET" accent="var(--accent-cyan)"
+      right={<Chip color="var(--accent-cyan)">${total.toFixed(0)}B 총거래</Chip>}>
+      <div style={{display:"flex", flexDirection:"column", gap:14}}>
+        {data.map(a => {
+          const series = ROTATION_HISTORY[a.id];
+          const colorVar = `var(--accent-${a.color})`;
+          const isH = highlight===a.id;
+          return (
+            <div key={a.id}
+              onMouseEnter={()=>setHighlight(a.id)}
+              onMouseLeave={()=>setHighlight(null)}
+              style={{
+                display:"grid", gridTemplateColumns:"110px 1fr 90px 88px",
+                gap:14, alignItems:"center",
+                padding:"4px 6px", margin:"-4px -6px", borderRadius:6,
+                background: isH ? "rgba(0,229,255,0.04)" : "transparent",
+                cursor:"default", transition:"background 0.15s",
+              }}>
+              <div>
+                <div style={{display:"flex", alignItems:"center", gap:7, marginBottom:3}}>
+                  <div style={{width:6, height:6, borderRadius:3, background:colorVar, boxShadow:`0 0 6px ${colorVar}`}}/>
+                  <span style={{fontSize:13, fontWeight:600}}>{a.kr}</span>
+                </div>
+                <div style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.06em"}} className="mono">{a.en.toUpperCase()} · {a.share}%</div>
+              </div>
+              <div>
+                <DivergingBar value={a.flowScaled} max={max} posColor="var(--up)" negColor="var(--down)" height={6}/>
+                <div style={{display:"flex", justifyContent:"space-between", fontSize:9, marginTop:3, color:"var(--text-3)"}} className="mono">
+                  <span>유출 OUT</span><span>유입 IN</span>
+                </div>
+              </div>
+              <Sparkline data={series} color={colorVar} width={86} height={28}/>
+              <div style={{textAlign:"right"}}>
+                <div className="num" style={{fontSize:14, fontWeight:600, color: a.flowScaled>=0?"var(--up)":"var(--down)"}}>
+                  {a.flowScaled>=0?"+":""}${a.flowScaled.toFixed(1)}B
+                </div>
+                <div className="num" style={{fontSize:10, color:"var(--text-3)"}}>
+                  prev {a.prevScaled>=0?"+":""}{a.prevScaled.toFixed(1)}B
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{marginTop:16, paddingTop:12, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)", display:"flex", justifyContent:"space-between"}}>
+        <span>채권에서 위험자산으로 회전 가속화 <span style={{color:"var(--accent-amber)"}}>↗</span></span>
+        <span className="mono" style={{color:"var(--text-3)"}}>26W</span>
+      </div>
+    </Card>
+  );
+}
+
+function PanelM2(){
+  const W=480, H=180, padL=44, padR=12, padT=16, padB=22;
+  const innerW = W-padL-padR, innerH=H-padT-padB;
+  const all = Object.values(M2_DATA).flatMap(d=>d.series);
+  const yMin = Math.floor(Math.min(...all)-1);
+  const yMax = Math.ceil(Math.max(...all)+1);
+  const sx = i => padL + (i/(M2_LABELS.length-1))*innerW;
+  const sy = v => padT + (1-(v-yMin)/(yMax-yMin))*innerH;
+  const [active, setActive] = useState(null);
+  const [hoverIdx, setHoverIdx] = useState(null);
+  const codes = Object.keys(M2_DATA);
+
+  const onMove = (e) => {
+    const svg = e.currentTarget;
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width * W;
+    const i = Math.round((px - padL) / innerW * (M2_LABELS.length-1));
+    if (i>=0 && i<M2_LABELS.length) setHoverIdx(i); else setHoverIdx(null);
+  };
+
+  return (
+    <Card id="m2-supply" title="M2 통화량 증가율 (전년대비)" subtitle="M2 MONEY SUPPLY · YoY % · 24M" accent="var(--accent-lime)"
+      right={
+        <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
+          {codes.map(c => {
+            const d = M2_DATA[c];
+            const isMuted = active!==null && active!==c;
+            return (
+              <Chip key={c} color={`var(--accent-${d.color})`} active={active===c}
+                onClick={()=>setActive(active===c?null:c)}
+                style={{opacity:isMuted?0.4:1, fontSize:10, padding:"3px 8px"}}>
+                {c} {d.latest>=0?"+":""}{d.latest}%
+              </Chip>
+            );
+          })}
+        </div>
+      }>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", height:180}}
+        onMouseMove={onMove} onMouseLeave={()=>setHoverIdx(null)}>
+        {[yMin,0,4,8,yMax].filter((v,i,a)=>a.indexOf(v)===i && v>=yMin && v<=yMax).map(v => (
+          <g key={v}>
+            <line x1={padL} y1={sy(v)} x2={W-padR} y2={sy(v)} stroke="var(--grid)" strokeWidth="1" strokeDasharray={v===0?"":"2 3"}/>
+            <text x={padL-6} y={sy(v)+3} textAnchor="end" style={{fontSize:10, fill:"var(--text-3)", fontFamily:"JetBrains Mono"}}>
+              {v>0?"+":""}{v}%
+            </text>
+          </g>
+        ))}
+        {M2_LABELS.map((l,i)=> l && (
+          <text key={i} x={sx(i)} y={H-6} textAnchor="middle" style={{fontSize:9, fill:"var(--text-3)", fontFamily:"JetBrains Mono", letterSpacing:"0.06em"}}>{l}</text>
+        ))}
+        {codes.map(c => {
+          const d = M2_DATA[c];
+          const colorVar = `var(--accent-${d.color})`;
+          const isMuted = active!==null && active!==c;
+          const path = d.series.map((v,i)=> (i===0?"M":"L")+sx(i)+" "+sy(v)).join(" ");
+          const fillP = path + ` L ${sx(d.series.length-1)} ${sy(0)} L ${sx(0)} ${sy(0)} Z`;
+          return (
+            <g key={c} opacity={isMuted?0.18:1}>
+              {!isMuted && active===c && <path d={fillP} fill={colorVar} opacity="0.08"/>}
+              <path d={path} fill="none" stroke={colorVar} strokeWidth={active===c?2:1.4}
+                strokeLinejoin="round" strokeLinecap="round"
+                filter={active===c?"drop-shadow(0 0 4px currentColor)":""}/>
+              <circle cx={sx(d.series.length-1)} cy={sy(d.series.at(-1))} r="3" fill={colorVar} filter="drop-shadow(0 0 3px currentColor)"/>
+              <text x={sx(d.series.length-1)+6} y={sy(d.series.at(-1))+3} style={{fontSize:10, fill:colorVar, fontWeight:600, fontFamily:"JetBrains Mono"}}>
+                {d.latest>=0?"+":""}{d.latest}
+              </text>
+              {hoverIdx!==null && (
+                <circle cx={sx(hoverIdx)} cy={sy(d.series[hoverIdx])} r="2.4" fill={colorVar}/>
+              )}
+            </g>
+          );
+        })}
+        {hoverIdx!==null && (
+          <line x1={sx(hoverIdx)} x2={sx(hoverIdx)} y1={padT} y2={H-padB}
+            stroke="var(--accent-cyan)" strokeWidth="0.5" opacity="0.4" strokeDasharray="2 2"/>
+        )}
+      </svg>
+      {hoverIdx!==null && (
+        <div style={{
+          marginTop:6, padding:"8px 10px",
+          background:"rgba(8,12,24,0.6)", border:"1px solid var(--line)",
+          borderRadius:8, fontSize:11, display:"flex", gap:14, flexWrap:"wrap",
+        }}>
+          <span className="mono" style={{color:"var(--text-3)"}}>월 {String(hoverIdx+1).padStart(2,"0")}</span>
+          {codes.map(c => (
+            <span key={c} style={{display:"flex", alignItems:"center", gap:5}}>
+              <span style={{width:6, height:6, borderRadius:3, background:`var(--accent-${M2_DATA[c].color})`}}/>
+              <span style={{color:"var(--text-2)"}}>{c}</span>
+              <span className="num" style={{color:"var(--text-0)", fontWeight:600}}>{M2_DATA[c].series[hoverIdx]>=0?"+":""}{M2_DATA[c].series[hoverIdx].toFixed(1)}%</span>
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{marginTop:8, paddingTop:8, borderTop:"1px dashed var(--line)", fontSize:11, color:"var(--text-2)", display:"flex", justifyContent:"space-between"}}>
+        <span>인도·중국 통화공급 확장세 → 유동성 신흥아시아로 이동</span>
+        <span className="mono" style={{color:"var(--text-3)"}}>SOURCE · CB DATA</span>
+      </div>
+    </Card>
+  );
+}
+
+function PanelLeaderboard({ periodFactor }){
+  const [tab, setTab] = useState("inflows");
+  const [hoverRow, setHoverRow] = useState(null);
+  const list = FLOW_LEADERBOARD[tab].map(item => ({ ...item, scaled: item.value * periodFactor }));
+  const max = Math.max(...list.map(x=>Math.abs(x.scaled))) || 1;
+  return (
+    <Card id="leaderboard" title="자금흐름 리더보드" subtitle="TOP FLOWS"
+      accent={tab==="inflows"?"var(--up)":"var(--down)"}
+      right={
+        <div style={{display:"flex", gap:4, padding:2, background:"rgba(120,150,210,0.08)", borderRadius:6}}>
+          <Chip onClick={()=>setTab("inflows")} active={tab==="inflows"} color="var(--up)" style={{border:"none", padding:"4px 10px"}}>유입 ▲</Chip>
+          <Chip onClick={()=>setTab("outflows")} active={tab==="outflows"} color="var(--down)" style={{border:"none", padding:"4px 10px"}}>유출 ▼</Chip>
+        </div>
+      }>
+      <div style={{display:"flex", flexDirection:"column", gap:10}}>
+        {list.map((item,i)=>(
+          <div key={i}
+            onMouseEnter={()=>setHoverRow(i)} onMouseLeave={()=>setHoverRow(null)}
+            style={{
+              display:"grid", gridTemplateColumns:"22px 1fr auto", gap:12, alignItems:"center",
+              padding:"4px 6px", margin:"-4px -6px", borderRadius:6,
+              background: hoverRow===i ? "rgba(0,229,255,0.04)" : "transparent",
+              transition:"background 0.15s",
+            }}>
+            <div className="mono" style={{fontSize:10, color:"var(--text-3)", textAlign:"right"}}>{String(i+1).padStart(2,"0")}</div>
+            <div style={{minWidth:0}}>
+              <div style={{display:"flex", alignItems:"center", gap:8, marginBottom:3}}>
+                <span style={{fontSize:12, fontWeight:600, color:"var(--text-0)"}}>{item.name}</span>
+                <span className="mono" style={{fontSize:10, color:"var(--text-3)", padding:"1px 5px", background:"rgba(120,150,210,0.08)", borderRadius:3}}>{item.ticker}</span>
+              </div>
+              <Bar value={Math.abs(item.scaled)} max={max} color={tab==="inflows"?"var(--up)":"var(--down)"} height={3}/>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div className="num" style={{fontSize:13, fontWeight:600, color:tab==="inflows"?"var(--up)":"var(--down)"}}>
+                {item.scaled>=0?"+":""}${item.scaled.toFixed(2)}B
+              </div>
+              <div className="num" style={{fontSize:10, color:"var(--text-3)"}}>
+                {item.pct>=0?"+":""}{item.pct}% AUM
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function PanelCurrency(){
+  const [sortKey, setSortKey] = useState("chg30");
+  const [sortDir, setSortDir] = useState("desc");
+  const sorted = useMemo(()=>{
+    const arr = [...CURRENCY_DATA];
+    arr.sort((a,b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      if (typeof av === "string") return sortDir==="desc" ? bv.localeCompare(av) : av.localeCompare(bv);
+      return sortDir==="desc" ? bv-av : av-bv;
+    });
+    return arr;
+  }, [sortKey, sortDir]);
+
+  const HCell = ({k, label, align}) => (
+    <button onClick={()=>{
+      if (sortKey===k) setSortDir(d=>d==="desc"?"asc":"desc");
+      else { setSortKey(k); setSortDir("desc"); }
+    }} style={{
+      textAlign:align||"left",
+      padding:0, fontSize:10, color:"var(--text-3)",
+      letterSpacing:"0.08em", fontFamily:"JetBrains Mono",
+      cursor:"pointer", display:"flex", justifyContent:align==="right"?"flex-end":"flex-start", alignItems:"center", gap:3,
+    }}>
+      {label}
+      {sortKey===k && <span style={{color:"var(--accent-cyan)"}}>{sortDir==="desc"?"▼":"▲"}</span>}
+    </button>
+  );
+
+  return (
+    <Card id="currency" title="통화 강도" subtitle="CURRENCY STRENGTH · 30D vs USD" accent="var(--accent-purple)">
+      <div style={{display:"grid", gridTemplateColumns:"40px 1fr 60px 70px 60px", gap:"8px 12px", alignItems:"center"}}>
+        <HCell k="code" label=""/>
+        <HCell k="kr" label="통화"/>
+        <HCell k="level" label="레벨" align="right"/>
+        <HCell k="chg30" label="30D" align="right"/>
+        <div></div>
+      </div>
+      <div style={{height:1, background:"var(--line)", margin:"6px 0"}}/>
+      <div style={{display:"flex", flexDirection:"column", gap:8}}>
+        {sorted.map(c => {
+          const intensity = Math.min(1, Math.abs(c.chg30)/4);
+          const tint = c.chg30>=0
+            ? `rgba(37, 224, 138, ${intensity*0.18})`
+            : `rgba(255, 84, 112, ${intensity*0.18})`;
+          return (
+            <div key={c.code} style={{
+              display:"grid", gridTemplateColumns:"40px 1fr 60px 70px 60px", gap:"8px 12px",
+              alignItems:"center", padding:"6px 8px", margin:"-6px -8px",
+              background:tint, borderRadius:6,
+            }}>
+              <div className="mono" style={{fontSize:11, fontWeight:600, color:"var(--text-0)"}}>{c.code}</div>
+              <div style={{fontSize:11, color:"var(--text-1)"}}>{c.kr}</div>
+              <div className="num" style={{fontSize:11, color:"var(--text-1)", textAlign:"right"}}>{c.level}</div>
+              <div className="num" style={{fontSize:11, fontWeight:600, textAlign:"right", color: c.chg30>=0?"var(--up)":"var(--down)"}}>{c.chg30>=0?"+":""}{c.chg30}%</div>
+              <Sparkline data={c.spark} color={c.chg30>=0?"var(--up)":"var(--down)"} width={56} height={18} fill={false} strokeWidth={1.2}/>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function PanelETF({ periodFactor }){
+  const [filter, setFilter] = useState("all");
+  const filtered = ETF_FLOWS.filter(e => {
+    if (filter==="all") return true;
+    if (filter==="in")  return e.value>0;
+    if (filter==="out") return e.value<0;
+    return e.color===filter;
+  }).map(e => ({ ...e, scaled: e.value * periodFactor }));
+  const max = Math.max(...filtered.map(e=>Math.abs(e.scaled)), 1);
+
+  return (
+    <Card id="etf" title="ETF 자금흐름" subtitle="ETF FLOWS BY CATEGORY" accent="var(--accent-amber)"
+      right={
+        <div style={{display:"flex", gap:4}}>
+          <Chip active={filter==="all"} color="var(--text-1)" onClick={()=>setFilter("all")}>전체</Chip>
+          <Chip active={filter==="in"} color="var(--up)" onClick={()=>setFilter("in")}>유입</Chip>
+          <Chip active={filter==="out"} color="var(--down)" onClick={()=>setFilter("out")}>유출</Chip>
+        </div>
+      }>
+      <div style={{display:"flex", flexDirection:"column", gap:7}}>
+        {filtered.map((e,i)=>{
+          const colorVar = `var(--accent-${e.color})`;
+          return (
+            <div key={i} style={{display:"grid", gridTemplateColumns:"1fr 90px 70px", gap:10, alignItems:"center"}}>
+              <div>
+                <div style={{display:"flex", alignItems:"center", gap:6, marginBottom:2}}>
+                  <div style={{width:4, height:11, background:colorVar, boxShadow:`0 0 4px ${colorVar}`}}/>
+                  <span style={{fontSize:11.5, color:"var(--text-0)"}}>{e.cat}</span>
+                </div>
+                <div style={{fontSize:9, color:"var(--text-3)", letterSpacing:"0.05em", marginLeft:10}} className="mono">AUM ${e.aum}B</div>
+              </div>
+              <DivergingBar value={e.scaled} max={max} height={5}/>
+              <div className="num" style={{fontSize:12, fontWeight:600, textAlign:"right", color: e.scaled>=0?"var(--up)":"var(--down)"}}>
+                {e.scaled>=0?"+":""}${e.scaled.toFixed(2)}B
+              </div>
+            </div>
+          );
+        })}
+        {filtered.length===0 && (
+          <div style={{padding:"24px 8px", textAlign:"center", color:"var(--text-3)", fontSize:11}}>
+            해당 조건에 맞는 카테고리가 없습니다.
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+window.PanelAssetRotation = PanelAssetRotation;
+window.PanelM2 = PanelM2;
+window.PanelLeaderboard = PanelLeaderboard;
+window.PanelCurrency = PanelCurrency;
+window.PanelETF = PanelETF;
+</script>
+<script type="text/babel" data-presets="react" id="app-main">
+// =====================================================================
+// App — header, KPI strip, time controls, hero switcher, layout, drawer
+// =====================================================================
+const NAV_ITEMS = [
+  { id:"top",            kr:"대시보드"   },
+  { id:"flow-tracking",  kr:"흐름추적"   },
+  { id:"asset-rotation", kr:"자산회전"   },
+  { id:"currency-m2",    kr:"통화·M2"    },
+  { id:"reports",        kr:"리포트"     },
+];
+
+function smoothScrollTo(id){
+  const el = id==="top" ? document.body : document.getElementById(id);
+  if (!el) return;
+  const y = id==="top" ? 0 : el.getBoundingClientRect().top + window.scrollY - 100;
+  window.scrollTo({ top:y, behavior:"smooth" });
+}
+
+function Header({ activeNav, onNav, period, onOpenSettings }){
+  return (
+    <header style={{
+      display:"flex", alignItems:"center", justifyContent:"space-between",
+      padding:"14px 24px", borderBottom:"1px solid var(--line)",
+      background:"linear-gradient(180deg, rgba(10,15,28,0.95), rgba(5,8,15,0.6))",
+      backdropFilter:"blur(12px)", position:"sticky", top:0, zIndex:20,
+    }}>
+      <div style={{display:"flex", alignItems:"center", gap:18}}>
+        <a href="../index.html" style={{display:"flex", alignItems:"center", gap:10}}>
+          <svg width="28" height="28" viewBox="0 0 28 28">
+            <defs>
+              <linearGradient id="logoG" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--accent-cyan)"/>
+                <stop offset="100%" stopColor="var(--accent-purple)"/>
+              </linearGradient>
+            </defs>
+            <circle cx="14" cy="14" r="12" fill="none" stroke="url(#logoG)" strokeWidth="1.5"/>
+            <circle cx="14" cy="14" r="3" fill="url(#logoG)"/>
+            <path d="M 4 14 Q 14 4 24 14" fill="none" stroke="var(--accent-cyan)" strokeWidth="1" opacity="0.5"/>
+            <path d="M 4 14 Q 14 24 24 14" fill="none" stroke="var(--accent-purple)" strokeWidth="1" opacity="0.5"/>
+          </svg>
+          <div>
+            <div style={{fontSize:13, fontWeight:700, letterSpacing:"0.08em", color:"var(--text-0)"}}>GLOBAL MONEY · MOVE</div>
+            <div style={{fontSize:9.5, color:"var(--text-2)", letterSpacing:"0.18em", marginTop:1}}>전세계 자금흐름 실시간 추적</div>
+          </div>
+        </a>
+        <div style={{height:24, width:1, background:"var(--line)"}}/>
+        <nav style={{display:"flex", gap:18, fontSize:12}}>
+          {NAV_ITEMS.map(item => {
+            const active = item.id===activeNav;
+            return (
+              <button key={item.id} onClick={()=>onNav(item.id)} style={{
+                color: active ? "var(--text-0)" : "var(--text-2)",
+                fontWeight: active ? 600 : 400,
+                borderBottom: active ? "1px solid var(--accent-cyan)" : "1px solid transparent",
+                paddingBottom:4, cursor:"pointer", background:"none",
+                transition:"color 0.15s",
+              }}>{item.kr}</button>
+            );
+          })}
+        </nav>
+      </div>
+      <div style={{display:"flex", alignItems:"center", gap:14}}>
+        <span className="mono" style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.12em"}}>VIEW · {period}</span>
+        <div style={{height:18, width:1, background:"var(--line)"}}/>
+        <LiveTick/>
+        <div style={{height:18, width:1, background:"var(--line)"}}/>
+        <button onClick={onOpenSettings} title="설정" style={{
+          display:"flex", alignItems:"center", gap:6, padding:"5px 10px",
+          fontSize:11, color:"var(--text-1)",
+          border:"1px solid var(--line-strong)", borderRadius:6,
+        }}>
+          <span style={{fontSize:13}}>⚙</span>
+          <span>설정</span>
+        </button>
+        <div style={{display:"flex", alignItems:"center", gap:8, fontSize:11}}>
+          <div style={{
+            width:24, height:24, borderRadius:12,
+            background:"linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            fontSize:10, fontWeight:700, color:"var(--bg-0)",
+          }}>MR</div>
+          <span style={{color:"var(--text-1)"}}>매크로 리서치</span>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function KpiStrip({ periodFactor, period, onJump }){
+  return (
+    <div style={{
+      display:"flex", borderBottom:"1px solid var(--line)",
+      background:"rgba(10,15,28,0.4)", backdropFilter:"blur(8px)",
+    }}>
+      {KPIS.map((k,i) => {
+        // Scale dollar/percent values; keep DXY/VIX as-is (level metrics)
+        let val = k.val;
+        if (k.unit==="$B") val = k.val * periodFactor;
+        else if (k.unit==="%") val = k.val * (period==="1D"?0.05:period==="1W"?0.3:period==="1M"?1:period==="3M"?1.4:period==="1Y"?1.8:2.2);
+        return (
+          <KPI key={i} {...k} val={val}
+            accent={`var(--accent-${k.accent})`}
+            onClick={()=>k.anchor && onJump(k.anchor)}/>
+        );
+      })}
+    </div>
+  );
+}
+
+function fmtDate(d){
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+  return `${y}.${m}.${day}`;
+}
+
+function TimeControls({ period, setPeriod, scrub, setScrub }){
+  const today = new Date(2026, 4, 4);
+  const start = new Date(today); start.setDate(today.getDate() - PERIOD_DAYS[period]);
+  const cursor = new Date(start.getTime() + (today.getTime()-start.getTime()) * scrub);
+  return (
+    <div style={{
+      display:"flex", alignItems:"center", gap:18,
+      padding:"10px 24px", borderBottom:"1px solid var(--line)",
+      background:"rgba(10,15,28,0.4)",
+    }}>
+      <div style={{display:"flex", alignItems:"center", gap:10, fontSize:11, color:"var(--text-2)", letterSpacing:"0.1em"}}>
+        <span>기간 PERIOD</span>
+      </div>
+      <div style={{display:"flex", gap:4, padding:3, background:"rgba(120,150,210,0.06)", borderRadius:7}}>
+        {TIME_PERIODS.map(p => (
+          <button key={p} onClick={()=>setPeriod(p)}
+            style={{
+              padding:"5px 12px", fontSize:11, fontWeight:600,
+              fontFamily:"JetBrains Mono", letterSpacing:"0.04em",
+              borderRadius:5,
+              background: period===p ? "rgba(0,229,255,0.14)" : "transparent",
+              color: period===p ? "var(--accent-cyan)" : "var(--text-2)",
+              border: period===p ? "1px solid rgba(0,229,255,0.3)" : "1px solid transparent",
+              transition:"all 0.15s",
+            }}>{p}</button>
+        ))}
+      </div>
+
+      <div style={{flex:1, display:"flex", alignItems:"center", gap:14}}>
+        <div style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.12em"}} className="mono">
+          {fmtDate(start)} → <span style={{color:"var(--accent-cyan)"}}>{fmtDate(cursor)}</span> → {fmtDate(today)}
+        </div>
+        <div style={{flex:1, position:"relative", height:24, display:"flex", alignItems:"center"}}>
+          <div style={{position:"absolute", left:0, right:0, height:3, borderRadius:2, background:"rgba(120,150,210,0.10)"}}/>
+          <div style={{
+            position:"absolute", left:0, width:`${scrub*100}%`,
+            height:3, borderRadius:2,
+            background:"linear-gradient(90deg, var(--accent-purple), var(--accent-cyan))",
+            boxShadow:"0 0 6px var(--accent-cyan)",
+          }}/>
+          {[0,0.25,0.5,0.75,1].map(t => (
+            <div key={t} style={{
+              position:"absolute", left:`${t*100}%`, width:1, height:8,
+              background: t<=scrub ? "var(--accent-cyan)" : "var(--text-3)",
+              opacity:0.4, transform:"translateX(-0.5px)",
+            }}/>
+          ))}
+          <div style={{
+            position:"absolute", left:`${scrub*100}%`,
+            width:14, height:14, borderRadius:8,
+            background:"var(--bg-0)", border:"2px solid var(--accent-cyan)",
+            boxShadow:"0 0 10px var(--accent-cyan)",
+            transform:"translateX(-7px)", cursor:"grab", pointerEvents:"none",
+          }}/>
+          <input type="range" min="0" max="1" step="0.01" value={scrub}
+            onChange={e=>setScrub(parseFloat(e.target.value))}
+            style={{position:"absolute", left:0, right:0, top:0, bottom:0, width:"100%", opacity:0, cursor:"grab", margin:0}}
+          />
+        </div>
+      </div>
+
+      <div style={{display:"flex", alignItems:"center", gap:8}}>
+        <button onClick={()=>setScrub(0)} style={{
+          padding:"5px 10px", fontSize:11, color:"var(--text-2)",
+          border:"1px solid var(--line-strong)", borderRadius:5,
+        }} className="mono">⏮ 초기화</button>
+        <PlayButton scrub={scrub} setScrub={setScrub}/>
+      </div>
+    </div>
+  );
+}
+
+function PlayButton({ scrub, setScrub }){
+  const [playing, setPlaying] = useState(false);
+  useEffect(()=>{
+    if (!playing) return;
+    const id = setInterval(()=>{
+      setScrub(s => {
+        const next = s + 0.005;
+        if (next >= 1) { setPlaying(false); return 1; }
+        return next;
+      });
+    }, 50);
+    return ()=>clearInterval(id);
+  }, [playing, setScrub]);
+  return (
+    <button onClick={()=>{ if (scrub>=1) setScrub(0); setPlaying(p=>!p); }} style={{
+      padding:"5px 12px", fontSize:11, fontWeight:600,
+      color: playing ? "var(--accent-cyan)" : "var(--text-1)",
+      background: playing ? "rgba(0,229,255,0.10)" : "transparent",
+      border:`1px solid ${playing ? "rgba(0,229,255,0.4)" : "var(--line-strong)"}`,
+      borderRadius:5, letterSpacing:"0.06em",
+    }} className="mono">
+      {playing ? "⏸ 일시정지" : "▶ 재생"}
+    </button>
+  );
+}
+
+function HeroSwitcher({ view, setView }){
+  const opts = [
+    { id:"map",    kr:"세계지도", icon:"🌐" },
+    { id:"sankey", kr:"자산회전", icon:"⇄" },
+    { id:"chord",  kr:"코드도표", icon:"◐" },
+    { id:"bubble", kr:"버블차트", icon:"○" },
+  ];
+  return (
+    <div style={{display:"flex", gap:4, padding:3, background:"rgba(120,150,210,0.06)", borderRadius:7}}>
+      {opts.map(o => (
+        <button key={o.id} onClick={()=>setView(o.id)} style={{
+          padding:"6px 12px", fontSize:11, fontWeight:600,
+          color: view===o.id ? "var(--text-0)" : "var(--text-2)",
+          background: view===o.id ? "rgba(0,229,255,0.10)" : "transparent",
+          border: view===o.id ? "1px solid rgba(0,229,255,0.3)" : "1px solid transparent",
+          borderRadius:5, letterSpacing:"0.04em",
+          display:"flex", alignItems:"center", gap:6,
+        }}>
+          <span style={{fontSize:12, opacity:0.8}}>{o.icon}</span>
+          <span>{o.kr}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function AssetFilter({ filter, setFilter }){
+  const opts = [
+    { id:"all",         kr:"전체",   color:"var(--text-1)"     },
+    { id:"equities",    kr:"주식",   color:"var(--accent-cyan)" },
+    { id:"bonds",       kr:"채권",   color:"var(--accent-purple)" },
+    { id:"gold",        kr:"금",     color:"var(--accent-amber)" },
+    { id:"commodities", kr:"원자재", color:"var(--accent-lime)"  },
+  ];
+  return (
+    <div style={{display:"flex", gap:5}}>
+      {opts.map(o => (
+        <Chip key={o.id} active={filter===o.id} color={o.color} onClick={()=>setFilter(o.id)}>{o.kr}</Chip>
+      ))}
+    </div>
+  );
+}
+
+function Hero({ view, scrub, filter, setFilter, periodFactor }){
+  return (
+    <Card style={{height:"100%"}}
+      title={
+        view==="map" ? "글로벌 자금이동 흐름" :
+        view==="sankey" ? "자산 클래스 회전 산키" :
+        view==="chord" ? "자산 클래스 상호 이동" :
+        "국가·자산 매트릭스"
+      }
+      subtitle={
+        view==="map" ? "GLOBAL CAPITAL FLOWS · NOTIONAL $B" :
+        view==="sankey" ? "ASSET ROTATION SANKEY" :
+        view==="chord" ? "BILATERAL ASSET ROTATION" :
+        "RETURN × FLOW × AUM · YTD"
+      }
+      accent="var(--accent-cyan)" padding={false}
+      right={view==="map" ? <AssetFilter filter={filter} setFilter={setFilter}/> : null}>
+      <div style={{position:"relative", flex:1, minHeight:0, height:"100%"}}>
+        {view==="map"    && <HeroMap scrub={scrub} filterAsset={filter} periodFactor={periodFactor}/>}
+        {view==="sankey" && <HeroSankey periodFactor={periodFactor}/>}
+        {view==="chord"  && <HeroChord  periodFactor={periodFactor}/>}
+        {view==="bubble" && <HeroBubble periodFactor={periodFactor}/>}
+      </div>
+    </Card>
+  );
+}
+
+function SettingsDrawer({ open, onClose, period, setPeriod, heroView, setHeroView, filter, setFilter, scrub, setScrub, density, setDensity }){
+  const Section = ({title, children}) => (
+    <div style={{padding:"14px 18px", borderBottom:"1px solid var(--line)"}}>
+      <div style={{
+        fontSize:10, fontWeight:600, letterSpacing:"0.14em",
+        color:"var(--text-2)", textTransform:"uppercase", marginBottom:10,
+      }}>{title}</div>
+      {children}
+    </div>
+  );
+  const Group = ({label, children}) => (
+    <div style={{marginBottom:10}}>
+      <div style={{fontSize:11, color:"var(--text-1)", marginBottom:6}}>{label}</div>
+      {children}
+    </div>
+  );
+  return (
+    <>
+      <div className={"settings-backdrop"+(open?" open":"")} onClick={onClose}/>
+      <aside className={"settings-drawer"+(open?" open":"")} aria-hidden={!open}>
+        <div style={{
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          padding:"14px 18px", borderBottom:"1px solid var(--line-strong)",
+        }}>
+          <div>
+            <div style={{fontSize:13, fontWeight:700, letterSpacing:"0.06em"}}>설정 · SETTINGS</div>
+            <div style={{fontSize:10, color:"var(--text-2)", marginTop:2, letterSpacing:"0.1em"}}>VIEW · DATA · TIMELINE</div>
+          </div>
+          <button onClick={onClose} style={{
+            width:28, height:28, borderRadius:6, color:"var(--text-1)",
+            border:"1px solid var(--line-strong)", fontSize:14,
+          }}>✕</button>
+        </div>
+        <div style={{flex:1, overflowY:"auto"}}>
+          <Section title="Hero 시각화">
+            <Group label="시각화 모드">
+              <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:6}}>
+                {[{v:"map",l:"세계지도"},{v:"sankey",l:"산키"},{v:"chord",l:"코드"},{v:"bubble",l:"버블"}].map(o => (
+                  <button key={o.v} onClick={()=>setHeroView(o.v)} style={{
+                    padding:"8px 10px", fontSize:11, fontWeight:600,
+                    border: heroView===o.v ? "1px solid var(--accent-cyan)" : "1px solid var(--line-strong)",
+                    background: heroView===o.v ? "rgba(0,229,255,0.10)" : "transparent",
+                    color: heroView===o.v ? "var(--text-0)" : "var(--text-1)",
+                    borderRadius:6,
+                  }}>{o.l}</button>
+                ))}
+              </div>
+            </Group>
+            <Group label="자산 필터">
+              <select value={filter} onChange={e=>setFilter(e.target.value)} style={{
+                width:"100%", padding:"6px 10px", fontSize:11,
+                background:"rgba(120,150,210,0.06)", color:"var(--text-0)",
+                border:"1px solid var(--line-strong)", borderRadius:6, fontFamily:"inherit",
+              }}>
+                <option value="all">전체</option>
+                <option value="equities">주식</option>
+                <option value="bonds">채권</option>
+                <option value="gold">금</option>
+                <option value="commodities">원자재</option>
+              </select>
+            </Group>
+          </Section>
+
+          <Section title="시간 컨트롤">
+            <Group label="기간">
+              <div style={{display:"flex", gap:4, padding:3, background:"rgba(120,150,210,0.06)", borderRadius:6}}>
+                {TIME_PERIODS.map(p => (
+                  <button key={p} onClick={()=>setPeriod(p)} style={{
+                    flex:1, padding:"5px 0", fontSize:11, fontWeight:600,
+                    fontFamily:"JetBrains Mono",
+                    background: period===p ? "rgba(0,229,255,0.14)" : "transparent",
+                    color: period===p ? "var(--accent-cyan)" : "var(--text-2)",
+                    border: period===p ? "1px solid rgba(0,229,255,0.3)" : "1px solid transparent",
+                    borderRadius:4,
+                  }}>{p}</button>
+                ))}
+              </div>
+            </Group>
+            <Group label={`타임라인 위치 · ${(scrub*100).toFixed(0)}%`}>
+              <input type="range" min="0" max="1" step="0.01" value={scrub}
+                onChange={e=>setScrub(parseFloat(e.target.value))}
+                style={{width:"100%", accentColor:"var(--accent-cyan)"}}/>
+            </Group>
+          </Section>
+
+          <Section title="화면 밀도">
+            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:6}}>
+              {[{v:"compact",l:"조밀"},{v:"regular",l:"기본"}].map(o => (
+                <button key={o.v} onClick={()=>setDensity(o.v)} style={{
+                  padding:"8px 10px", fontSize:11, fontWeight:600,
+                  border: density===o.v ? "1px solid var(--accent-cyan)" : "1px solid var(--line-strong)",
+                  background: density===o.v ? "rgba(0,229,255,0.10)" : "transparent",
+                  color: density===o.v ? "var(--text-0)" : "var(--text-1)",
+                  borderRadius:6,
+                }}>{o.l}</button>
+              ))}
+            </div>
+          </Section>
+        </div>
+        <div style={{padding:"12px 18px", borderTop:"1px solid var(--line-strong)", fontSize:10, color:"var(--text-3)", letterSpacing:"0.1em"}} className="mono">
+          v2.4.1 · 한국어 · GMM TERMINAL
+        </div>
+      </aside>
+    </>
+  );
+}
+
+// ============================================================
+function App(){
+  const [heroView, setHeroView] = useState("map");
+  const [period, setPeriod] = useState("1M");
+  const [scrub, setScrub] = useState(0.78);
+  const [filter, setFilter] = useState("all");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [activeNav, setActiveNav] = useState("top");
+  const [density, setDensity] = useState("regular");
+
+  const periodFactor = PERIOD_FACTOR[period] || 1;
+
+  const onNav = (id) => {
+    setActiveNav(id);
+    smoothScrollTo(id);
+  };
+
+  // Track which section is in viewport for nav highlight
+  useEffect(()=>{
+    const sectionMap = {
+      "flow-tracking":  "flow-tracking",
+      "asset-rotation": "asset-rotation",
+      "currency-m2":    "m2-supply",
+      "reports":        "leaderboard",
+    };
+    const onScroll = () => {
+      const y = window.scrollY + 200;
+      if (y < 200) { setActiveNav("top"); return; }
+      let pick = "top";
+      for (const [navId, elId] of Object.entries(sectionMap)){
+        const el = document.getElementById(elId);
+        if (el && y >= el.offsetTop) pick = navId;
+      }
+      setActiveNav(pick);
+    };
+    window.addEventListener("scroll", onScroll, { passive:true });
+    onScroll();
+    return ()=>window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Density presets
+  const gap = density==="compact" ? 10 : 14;
+  const padX = density==="compact" ? 16 : 24;
+  const heroH = density==="compact" ? 480 : 560;
+
+  return (
+    <div style={{minHeight:"100vh"}}>
+      <Header activeNav={activeNav} onNav={onNav} period={period}
+        onOpenSettings={()=>setSettingsOpen(true)}/>
+      <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav}/>
+      <TimeControls period={period} setPeriod={setPeriod} scrub={scrub} setScrub={setScrub}/>
+
+      <div id="flow-tracking" style={{
+        display:"grid",
+        gridTemplateColumns:"minmax(0, 1.55fr) minmax(380px, 1fr)",
+        gap, padding:`${gap}px ${padX}px ${gap}px`,
+        scrollMarginTop:120,
+      }}>
+        <div style={{display:"flex", flexDirection:"column", gap, minWidth:0}}>
+          <div style={{
+            display:"flex", justifyContent:"space-between", alignItems:"center",
+            padding:"4px 2px",
+          }}>
+            <div style={{display:"flex", alignItems:"center", gap:14}}>
+              <div style={{fontSize:11, color:"var(--text-2)", letterSpacing:"0.18em", fontWeight:600}}>HERO VIEW · 시각화 모드</div>
+            </div>
+            <HeroSwitcher view={heroView} setView={setHeroView}/>
+          </div>
+          <div style={{height:heroH, minHeight:heroH}}>
+            <Hero view={heroView} scrub={scrub} filter={filter} setFilter={setFilter} periodFactor={periodFactor}/>
+          </div>
+          <div id="currency-m2"><PanelM2/></div>
+        </div>
+
+        <div style={{display:"flex", flexDirection:"column", gap, minWidth:0}}>
+          <PanelAssetRotation periodFactor={periodFactor}/>
+          <div id="reports"><PanelLeaderboard periodFactor={periodFactor}/></div>
+          <PanelCurrency/>
+          <PanelETF periodFactor={periodFactor}/>
+        </div>
+      </div>
+
+      <footer style={{
+        padding:"14px 24px", borderTop:"1px solid var(--line)",
+        display:"flex", justifyContent:"space-between",
+        fontSize:10, color:"var(--text-3)", letterSpacing:"0.1em",
+      }} className="mono">
+        <span>© 2026 GLOBAL MONEY MOVE · MACRO RESEARCH TERMINAL</span>
+        <span>DATA · BIS · IIF · IMF · ICI · BLOOMBERG · 2026.05.04</span>
+        <span>v2.4.1 · 한국어</span>
+      </footer>
+
+      <button className="settings-fab" title="설정 열기" onClick={()=>setSettingsOpen(true)}>⚙</button>
+
+      <SettingsDrawer open={settingsOpen} onClose={()=>setSettingsOpen(false)}
+        period={period} setPeriod={setPeriod}
+        heroView={heroView} setHeroView={setHeroView}
+        filter={filter} setFilter={setFilter}
+        scrub={scrub} setScrub={setScrub}
+        density={density} setDensity={setDensity}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
