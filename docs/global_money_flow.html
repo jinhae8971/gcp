@@ -69,6 +69,29 @@
     opacity:0; pointer-events:none; transition:opacity 0.2s;
   }
   .settings-backdrop.open{opacity:1; pointer-events:auto}
+
+  /* Responsive: collapse the hero / right-column grid on tablet & smaller. */
+  @media (max-width: 1100px){
+    .gmm-main-grid{ grid-template-columns: 1fr !important; }
+    .gmm-hero-shell{ height: 460px !important; min-height: 460px !important; }
+    header nav{ display: none !important; }
+    .gmm-data-pill{ display: none !important; }
+  }
+  @media (max-width: 720px){
+    .gmm-time-controls{ flex-wrap: wrap !important; gap: 10px !important; }
+    .gmm-time-scrubber{ flex-basis: 100% !important; }
+    .gmm-hero-shell{ height: 380px !important; min-height: 380px !important; }
+  }
+
+  /* Refresh button spin while any feed slice is loading */
+  .gmm-refresh-spin{ animation: gmm-spin 1.1s linear infinite; transform-origin: 50% 50%; display: inline-block; }
+  @keyframes gmm-spin { to { transform: rotate(360deg); } }
+
+  /* Respect user motion preferences */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    /* SVG <animate> / <animateMotion> get explicitly hidden via JS-side mute below */
+  }
 </style>
 </head>
 <body>
@@ -518,14 +541,27 @@ function arcPath(x1,y1,x2,y2,curve=0.3){
   return { d:`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`, cx, cy };
 }
 
-function HeroMap({ scrub, filterAsset, periodFactor }){
+function HeroMap({ scrub, filterAsset, periodFactor, ai }){
   const [hover, setHover] = useState(null);
   const [hoverFlow, setHoverFlow] = useState(null);
   const containerRef = useRef(null);
 
+  // Color is derived from asset class so the AI doesn't have to specify it.
+  const ASSET_TO_COLOR = { equities:"cyan", bonds:"purple", gold:"amber", commodities:"amber", cash:"mag" };
+  const aiGeo = ai?.data?.geoFlows;
+  const usingAIGeo = Array.isArray(aiGeo) && aiGeo.length >= 6;
+  const allFlows = usingAIGeo
+    ? aiGeo.filter(f => GEO_NODES[f.from] && GEO_NODES[f.to] && Number.isFinite(Number(f.value)))
+           .map(f => ({ ...f, value: Number(f.value), color: f.color || ASSET_TO_COLOR[f.asset] || "cyan" }))
+    : GEO_FLOWS;
+
+  // AI geoFlows are already absolute (last 30 days) — don't re-scale by periodFactor in tooltips.
+  // We expose this so the map node aggregation matches.
+  const effectiveScale = usingAIGeo ? 1 : periodFactor;
+
   const flows = useMemo(()=>{
-    return GEO_FLOWS.filter(f => filterAsset==="all" || f.asset===filterAsset);
-  }, [filterAsset]);
+    return allFlows.filter(f => filterAsset==="all" || f.asset===filterAsset);
+  }, [filterAsset, ai, usingAIGeo]);
 
   const W = 100, H = 100;
 
@@ -566,7 +602,7 @@ function HeroMap({ scrub, filterAsset, periodFactor }){
             if (!from || !to) return null;
             const { d } = arcPath(from.x, from.y, to.x, to.y);
             const colorVar = `var(--accent-${f.color})`;
-            const scaledValue = f.value * periodFactor;
+            const scaledValue = f.value * effectiveScale;
             const strokeW = 0.08 + Math.min(0.45, scaledValue/100);
             const isHover = hoverFlow===i;
             // scrub-driven dash phase: makes the line "fill in" as scrub progresses
@@ -601,9 +637,9 @@ function HeroMap({ scrub, filterAsset, periodFactor }){
 
         <g>
           {Object.entries(GEO_NODES).map(([id, n]) => {
-            const inflow = GEO_FLOWS.filter(f=>f.to===id).reduce((s,f)=>s+f.value,0);
-            const outflow = GEO_FLOWS.filter(f=>f.from===id).reduce((s,f)=>s+f.value,0);
-            const total = (inflow + outflow) * periodFactor;
+            const inflow = allFlows.filter(f=>f.to===id).reduce((s,f)=>s+f.value,0);
+            const outflow = allFlows.filter(f=>f.from===id).reduce((s,f)=>s+f.value,0);
+            const total = (inflow + outflow) * effectiveScale;
             const r = 0.6 + Math.min(1.6, total/120);
             const isMajor = total > 30;
             const isHover = hover===id;
@@ -636,10 +672,10 @@ function HeroMap({ scrub, filterAsset, periodFactor }){
 
       {hover && (() => {
         const n = GEO_NODES[hover];
-        const inflows = GEO_FLOWS.filter(f=>f.to===hover);
-        const outflows = GEO_FLOWS.filter(f=>f.from===hover);
-        const inSum = inflows.reduce((s,f)=>s+f.value,0) * periodFactor;
-        const outSum = outflows.reduce((s,f)=>s+f.value,0) * periodFactor;
+        const inflows = allFlows.filter(f=>f.to===hover);
+        const outflows = allFlows.filter(f=>f.from===hover);
+        const inSum = inflows.reduce((s,f)=>s+f.value,0) * effectiveScale;
+        const outSum = outflows.reduce((s,f)=>s+f.value,0) * effectiveScale;
         return (
           <div style={{
             position:"absolute", left:`${n.x}%`, top:`${n.y}%`,
@@ -674,7 +710,7 @@ function HeroMap({ scrub, filterAsset, periodFactor }){
         const midX = (from.x+to.x)/2;
         const midY = (from.y+to.y)/2 - 6;
         const ASSET_KR = {equities:"주식", bonds:"채권", gold:"금", commodities:"원자재", cash:"현금"};
-        const v = f.value * periodFactor;
+        const v = f.value * effectiveScale;
         return (
           <div style={{
             position:"absolute", left:`${midX}%`, top:`${midY}%`,
@@ -1797,15 +1833,17 @@ function Header({ activeNav, onNav, period, onOpenSettings, feed, onRefresh }){
         </nav>
       </div>
       <div style={{display:"flex", alignItems:"center", gap:14}}>
-        <div style={{display:"flex", alignItems:"center", gap:8, padding:"3px 10px", border:"1px solid var(--line-strong)", borderRadius:14}} title="데이터 소스 상태">
+        <div className="gmm-data-pill" style={{display:"flex", alignItems:"center", gap:8, padding:"3px 10px", border:"1px solid var(--line-strong)", borderRadius:14}} title="데이터 소스 상태">
           <span style={{fontSize:9, color:"var(--text-3)", letterSpacing:"0.12em"}} className="mono">DATA</span>
           <SourceDot status={feed?.currency} />
           <span style={{color:"var(--text-3)"}}>·</span>
           <SourceDot status={feed?.m2} requiresKey={feed?.m2?.source==="sample" && !feed?.m2?.error} keyLabel="FRED" />
           <span style={{color:"var(--text-3)"}}>·</span>
           <SourceDot status={feed?.ai} requiresKey={false} keyLabel="" />
-          <button onClick={onRefresh} title="실시간 데이터 새로고침"
-            style={{padding:"2px 6px", fontSize:11, color:"var(--text-1)", borderRadius:4}}>↻</button>
+          <button onClick={onRefresh} title="실시간 데이터 새로고침" aria-label="실시간 데이터 새로고침"
+            style={{padding:"2px 6px", fontSize:11, color:"var(--text-1)", borderRadius:4}}>
+            <span className={(feed?.currency?.loading || feed?.m2?.loading || feed?.vix?.loading || feed?.ai?.loading) ? "gmm-refresh-spin" : ""}>↻</span>
+          </button>
         </div>
         <div style={{height:18, width:1, background:"var(--line)"}}/>
         <span className="mono" style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.12em"}}>VIEW · {period}</span>
@@ -1873,7 +1911,7 @@ function TimeControls({ period, setPeriod, scrub, setScrub }){
   const start = new Date(today); start.setDate(today.getDate() - PERIOD_DAYS[period]);
   const cursor = new Date(start.getTime() + (today.getTime()-start.getTime()) * scrub);
   return (
-    <div style={{
+    <div className="gmm-time-controls" style={{
       display:"flex", alignItems:"center", gap:18,
       padding:"10px 24px", borderBottom:"1px solid var(--line)",
       background:"rgba(10,15,28,0.4)",
@@ -1896,7 +1934,7 @@ function TimeControls({ period, setPeriod, scrub, setScrub }){
         ))}
       </div>
 
-      <div style={{flex:1, display:"flex", alignItems:"center", gap:14}}>
+      <div className="gmm-time-scrubber" style={{flex:1, display:"flex", alignItems:"center", gap:14, minWidth:0}}>
         <div style={{fontSize:10, color:"var(--text-3)", letterSpacing:"0.12em"}} className="mono">
           {fmtDate(start)} → <span style={{color:"var(--accent-cyan)"}}>{fmtDate(cursor)}</span> → {fmtDate(today)}
         </div>
@@ -2009,7 +2047,8 @@ function AssetFilter({ filter, setFilter }){
   );
 }
 
-function Hero({ view, scrub, filter, setFilter, periodFactor }){
+function Hero({ view, scrub, filter, setFilter, periodFactor, period, ai }){
+  const periodTag = period ? ` · ${period}` : "";
   return (
     <Card style={{height:"100%"}}
       title={
@@ -2019,15 +2058,20 @@ function Hero({ view, scrub, filter, setFilter, periodFactor }){
         "국가·자산 매트릭스"
       }
       subtitle={
-        view==="map" ? "GLOBAL CAPITAL FLOWS · NOTIONAL $B" :
-        view==="sankey" ? "ASSET ROTATION SANKEY" :
-        view==="chord" ? "BILATERAL ASSET ROTATION" :
+        view==="map" ? `GLOBAL CAPITAL FLOWS${periodTag} · NOTIONAL $B` :
+        view==="sankey" ? `ASSET ROTATION SANKEY${periodTag}` :
+        view==="chord" ? `BILATERAL ASSET ROTATION${periodTag}` :
         "RETURN × FLOW × AUM · YTD"
       }
       accent="var(--accent-cyan)" padding={false}
-      right={view==="map" ? <AssetFilter filter={filter} setFilter={setFilter}/> : null}>
+      right={view==="map" ? (
+        <div style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap"}}>
+          <AISourceBadge ai={ai}/>
+          <AssetFilter filter={filter} setFilter={setFilter}/>
+        </div>
+      ) : null}>
       <div style={{position:"relative", flex:1, minHeight:0, height:"100%"}}>
-        {view==="map"    && <HeroMap scrub={scrub} filterAsset={filter} periodFactor={periodFactor}/>}
+        {view==="map"    && <HeroMap scrub={scrub} filterAsset={filter} periodFactor={periodFactor} ai={ai}/>}
         {view==="sankey" && <HeroSankey periodFactor={periodFactor}/>}
         {view==="chord"  && <HeroChord  periodFactor={periodFactor}/>}
         {view==="bubble" && <HeroBubble periodFactor={periodFactor}/>}
@@ -2279,6 +2323,14 @@ function App(){
     return ()=>window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Esc closes settings drawer (a11y baseline for any modal-like UI)
+  useEffect(()=>{
+    if (!settingsOpen) return;
+    const onKey = (e) => { if (e.key === "Escape") setSettingsOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return ()=>window.removeEventListener("keydown", onKey);
+  }, [settingsOpen]);
+
   // Density presets
   const gap = density==="compact" ? 10 : 14;
   const padX = density==="compact" ? 16 : 24;
@@ -2292,7 +2344,7 @@ function App(){
       <KpiStrip periodFactor={periodFactor} period={period} onJump={onNav} feed={feed}/>
       <TimeControls period={period} setPeriod={setPeriod} scrub={scrub} setScrub={setScrub}/>
 
-      <div id="flow-tracking" style={{
+      <div id="flow-tracking" className="gmm-main-grid" style={{
         display:"grid",
         gridTemplateColumns:"minmax(0, 1.55fr) minmax(380px, 1fr)",
         gap, padding:`${gap}px ${padX}px ${gap}px`,
@@ -2308,9 +2360,20 @@ function App(){
             </div>
             <HeroSwitcher view={heroView} setView={setHeroView}/>
           </div>
-          <div style={{height:heroH, minHeight:heroH}}>
-            <Hero view={heroView} scrub={scrub} filter={filter} setFilter={setFilter} periodFactor={periodFactor}/>
+          <div className="gmm-hero-shell" style={{height:heroH, minHeight:heroH}}>
+            <Hero view={heroView} scrub={scrub} filter={filter} setFilter={setFilter} periodFactor={periodFactor} period={period} ai={feed.ai}/>
           </div>
+          {feed.ai?.data?.narratives?.hero && (
+            <div style={{
+              padding:"10px 14px", fontSize:12, color:"var(--text-1)",
+              background:"linear-gradient(90deg, rgba(0,229,255,0.06), rgba(139,108,255,0.04))",
+              border:"1px solid var(--line)", borderRadius:10,
+              borderLeft:"2px solid var(--accent-cyan)",
+            }}>
+              <span style={{fontSize:9.5, color:"var(--text-3)", letterSpacing:"0.14em", marginRight:8}} className="mono">AI 매크로 해설</span>
+              {feed.ai.data.narratives.hero}
+            </div>
+          )}
           <div id="currency-m2"><PanelM2 feedStatus={feed.m2} ai={feed.ai}/></div>
         </div>
 
