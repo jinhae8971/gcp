@@ -257,9 +257,9 @@ Object.assign(window, {
 <script type="text/babel" data-presets="react" id="app-primitives">
 // =====================================================================
 // UI primitives — Card, Sparkline, Bar, KPI, Chip, LiveTick, Tooltip
+// (useState/useEffect/useRef/useMemo/useCallback are exposed on window
+//  by the data script via `var {...} = React;`)
 // =====================================================================
-const { useState, useEffect, useRef, useMemo, useCallback } = React;
-
 function Card({ title, subtitle, right, children, padding=true, style, accent, id }){
   return (
     <div id={id} style={{
