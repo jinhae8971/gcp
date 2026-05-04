@@ -78,6 +78,7 @@ NAVER_HEADERS = {
 }
 
 _NAVER_LOGGED_KEYS = {"index": False, "stock_list": False, "stock_basic": False, "intraday": False}
+_NAVER_RAW_SAMPLES = {}  # key -> dict (첫 번째 raw response sample for embedding in JSON debug)
 
 def _parse_naver_num(v, default=0):
     """Naver는 숫자를 string('27,450') 또는 int로 반환 — 둘 다 처리"""
@@ -109,7 +110,8 @@ def naver_index_basic(market="KOSPI"):
         r.raise_for_status()
         d = r.json()
         if not _NAVER_LOGGED_KEYS["index"]:
-            print(f"  [naver-debug] index keys: {list(d.keys())[:20]}")
+            print(f"  [naver-debug] index raw: {json.dumps(d, ensure_ascii=False)[:600]}")
+            _NAVER_RAW_SAMPLES["index_kospi"] = d
             _NAVER_LOGGED_KEYS["index"] = True
         return {
             "value":     _first_present(d, ["closePrice", "lastPrice", "currentPrice"]),
@@ -132,7 +134,8 @@ def naver_stock_basic(code):
         r.raise_for_status()
         d = r.json()
         if not _NAVER_LOGGED_KEYS["stock_basic"]:
-            print(f"  [naver-debug] stock keys: {list(d.keys())[:25]}")
+            print(f"  [naver-debug] stock_basic raw: {json.dumps(d, ensure_ascii=False)[:800]}")
+            _NAVER_RAW_SAMPLES["stock_basic"] = d
             _NAVER_LOGGED_KEYS["stock_basic"] = True
         return {
             "code": code,
@@ -176,7 +179,8 @@ def naver_top_stocks(market="KOSPI", direction="up", limit=30):
         d = r.json()
         stocks = d.get("stocks", [])
         if stocks and not _NAVER_LOGGED_KEYS["stock_list"]:
-            print(f"  [naver-debug] stock list keys: {list(stocks[0].keys())[:20]}")
+            print(f"  [naver-debug] stock_list[0] raw: {json.dumps(stocks[0], ensure_ascii=False)[:600]}")
+            _NAVER_RAW_SAMPLES["stock_list_first"] = stocks[0]
             _NAVER_LOGGED_KEYS["stock_list"] = True
         out = []
         for s in stocks[:limit]:
@@ -984,6 +988,10 @@ def main():
             "programTrade": program,
             "_source": pipeline_source,
         }
+
+    # 디버그용 raw 샘플 임베드 (필드명 발견 후 제거)
+    if _NAVER_RAW_SAMPLES:
+        out["_debug"] = _NAVER_RAW_SAMPLES
 
     os.makedirs(DOCS_DIR, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
