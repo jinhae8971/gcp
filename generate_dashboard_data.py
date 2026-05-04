@@ -77,6 +77,30 @@ NAVER_HEADERS = {
     "Accept": "application/json",
 }
 
+_NAVER_LOGGED_KEYS = {"index": False, "stock_list": False, "stock_basic": False, "intraday": False}
+_NAVER_RAW_SAMPLES = {}  # key -> dict (첫 번째 raw response sample for embedding in JSON debug)
+
+def _parse_naver_num(v, default=0):
+    """Naver는 숫자를 string('27,450') 또는 int로 반환 — 둘 다 처리"""
+    if v is None:
+        return default
+    if isinstance(v, (int, float)):
+        return v
+    s = str(v).replace(",", "").strip()
+    if not s or s == "-":
+        return default
+    try:
+        return float(s)
+    except Exception:
+        return default
+
+def _first_present(d, keys, default=0):
+    """여러 후보 키 중 첫 존재하는 값을 숫자로 파싱"""
+    for k in keys:
+        if k in d and d[k] not in (None, "", "-"):
+            return _parse_naver_num(d[k], default)
+    return default
+
 
 def naver_index_basic(market="KOSPI"):
     """Naver: KOSPI/KOSDAQ 인덱스 기본 시세"""
@@ -85,35 +109,188 @@ def naver_index_basic(market="KOSPI"):
         r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
         r.raise_for_status()
         d = r.json()
+        if not _NAVER_LOGGED_KEYS["index"]:
+            print(f"  [naver-debug] index raw: {json.dumps(d, ensure_ascii=False)[:600]}")
+            _NAVER_RAW_SAMPLES["index_kospi"] = d
+            _NAVER_LOGGED_KEYS["index"] = True
         return {
-            "value": safe_float(d.get("closePrice", "0").replace(",", "")),
-            "change": safe_float(d.get("compareToPreviousClosePrice", "0").replace(",", "")),
-            "changePct": safe_float(d.get("fluctuationsRatio", "0")),
-            "high": safe_float(d.get("highPrice", "0").replace(",", "")),
-            "low": safe_float(d.get("lowPrice", "0").replace(",", "")),
-            "volume": safe_int(d.get("accumulatedTradingValue", "0").replace(",", "")),
+            "value":     _first_present(d, ["closePrice", "lastPrice", "currentPrice"]),
+            "change":    _first_present(d, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
+            "changePct": _first_present(d, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
+            "high":      _first_present(d, ["highPrice", "high"]),
+            "low":       _first_present(d, ["lowPrice", "low"]),
+            "volume":    _first_present(d, ["accumulatedTradingValue", "tradingValue", "tradeAmount", "accumulatedTradingVolume"]),
         }
     except Exception as e:
         print(f"  [naver-index] {market} failed: {e}")
         return None
 
 
+def naver_stock_basic(code):
+    """Naver: 개별 종목 기본 시세 — 여러 endpoint 시도"""
+    candidates = [
+        f"https://m.stock.naver.com/api/stock/{code}/basic",          # 단수형
+        f"https://m.stock.naver.com/api/stocks/{code}/basic",         # 복수형 (실패 가능)
+        f"https://m.stock.naver.com/api/stocks/{code}/integration",   # 통합 데이터
+    ]
+    last_err = None
+    for url in candidates:
+        try:
+            r = requests.get(url, headers=NAVER_HEADERS, timeout=6)
+            if r.status_code != 200:
+                last_err = f"HTTP {r.status_code}"
+                continue
+            d = r.json()
+            if not _NAVER_LOGGED_KEYS["stock_basic"]:
+                print(f"  [naver-debug] stock_basic({url.split('/')[-1]}) raw: {json.dumps(d, ensure_ascii=False)[:400]}")
+                _NAVER_RAW_SAMPLES["stock_basic"] = {"url": url, "data": d}
+                _NAVER_LOGGED_KEYS["stock_basic"] = True
+            # integration endpoint은 stockBasic 또는 별도 객체로 감쌀 수 있음
+            stock = d.get("stockBasic") or d.get("basic") or d
+            # value 단위: accumulatedTradingValue는 백만원 → 원으로 변환
+            tv_million = _first_present(stock, ["accumulatedTradingValue", "tradingValue"])
+            mv_eok = _first_present(stock, ["marketValue", "marketCap"])
+            return {
+                "code": code,
+                "name":      stock.get("stockName") or stock.get("itemName") or stock.get("name") or code,
+                "price":     int(_first_present(stock, ["closePriceRaw", "closePrice", "lastPrice", "currentPrice"])),
+                "changePct": _first_present(stock, ["fluctuationsRatio", "changeRate", "fluctuationRate"]),
+                "change":    _first_present(stock, ["compareToPreviousClosePrice", "compareToPreviousPrice", "change"]),
+                "volume_won": int(tv_million * 1_000_000),  # 백만원 → 원
+                "volume":    int(_first_present(stock, ["accumulatedTradingVolume", "tradingVolume"])),
+                "marketCap": int(mv_eok * 100_000_000),  # 억원 → 원
+            }
+        except Exception as e:
+            last_err = str(e)
+            continue
+    print(f"  [naver-stock-basic] {code} failed all endpoints: {last_err}")
+    return None
+
+
 def naver_index_intraday(market="KOSPI"):
-    """Naver: 인덱스 일봉 차트 (최근 30일)"""
+    """Naver: 인덱스 차트 — siseJson API (PC) 가 가장 안정적"""
+    # 1. PC siseJson API (분봉 차트용)
     try:
-        url = f"https://m.stock.naver.com/api/chart/domestic/index/{market}?periodType=dayCandle&count=30"
-        r = requests.get(url, headers=NAVER_HEADERS, timeout=10)
-        r.raise_for_status()
-        d = r.json()
-        out = []
-        for row in d:
-            t = row.get("localTime", "")[5:10]  # MM-DD
-            close = safe_float(row.get("closePrice", 0))
-            out.append([t, close])
-        return out[-20:]
+        end_dt = NOW.strftime("%Y%m%d")
+        start_dt = (NOW.date() - datetime.timedelta(days=30)).strftime("%Y%m%d")
+        url = f"https://api.finance.naver.com/siseJson.naver?symbol={market}&requestType=1&startTime={start_dt}&endTime={end_dt}&timeframe=day"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+        if r.status_code == 200 and r.text.strip():
+            # response is a JS-array-like text. Parse with eval-safe approach.
+            txt = r.text.strip()
+            # Replace single-quoted dates to double-quoted JSON
+            import re
+            txt = re.sub(r"'([^']*)'", r'"\1"', txt)
+            arr = json.loads(txt)
+            if isinstance(arr, list) and len(arr) > 1:
+                out = []
+                for row in arr[1:]:  # row[0] is header
+                    if len(row) < 2: continue
+                    date_s = str(row[0])
+                    close = safe_float(row[4] if len(row) >= 5 else row[1])
+                    if close > 0:
+                        # date format: 20260504 → 05-04
+                        if len(date_s) == 8:
+                            t = f"{date_s[4:6]}-{date_s[6:8]}"
+                        else:
+                            t = date_s[-5:]
+                        out.append([t, close])
+                if out:
+                    if not _NAVER_LOGGED_KEYS["intraday"]:
+                        print(f"  [naver-debug] intraday(siseJson): {len(out)} points")
+                        _NAVER_LOGGED_KEYS["intraday"] = True
+                    return out[-30:]
     except Exception as e:
-        print(f"  [naver-intraday] {market} failed: {e}")
-        return None
+        print(f"  [naver-intraday] siseJson failed: {e}")
+
+    # 2. integration endpoint (totalInfos 배열에 분봉 데이터 시도)
+    try:
+        url = f"https://m.stock.naver.com/api/index/{market}/integration"
+        r = requests.get(url, headers=NAVER_HEADERS, timeout=8)
+        if r.status_code == 200:
+            d = r.json()
+            # 분봉 series 키 탐색
+            for key in ["intradayMinutes", "minutesData", "minuteData", "minutes", "minuteCandles"]:
+                series = d.get(key)
+                if isinstance(series, list) and series:
+                    out = []
+                    for row in series:
+                        t = str(row.get("localTime", row.get("time", "")))[-8:-3]
+                        close = safe_float(row.get("closePrice") or row.get("close") or 0)
+                        if close > 0:
+                            out.append([t, close])
+                    if out:
+                        return out[-30:]
+    except Exception:
+        pass
+
+    print(f"  [naver-intraday] {market} all endpoints failed")
+    return None
+
+
+def fetch_naver_news_v2():
+    """Naver Finance 시황 뉴스 v2 — 여러 source 시도"""
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    out = []
+
+    # 1. Naver Finance mobile news API
+    try:
+        r = requests.get(
+            "https://m.stock.naver.com/api/news/section/categoryAll?pageSize=15",
+            headers=headers, timeout=10,
+        )
+        if r.status_code == 200:
+            d = r.json()
+            items = d.get("items") or d.get("articles") or d.get("data", [])
+            for it in items[:10]:
+                headline = it.get("title") or it.get("headline") or ""
+                if not headline:
+                    continue
+                t = it.get("displayDateTime", "") or it.get("publishedAt", "") or ""
+                t = t[11:16] if len(t) >= 16 and ":" in t else NOW.strftime("%H:%M")
+                source = it.get("officeName") or it.get("source") or "네이버금융"
+                out.append({
+                    "time": t, "source": source, "headline": headline,
+                    "sentiment": classify_sentiment(headline),
+                    "tags": extract_tags(headline),
+                })
+            if out:
+                print(f"  [news] mobile API: {len(out)} items")
+                return out
+    except Exception as e:
+        print(f"  [news] mobile API failed: {e}")
+
+    # 2. Naver Finance HTML 페이지
+    try:
+        r = requests.get(
+            "https://finance.naver.com/news/mainnews.naver",
+            headers=headers, timeout=10,
+        )
+        r.encoding = "euc-kr"
+        soup = BeautifulSoup(r.text, "html.parser")
+        for li in (soup.select("li.block1") or soup.select("dl.newsList dd") or soup.select(".articleSubject"))[:10]:
+            a = li.select_one("a")
+            if not a:
+                continue
+            headline = a.get_text(strip=True)
+            if not headline or len(headline) < 5:
+                continue
+            time_el = li.select_one(".date") or li.select_one(".wdate")
+            t = time_el.get_text(strip=True)[-5:] if time_el else NOW.strftime("%H:%M")
+            src_el = li.select_one(".press") or li.select_one("em.press")
+            source = src_el.get_text(strip=True) if src_el else "네이버금융"
+            out.append({
+                "time": t, "source": source, "headline": headline,
+                "sentiment": classify_sentiment(headline),
+                "tags": extract_tags(headline),
+            })
+        if out:
+            print(f"  [news] HTML scrape: {len(out)} items")
+            return out
+    except Exception as e:
+        print(f"  [news] HTML scrape failed: {e}")
+
+    return None
 
 
 def naver_top_stocks(market="KOSPI", direction="up", limit=30):
@@ -124,15 +301,22 @@ def naver_top_stocks(market="KOSPI", direction="up", limit=30):
         r.raise_for_status()
         d = r.json()
         stocks = d.get("stocks", [])
+        if stocks and not _NAVER_LOGGED_KEYS["stock_list"]:
+            print(f"  [naver-debug] stock_list[0] raw: {json.dumps(stocks[0], ensure_ascii=False)[:600]}")
+            _NAVER_RAW_SAMPLES["stock_list_first"] = stocks[0]
+            _NAVER_LOGGED_KEYS["stock_list"] = True
         out = []
         for s in stocks[:limit]:
+            tv_million = _first_present(s, ["accumulatedTradingValue", "tradingValue", "tradeAmount"])
+            mv_eok = _first_present(s, ["marketValue", "marketCap"])
             out.append({
-                "code": s.get("itemCode", ""),
-                "name": s.get("stockName", ""),
-                "price": safe_int(str(s.get("closePrice", "0")).replace(",", "")),
-                "changePct": safe_float(s.get("fluctuationsRatio", 0)),
-                "volume_won": safe_int(str(s.get("accumulatedTradingValue", "0")).replace(",", "")),
-                "volume": safe_int(str(s.get("accumulatedTradingVolume", "0")).replace(",", "")),
+                "code": s.get("itemCode") or s.get("code", ""),
+                "name": s.get("stockName") or s.get("name", ""),
+                "price":     int(_first_present(s, ["closePriceRaw", "closePrice", "lastPrice"])),
+                "changePct": _first_present(s, ["fluctuationsRatio", "changeRate"]),
+                "volume_won": int(tv_million * 1_000_000),  # 백만원 → 원
+                "volume":     int(_first_present(s, ["accumulatedTradingVolume", "tradingVolume"])),
+                "marketCap":  int(mv_eok * 100_000_000),  # 억원 → 원
             })
         return out
     except Exception as e:
@@ -546,51 +730,13 @@ def compute_special_stocks(snap):
 # 8. 뉴스 (Naver Finance 메인 헤드라인 스크래핑)
 # ─────────────────────────────────────────
 def fetch_news():
-    """Naver 증권 메인 뉴스 스크래핑"""
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    out = []
-    try:
-        r = requests.get(
-            "https://finance.naver.com/news/mainnews.naver",
-            headers=headers, timeout=10,
-        )
-        r.encoding = "euc-kr"
-        soup = BeautifulSoup(r.text, "html.parser")
-        items = soup.select("li.block1") or soup.select("li") or []
-        for li in items[:7]:
-            a = li.select_one("a.tit") or li.select_one("a")
-            if not a:
-                continue
-            headline = a.get_text(strip=True)
-            if not headline or len(headline) < 5:
-                continue
-            time_el = li.select_one("span.wdate") or li.select_one("span.date")
-            t = time_el.get_text(strip=True) if time_el else NOW.strftime("%H:%M")
-            # 시간 추출 시도 (예: "2026-05-04 13:42" → "13:42")
-            if ":" in t and len(t) > 5:
-                t = t.split()[-1] if " " in t else t
-            source = "네이버금융"
-            src_el = li.select_one("span.press") or li.select_one("em.press")
-            if src_el:
-                source = src_el.get_text(strip=True)
-            sentiment = classify_sentiment(headline)
-            out.append({
-                "time": t[:5] if len(t) > 5 else t,
-                "source": source,
-                "headline": headline,
-                "sentiment": sentiment,
-                "tags": extract_tags(headline),
-            })
-        if len(out) < 3:
-            raise RuntimeError(f"only {len(out)} news scraped — fallback")
-    except Exception as e:
-        print(f"  [news] failed: {e}, using fallback")
-        out = [
-            {"time": NOW.strftime("%H:%M"), "source": "시스템", "sentiment": "neutral",
+    """Naver 증권 뉴스 — v2 다중 source 시도"""
+    out = fetch_naver_news_v2()
+    if out and len(out) >= 3:
+        return out
+    return [{"time": NOW.strftime("%H:%M"), "source": "시스템", "sentiment": "neutral",
              "headline": f"실시간 뉴스 수집 일시 중단 — {NOW.strftime('%Y-%m-%d %H:%M')} KST 기준",
-             "tags": ["시스템"]},
-        ]
-    return out
+             "tags": ["시스템"]}]
 
 
 def classify_sentiment(headline):
@@ -709,31 +855,52 @@ def naver_only_pipeline():
     kospi_intra = naver_index_intraday("KOSPI") or []
     kosdaq_basic = naver_index_basic("KOSDAQ") or {"value": 0, "change": 0, "changePct": 0}
 
-    # 상승/하락 상위에서 거래대금 큰 순 → topVolume 근사
+    # 상승/하락 상위 (등락률 기준)
     rising = naver_top_stocks("KOSPI", "up", limit=50)
     falling = naver_top_stocks("KOSPI", "down", limit=50)
     all_stocks = rising + falling
 
-    # 거래대금 상위 10
-    top_volume = sorted(all_stocks, key=lambda x: x["volume_won"], reverse=True)[:10]
+    # 큐레이션 섹터의 모든 ticker → 일부는 TOP에 없을 수 있으므로 개별 페치
+    code_data = {s["code"]: s for s in all_stocks}
+    needed = set()
+    for sec in SECTOR_DEFS:
+        for t in sec["tickers"]:
+            if t not in code_data:
+                needed.add(t)
+
+    print(f"  [naver-only] 개별 페치 필요한 섹터 종목: {len(needed)}개")
+    fetched = 0
+    for code in needed:
+        basic = naver_stock_basic(code)
+        if basic:
+            code_data[code] = basic
+            fetched += 1
+            time.sleep(0.05)
+    print(f"  [naver-only] 개별 페치 완료: {fetched}/{len(needed)}")
+
+    # 거래대금 상위 10 (전체 stocks + 페치 종목 합산)
+    all_known = list(code_data.values())
+    top_volume_raw = sorted([s for s in all_known if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
     top_volume = [{
         "code": s["code"], "name": s["name"],
-        "amount": s["volume_won"] // 100_000_000,
-        "price": s["price"], "changePct": s["changePct"],
-    } for s in top_volume]
+        "amount": s.get("volume_won", 0) // 100_000_000,
+        "price": s.get("price", 0), "changePct": s.get("changePct", 0),
+    } for s in top_volume_raw]
 
-    # 등락률 기준 상위/하위 (외인 수급 데이터 없으므로 등락률을 proxy로 사용)
-    top_gainers = sorted(rising, key=lambda x: x["changePct"], reverse=True)[:10]
-    top_losers = sorted(falling, key=lambda x: x["changePct"])[:10]
+    # 외인 수급 proxy: 거래대금 기준 상위 종목 (실제 외인 데이터 없음)
+    top_gainers = sorted([s for s in rising if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
+    top_losers = sorted([s for s in falling if s.get("volume_won", 0) > 0], key=lambda x: x.get("volume_won", 0), reverse=True)[:10]
 
     def to_flow_row(s, sign=1):
-        # 외인 수급 데이터 없으므로 거래대금 기반 추정 (단순 proxy)
-        proxy_net = (s["volume_won"] // 100_000_000) // 4 * sign
+        # 거래대금의 ~5%를 외인 순매수로 추정 (proxy, 억 단위)
+        # volume_won은 원 단위 → /1e8 = 억원, * 0.05 = 5%
+        eok = (s.get("volume_won", 0) // 100_000_000)
+        proxy_net = max(1, eok // 20) * sign
         return {
             "code": s["code"], "name": s["name"],
             "sector": guess_sector(s["code"]),
             "net": proxy_net,
-            "price": s["price"], "changePct": s["changePct"],
+            "price": s.get("price", 0), "changePct": s.get("changePct", 0),
         }
 
     foreign_buy = [to_flow_row(s, +1) for s in top_gainers]
@@ -744,17 +911,17 @@ def naver_only_pipeline():
         "code": s["code"], "name": s["name"],
         "changePct": s["changePct"], "price": s["price"],
         "reason": "상한가 도달"
-    } for s in rising if s["changePct"] >= 29.0][:5]
+    } for s in rising if s.get("changePct", 0) >= 29.0][:5]
 
-    # 52주 신고가 — Naver만으로는 정확 판정 어려움 → 큰 폭 상승 상위 6종목으로 근사
+    # 52주 신고가 근사 (큰 폭 상승)
     new_52w_high = [{
         "code": s["code"], "name": s["name"],
         "changePct": s["changePct"], "price": s["price"],
-    } for s in top_gainers[:7] if s["changePct"] >= 3.0]
+    } for s in sorted(rising, key=lambda x: x.get("changePct", 0), reverse=True) if s.get("changePct", 0) >= 3.0][:8]
 
-    # 큐레이션 섹터의 leadStocks 시세를 매핑하여 등락률 가중평균 계산
-    code_data = {s["code"]: s for s in all_stocks}
+    # 섹터 집계 — 이제 모든 leadStocks 데이터가 있어야 함
     sectors_out = []
+    total_market_cap = sum(s.get("marketCap", 0) for s in all_known)
     for sec in SECTOR_DEFS:
         valid = [t for t in sec["tickers"] if t in code_data]
         if not valid:
@@ -764,19 +931,29 @@ def naver_only_pipeline():
                 "leadStocks": [], "leadCodes": [], "momentum": "flat-up",
             })
             continue
-        # 등락률 단순 평균 (시총 정보 없음)
-        avg_chg = sum(code_data[t]["changePct"] for t in valid) / len(valid)
+
+        # 시총 가중 평균 등락률 (시총 정보 있으면), 없으면 단순 평균
+        sector_cap = sum(code_data[t].get("marketCap", 0) for t in valid)
+        if sector_cap > 0:
+            avg_chg = sum(code_data[t].get("marketCap", 0) * code_data[t].get("changePct", 0) for t in valid) / sector_cap
+            weight = (sector_cap / total_market_cap * 100) if total_market_cap else 0
+        else:
+            avg_chg = sum(code_data[t].get("changePct", 0) for t in valid) / len(valid)
+            sec_vol = sum(code_data[t].get("volume_won", 0) for t in valid)
+            total_vol = sum(s.get("volume_won", 0) for s in all_known)
+            weight = (sec_vol / total_vol * 100) if total_vol else 0
+
         if avg_chg > 2.5:   momentum = "strong-up"
         elif avg_chg > 0.5: momentum = "up"
-        elif avg_chg >= 0:  momentum = "flat-up"
+        elif avg_chg >= -0.5: momentum = "flat-up"
         elif avg_chg > -2:  momentum = "down"
         else:               momentum = "strong-down"
-        # 거래대금 비중 → weight 근사
-        sec_vol = sum(code_data[t]["volume_won"] for t in valid)
-        total_vol = sum(s["volume_won"] for s in all_stocks)
-        weight = (sec_vol / total_vol * 100) if total_vol else 0
-        lead_codes = sec["tickers"][:3]
-        lead_names = [code_data[t]["name"] if t in code_data else t for t in lead_codes]
+
+        # 시총 상위 3종목으로 leadStocks 정렬
+        valid_sorted = sorted(valid, key=lambda t: code_data[t].get("marketCap", 0) or code_data[t].get("volume_won", 0), reverse=True)
+        lead_codes = valid_sorted[:3]
+        lead_names = [code_data[t].get("name", t) for t in lead_codes]
+
         sectors_out.append({
             "id": sec["id"], "name": sec["name"], "theme": sec["theme"],
             "changePct": round(avg_chg, 2),
@@ -786,14 +963,19 @@ def naver_only_pipeline():
             "momentum": momentum,
         })
 
+    # KOSPI 합계 거래대금 = 모든 알려진 종목의 거래대금 합산 (근사)
+    # all_known은 약 100개 + 누락 섹터 추가분 → 코스피 ~800개 중 일부. 평균 거래대금 비율로 보정
+    sample_total = sum(s.get("volume_won", 0) for s in all_known)
+    kospi_volume_won = int(sample_total * 1.5)  # 표본 → 전체 추정 (대표주 위주이므로 비중 높음)
+
     return {
         "kospi": {
-            "value": kospi_basic["value"],
-            "change": kospi_basic["change"],
-            "changePct": kospi_basic["changePct"],
-            "volume": kospi_basic["volume"],
-            "high": kospi_basic["high"],
-            "low": kospi_basic["low"],
+            "value": kospi_basic.get("value", 0),
+            "change": kospi_basic.get("change", 0),
+            "changePct": kospi_basic.get("changePct", 0),
+            "volume": kospi_volume_won,  # 인덱스 endpoint에 거래대금 없으므로 합산값 사용
+            "high": kospi_basic.get("high", 0),
+            "low": kospi_basic.get("low", 0),
             "foreignNet": 0, "instNet": 0, "indivNet": 0,
             "intraday": kospi_intra,
         },

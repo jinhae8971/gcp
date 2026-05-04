@@ -546,10 +546,10 @@ function MarketHeader({ data, onRun, loading, runLabel = 'RUN ANALYSIS' }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-        <FlowCell label="거래대금" value={`₩${(k.volume / 1e12).toFixed(2)}T`} sub="누적" />
-        <FlowCell label="외국인" value={fmtEok(k.foreignNet / 1e8)} sub="NET BUY" pct={k.foreignNet > 0 ? +1 : -1} />
-        <FlowCell label="기관" value={fmtEok(k.instNet / 1e8)} sub="NET BUY" pct={k.instNet > 0 ? +1 : -1} />
-        <FlowCell label="개인" value={fmtEok(k.indivNet / 1e8)} sub="NET BUY" pct={k.indivNet > 0 ? +1 : -1} />
+        <FlowCell label="거래대금" value={k.volume > 0 ? `₩${(k.volume / 1e12).toFixed(2)}T` : 'N/A'} sub={k.volume > 0 ? '누적' : '데이터 제한'} />
+        <FlowCell label="외국인" value={k.foreignNet ? fmtEok(k.foreignNet / 1e8) : 'N/A'} sub={k.foreignNet ? 'NET BUY' : 'KRX 필요'} pct={k.foreignNet ? (k.foreignNet > 0 ? +1 : -1) : null} />
+        <FlowCell label="기관" value={k.instNet ? fmtEok(k.instNet / 1e8) : 'N/A'} sub={k.instNet ? 'NET BUY' : 'KRX 필요'} pct={k.instNet ? (k.instNet > 0 ? +1 : -1) : null} />
+        <FlowCell label="개인" value={k.indivNet ? fmtEok(k.indivNet / 1e8) : 'N/A'} sub={k.indivNet ? 'NET BUY' : 'KRX 필요'} pct={k.indivNet ? (k.indivNet > 0 ? +1 : -1) : null} />
       </div>
     </div>
   );
@@ -593,15 +593,19 @@ function FlowCell({ label, value, sub, pct }) {
    SectorHeatmap
 =================================================================== */
 function SectorHeatmap({ sectors, onSelect, selectedId }) {
-  const total = sectors.reduce((s, x) => s + x.weight, 0);
+  sectors = sectors || [];
+  const total = Math.max(1, sectors.reduce((s, x) => s + (x.weight || 0), 0));
+  // 비중 데이터가 부족하면(naver 폴백) 균등 분포로 폴백
+  const useEqual = sectors.every(s => !s.weight) || total <= 1;
   return (
     <div className="dash-card">
-      <CardHead title="Sector Heatmap · 주도섹터" subtitle="시총 비중 × 등락률" right={<LegendInline />} live />
+      <CardHead title="Sector Heatmap · 주도섹터" subtitle={useEqual ? '균등 분포 (시총 데이터 제한)' : '시총 비중 × 등락률'} right={<LegendInline />} live />
       <div style={{ padding: '0 14px 14px 14px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '74px', gap: 4 }}>
           {sectors.map((s) => {
-            const span = Math.max(2, Math.round((s.weight / total) * 12));
-            const rowSpan = s.weight > 12 ? 2 : 1;
+            const w = s.weight || 0;
+            const span = useEqual ? Math.max(2, Math.floor(12 / sectors.length)) : Math.max(2, Math.round((w / total) * 12));
+            const rowSpan = w > 12 ? 2 : 1;
             const intensity = Math.min(1, Math.abs(s.changePct) / 4);
             const isUp = s.changePct >= 0;
             const baseUp = [255, 93, 108];
@@ -729,10 +733,10 @@ function SupplyDemand({ data }) {
     { id: 'foreign-sell', label: '외국인 매도' },
     { id: 'volume', label: '거래대금' },
   ];
-  const lists = { 'foreign-buy': data.foreignBuy, 'foreign-sell': data.foreignSell, 'volume': data.topVolume };
+  const lists = { 'foreign-buy': data.foreignBuy || [], 'foreign-sell': data.foreignSell || [], 'volume': data.topVolume || [] };
   const list = lists[tab];
   const isVolume = tab === 'volume';
-  const max = Math.max(...list.map(x => Math.abs(x.net || x.amount || 1)));
+  const max = Math.max(1, ...list.map(x => Math.abs(x.net || x.amount || 0)));
 
   return (
     <div className="dash-card" style={{ height: '100%' }}>
@@ -877,7 +881,8 @@ function SpecialStocks({ data }) {
    ThemeTrends (functional theme name → search)
 =================================================================== */
 function ThemeTrends({ themes }) {
-  const max = Math.max(...themes.map(t => t.heat));
+  themes = themes || [];
+  const max = Math.max(1, ...themes.map(t => t.heat || 0));
   return (
     <div className="dash-card">
       <CardHead title="Thematic Heat · 테마 트렌드" subtitle="검색·거래 열기" />
@@ -971,8 +976,9 @@ function NewsList({ news }) {
    ProgramTrade
 =================================================================== */
 function ProgramTrade({ data }) {
-  const p = data.programTrade;
-  const max = Math.max(Math.abs(p.arbBuy), Math.abs(p.arbSell), Math.abs(p.nonArbBuy), Math.abs(p.nonArbSell));
+  const p = data.programTrade || { arbBuy: 0, arbSell: 0, nonArbBuy: 0, nonArbSell: 0, netTotal: 0 };
+  const max = Math.max(1, Math.abs(p.arbBuy), Math.abs(p.arbSell), Math.abs(p.nonArbBuy), Math.abs(p.nonArbSell));
+  const allZero = !p.arbBuy && !p.arbSell && !p.nonArbBuy && !p.nonArbSell;
   const Bar = ({ label, v, max }) => {
     const w = (Math.abs(v) / max) * 100;
     return (
@@ -996,12 +1002,21 @@ function ProgramTrade({ data }) {
   };
   return (
     <div className="dash-card">
-      <CardHead title="Program Trading · 프로그램 매매" subtitle={`NET ${fmtChange(p.netTotal)}억`} />
+      <CardHead title="Program Trading · 프로그램 매매" subtitle={allZero ? 'NO DATA · KRX 자격증명 필요' : `NET ${fmtChange(p.netTotal)}억`} />
       <div style={{ padding: '0 18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Bar label="ARB BUY" v={p.arbBuy} max={max} />
-        <Bar label="ARB SELL" v={p.arbSell} max={max} />
-        <Bar label="NON-ARB BUY" v={p.nonArbBuy} max={max} />
-        <Bar label="NON-ARB SELL" v={p.nonArbSell} max={max} />
+        {allZero ? (
+          <div style={{ padding: '24px 8px', textAlign: 'center', color: 'var(--ink-3)', fontSize: 11, lineHeight: 1.6 }}>
+            프로그램 매매 데이터는 KRX 로그인이 필요합니다.<br />
+            Settings(⚙) → KRX 자격증명 안내 참조.
+          </div>
+        ) : (
+          <>
+            <Bar label="ARB BUY" v={p.arbBuy} max={max} />
+            <Bar label="ARB SELL" v={p.arbSell} max={max} />
+            <Bar label="NON-ARB BUY" v={p.nonArbBuy} max={max} />
+            <Bar label="NON-ARB SELL" v={p.nonArbSell} max={max} />
+          </>
+        )}
       </div>
     </div>
   );
@@ -1315,24 +1330,34 @@ function StatCard({ label, value, delta, sub, icon }) {
 }
 
 function InvestorCard({ label, net, streak, highlight }) {
-  const isPos = net >= 0;
+  const isPos = (net || 0) >= 0;
+  const hasData = net != null && net !== 0;
   return (
     <div className="dash-card" style={{
       padding: '16px 18px',
-      borderColor: highlight ? (isPos ? 'var(--up-soft)' : 'var(--down-soft)') : 'var(--line)',
-      background: highlight ? `linear-gradient(180deg, ${isPos ? 'var(--up-soft)' : 'var(--down-soft)'} 0%, var(--surface) 60%)` : 'var(--surface)',
+      borderColor: highlight && hasData ? (isPos ? 'var(--up-soft)' : 'var(--down-soft)') : 'var(--line)',
+      background: highlight && hasData ? `linear-gradient(180deg, ${isPos ? 'var(--up-soft)' : 'var(--down-soft)'} 0%, var(--surface) 60%)` : 'var(--surface)',
     }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ink-3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</div>
-      <div className="tnum mono" style={{ fontSize: 24, fontWeight: 700, color: colorFor(net), letterSpacing: '-0.02em', marginTop: 4 }}>
-        {fmtEok(net)}
+      <div className="tnum mono" style={{ fontSize: 24, fontWeight: 700, color: hasData ? colorFor(net) : 'var(--ink-3)', letterSpacing: '-0.02em', marginTop: 4 }}>
+        {hasData ? fmtEok(net) : 'N/A'}
       </div>
-      <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>{streak}</div>
+      <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 2 }}>{hasData ? streak : 'KRX 자격증명 필요'}</div>
     </div>
   );
 }
 
 function RankList({ title, rows, field, positive }) {
-  const max = Math.max(...rows.map(r => Math.abs(r[field])));
+  rows = rows || [];
+  const max = Math.max(1, ...rows.map(r => Math.abs(r[field] || 0)));
+  if (rows.length === 0) {
+    return (
+      <div className="dash-card">
+        <CardHead title={title} />
+        <div style={{ padding: '24px 18px', textAlign: 'center', color: 'var(--ink-3)', fontSize: 11 }}>데이터 없음</div>
+      </div>
+    );
+  }
   return (
     <div className="dash-card">
       <CardHead title={title} />
@@ -1396,10 +1421,11 @@ function OverviewPage({ ctx }) {
 
 function SectorsPage({ ctx }) {
   const { data, sector, selectedSector, setSelectedSector, goHome } = ctx;
-  const sorted = [...data.sectors].sort((a, b) => b.changePct - a.changePct);
-  const upCount = data.sectors.filter(s => s.changePct > 0).length;
-  const downCount = data.sectors.length - upCount;
-  const breadthPct = (upCount / data.sectors.length) * 100;
+  const sorted = [...(data.sectors || [])].sort((a, b) => b.changePct - a.changePct);
+  const upCount = (data.sectors || []).filter(s => s.changePct > 0).length;
+  const downCount = (data.sectors || []).length - upCount;
+  const breadthPct = data.sectors?.length ? (upCount / data.sectors.length) * 100 : 0;
+  const hasFlowData = (data.sectors || []).some(s => s.foreignNet || s.instNet);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <PageHead title="주도섹터 분석" subtitle="시가총액 비중과 등락률, 외국인·기관 자금 흐름을 종합한 섹터 리더보드" breadcrumb="대시보드 · 주도섹터" onBreadcrumbHome={goHome} />
@@ -1413,7 +1439,7 @@ function SectorsPage({ ctx }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 14 }}>
         <SectorDetail sector={sector} />
         <div className="dash-card">
-          <CardHead title="섹터 자금 흐름" subtitle="외국인 + 기관 순매수 (억원)" />
+          <CardHead title="섹터 자금 흐름" subtitle={hasFlowData ? "외국인 + 기관 순매수 (억원)" : "KRX 자격증명 미설정 — 등락률만 표시"} />
           <div style={{ padding: '0 0 12px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
@@ -1564,13 +1590,14 @@ function ProgramPage({ ctx }) {
 function NewsPage({ ctx }) {
   const { data, goHome } = ctx;
   const [filter, setFilter] = useState('all');
+  const news = data.news || [];
   const filters = [
     { id: 'all', label: '전체' },
     { id: 'positive', label: '호재' },
     { id: 'negative', label: '악재' },
     { id: 'neutral', label: '중립' },
   ];
-  const filtered = filter === 'all' ? data.news : data.news.filter(n => n.sentiment === filter);
+  const filtered = filter === 'all' ? news : news.filter(n => n.sentiment === filter);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <PageHead
@@ -1586,7 +1613,7 @@ function NewsPage({ ctx }) {
                 padding: '6px 12px', fontSize: 10, fontWeight: 700,
                 fontFamily: 'inherit', letterSpacing: '0.06em', textTransform: 'uppercase',
                 borderRight: i < filters.length - 1 ? '1px solid var(--line)' : 'none',
-              }}>{f.label} ({filter === 'all' ? data.news.length : data.news.filter(n => n.sentiment === f.id).length})</button>
+              }}>{f.label} ({f.id === 'all' ? news.length : news.filter(n => n.sentiment === f.id).length})</button>
             ))}
           </div>
         }
