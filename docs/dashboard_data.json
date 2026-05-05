@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-05 16:53:32",
+  "asOf": "2026-05-05 17:30:22",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 6936.99,
@@ -105,19 +105,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1473.56005859375,
-    "change": 1.830078125,
-    "changePct": 0.12434876976666026
+    "usdkrw": 1471.3699951171875,
+    "change": -0.3599853515625,
+    "changePct": -0.024460013476646284
   },
   "oil": {
-    "value": 103.69000244140625,
-    "change": -2.7299957275390625,
-    "changePct": -2.5653033024912317
+    "value": 104.05000305175781,
+    "change": -2.3699951171875,
+    "changePct": -2.2270204453725446
   },
   "gold": {
-    "value": 4563.10009765625,
-    "change": 43.60009765625,
-    "changePct": 0.9647106462274587
+    "value": 4559.7998046875,
+    "change": 40.2998046875,
+    "changePct": 0.8916872372496958
   },
   "rate": {
     "value": 3.25,
@@ -845,27 +845,36 @@
       ]
     },
     {
-      "time": "09:03",
-      "source": "v.daum.net",
-      "headline": "[ETF시대의 명암]코스피보다 더 잦은 손바뀜...단타 열풍에 증시도 출렁",
-      "sentiment": "neutral",
+      "time": "15:01",
+      "source": "seoulwire.com",
+      "headline": "코스닥, 코스피 수익률과 '키맞추기' 전개될까...5월 수급 활성화 기대감 커",
+      "sentiment": "positive",
       "tags": [
-        "증시"
+        "수급"
       ]
     },
     {
-      "time": "09:29",
-      "source": "마켓인",
-      "headline": "코스피 불장에 계좌 녹았다…5526억 역베팅 개미들의 최후",
+      "time": "17:06",
+      "source": "머니투데이",
+      "headline": "외국인 '바이 코리아'에 코스피 7000 돌파 '목전' - 머니투데이",
       "sentiment": "neutral",
       "tags": [
-        "증시"
+        "수급"
       ]
     },
     {
-      "time": "05:04",
+      "time": "10:26",
       "source": "v.daum.net",
-      "headline": "코스피 오르자 곱버스 사라진다… ETN 상폐·ETF 위기",
+      "headline": "‘7000피’ 목전에 둔 코스피… 외국인 국장 투자 본격화하면 더 오른다",
+      "sentiment": "neutral",
+      "tags": [
+        "수급"
+      ]
+    },
+    {
+      "time": "21:16",
+      "source": "KBS 뉴스",
+      "headline": "코스피 7천피 ‘눈앞’…하이닉스 시총 1,000조 돌파",
       "sentiment": "neutral",
       "tags": [
         "증시"
@@ -899,19 +908,10 @@
       ]
     },
     {
-      "time": "21:16",
-      "source": "KBS 뉴스",
-      "headline": "코스피 7천피 ‘눈앞’…하이닉스 시총 1,000조 돌파",
+      "time": "09:03",
+      "source": "v.daum.net",
+      "headline": "[ETF시대의 명암]코스피보다 더 잦은 손바뀜...단타 열풍에 증시도 출렁",
       "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "19:39",
-      "source": "JTBC",
-      "headline": "140만닉스·23만전자 됐다…코스피 사상 최고치 마감",
-      "sentiment": "positive",
       "tags": [
         "증시"
       ]
