@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-05-08 15:51:31",
+  "asOf": "2026-05-08 16:15:47",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7498.0,
     "change": 7.95,
     "changePct": 0.11,
-    "volume": 11113378500000,
+    "volume": 11220805500000,
     "high": 7511.01,
     "low": 7318.96,
     "open": 7353.94,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1468.780029296875,
-    "change": 24.330078125,
-    "changePct": 1.684383602579039
+    "usdkrw": 1469.280029296875,
+    "change": 24.830078125,
+    "changePct": 1.7189988552289739
   },
   "oil": {
-    "value": 94.68000030517578,
-    "change": -0.12999725341796875,
-    "changePct": -0.13711344453693172
+    "value": 94.94000244140625,
+    "change": 0.1300048828125,
+    "changePct": 0.13712149157282214
   },
   "gold": {
-    "value": 4739.0,
-    "change": 39.2001953125,
-    "changePct": 0.834082236298712
+    "value": 4734.10009765625,
+    "change": 34.30029296875,
+    "changePct": 0.729824554112698
   },
   "rate": {
     "value": 3.25,
@@ -570,7 +570,7 @@
     {
       "code": "001440",
       "name": "대한전선",
-      "amount": 14240,
+      "amount": 14244,
       "price": 72300,
       "changePct": 12.79
     },
@@ -626,14 +626,14 @@
     {
       "code": "064350",
       "name": "현대로템",
-      "amount": 2471,
+      "amount": 2472,
       "price": 223000,
       "changePct": -5.11
     },
     {
       "code": "336260",
       "name": "두산퓨얼셀",
-      "amount": 2447,
+      "amount": 2448,
       "price": 86300,
       "changePct": 13.25
     }
@@ -845,6 +845,15 @@
   ],
   "news": [
     {
+      "time": "09:25",
+      "source": "조선일보",
+      "headline": "2% 하락했던 코스피 상승 전환해 마감...사상 최고치 또 경신",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
       "time": "11:47",
       "source": "YTN",
       "headline": "외국인 '3조 순매도'에 코스피 하락...현대차는 급등",
@@ -854,55 +863,10 @@
       ]
     },
     {
-      "time": "11:50",
-      "source": "Chosunbiz",
-      "headline": "코스피, 7400포인트 사수 ‘고지전’… 코스닥 하락 전환 - 조선비즈",
-      "sentiment": "negative",
-      "tags": [
-        "조선"
-      ]
-    },
-    {
-      "time": "11:34",
-      "source": "연합뉴스",
-      "headline": "코스피 하락, 7400선 안팎에서 등락…코스닥은 혼조",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:47",
-      "source": "경향신문",
-      "headline": "코스피, 나흘 연속 사상 최고치 마감…7500선 턱밑",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
       "time": "15:32",
       "source": "newsis.com",
       "headline": "[속보]코스피, 0.11% 상승 반전하며 7498.00 마감…또 사상 최고치",
       "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "08:37",
-      "source": "마켓인",
-      "headline": "PLUS코스피50 최근 1년 수익률 261.38%... 코스피지수 추종 ETF 중 1위",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "08:50",
-      "source": "아시아경제",
-      "headline": "'PLUS코스피50', 코스피 추종 ETF 중 1년 수익률 1위",
-      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
@@ -917,10 +881,28 @@
       ]
     },
     {
-      "time": "14:25",
+      "time": "08:37",
+      "source": "마켓인",
+      "headline": "PLUS코스피50 최근 1년 수익률 261.38%... 코스피지수 추종 ETF 중 1위",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "13:02",
       "source": "v.daum.net",
-      "headline": "[셀럽의 한 수] 외인 매도에도 코스피 또 최고치…이번주 평가?",
-      "sentiment": "positive",
+      "headline": "코스피 너무 올랐다...외국계 ETF에서 하루에 6000억 빠져나갔다",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "16:01",
+      "source": "v.daum.net",
+      "headline": "[경제쏙] 코스피 7천 조급해진 개미들‥\"화려하지만 양극화\"",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
@@ -929,6 +911,24 @@
       "time": "20:00",
       "source": "한국경제",
       "headline": "'250조' 벌었는데…코스피 폭주에 국민연금 고민하는 까닭",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "20:19",
+      "source": "MBC 뉴스",
+      "headline": "코스피 불장에 국민연금도 넉 달 만에 '250조' 수익‥이미 작년 수익 초과",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "10:40",
+      "source": "지디넷코리아",
+      "headline": "85조원 매도 앞에 선 코스피, 국민연금의 '거대한 리밸런싱'이 가져올 파장",
       "sentiment": "neutral",
       "tags": [
         "증시"
