@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-08 16:15:47",
+  "asOf": "2026-05-08 17:01:22",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7498.0,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1469.280029296875,
-    "change": 24.830078125,
-    "changePct": 1.7189988552289739
+    "usdkrw": 1468.31005859375,
+    "change": 23.860107421875,
+    "changePct": 1.6518472933255608
   },
   "oil": {
-    "value": 94.94000244140625,
-    "change": 0.1300048828125,
-    "changePct": 0.13712149157282214
+    "value": 95.30000305175781,
+    "change": 0.4900054931640625,
+    "changePct": 0.5168289270983611
   },
   "gold": {
-    "value": 4734.10009765625,
-    "change": 34.30029296875,
-    "changePct": 0.729824554112698
+    "value": 4719.39990234375,
+    "change": 19.60009765625,
+    "changePct": 0.417041118149356
   },
   "rate": {
     "value": 3.25,
@@ -863,46 +863,46 @@
       ]
     },
     {
-      "time": "15:32",
-      "source": "newsis.com",
-      "headline": "[속보]코스피, 0.11% 상승 반전하며 7498.00 마감…또 사상 최고치",
+      "time": "16:38",
+      "source": "연합뉴스",
+      "headline": "골드만삭스 \"상승랠리 끝나지 않았다…코스피 9,000으로 상향\"",
       "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "15:40",
-      "source": "연합뉴스",
-      "headline": "한화운용 '코스피50' ETF 연수익률 261%…\"코스피 추종 ETF 1위\"",
-      "sentiment": "neutral",
+      "time": "21:12",
+      "source": "KBS 뉴스",
+      "headline": "코스피 7,500 터치…이 대통령, 국민성장펀드 참여 독려 “자산 증식 마중물”",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "08:37",
-      "source": "마켓인",
-      "headline": "PLUS코스피50 최근 1년 수익률 261.38%... 코스피지수 추종 ETF 중 1위",
-      "sentiment": "neutral",
+      "time": "14:50",
+      "source": "newsis.com",
+      "headline": "[속보]코스피, 장중 상승 전환…7500선 재돌파 시도",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "13:02",
-      "source": "v.daum.net",
-      "headline": "코스피 너무 올랐다...외국계 ETF에서 하루에 6000억 빠져나갔다",
-      "sentiment": "neutral",
+      "time": "15:33",
+      "source": "news.sbs.co.kr",
+      "headline": "[속보] 코스피, 상승 전환해 또 사상 최고…7,498 마감",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "16:01",
-      "source": "v.daum.net",
-      "headline": "[경제쏙] 코스피 7천 조급해진 개미들‥\"화려하지만 양극화\"",
-      "sentiment": "neutral",
+      "time": "15:33",
+      "source": "파이낸셜뉴스",
+      "headline": "[속보] 코스피, 상승전환해 또 사상최고…7,498 마감",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
@@ -926,9 +926,9 @@
       ]
     },
     {
-      "time": "10:40",
-      "source": "지디넷코리아",
-      "headline": "85조원 매도 앞에 선 코스피, 국민연금의 '거대한 리밸런싱'이 가져올 파장",
+      "time": "07:54",
+      "source": "네이트",
+      "headline": "\"250조 벌었는데도 못 웃는다\"…국민연금, 코스피 폭주 속 '딜레마'",
       "sentiment": "neutral",
       "tags": [
         "증시"
