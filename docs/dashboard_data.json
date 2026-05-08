@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-08 17:01:22",
+  "asOf": "2026-05-08 17:21:12",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7498.0,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1468.31005859375,
-    "change": 23.860107421875,
-    "changePct": 1.6518472933255608
+    "usdkrw": 1468.1600341796875,
+    "change": 23.7100830078125,
+    "changePct": 1.6414610273326973
   },
   "oil": {
-    "value": 95.30000305175781,
-    "change": 0.4900054931640625,
-    "changePct": 0.5168289270983611
+    "value": 95.41000366210938,
+    "change": 0.600006103515625,
+    "changePct": 0.632851090566492
   },
   "gold": {
-    "value": 4719.39990234375,
-    "change": 19.60009765625,
-    "changePct": 0.417041118149356
+    "value": 4719.2001953125,
+    "change": 19.400390625,
+    "changePct": 0.4127918513816351
   },
   "rate": {
     "value": 3.25,
@@ -863,6 +863,33 @@
       ]
     },
     {
+      "time": "16:55",
+      "source": "newsis.com",
+      "headline": "밸류업 지수 올 들어 65% 뛰었다…코스피 수익률 앞질러",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "15:12",
+      "source": "v.daum.net",
+      "headline": "밸류업 지수 상승률, '세계 1위' 코스피 수익률 넘었다",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "14:41",
+      "source": "마켓인",
+      "headline": "증시 랠리에 밸류업 지수도 최고치 행진…코스피 수익률 웃돌아",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
       "time": "16:38",
       "source": "연합뉴스",
       "headline": "골드만삭스 \"상승랠리 끝나지 않았다…코스피 9,000으로 상향\"",
@@ -872,36 +899,9 @@
       ]
     },
     {
-      "time": "21:12",
-      "source": "KBS 뉴스",
-      "headline": "코스피 7,500 터치…이 대통령, 국민성장펀드 참여 독려 “자산 증식 마중물”",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "14:50",
-      "source": "newsis.com",
-      "headline": "[속보]코스피, 장중 상승 전환…7500선 재돌파 시도",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:33",
-      "source": "news.sbs.co.kr",
-      "headline": "[속보] 코스피, 상승 전환해 또 사상 최고…7,498 마감",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:33",
-      "source": "파이낸셜뉴스",
-      "headline": "[속보] 코스피, 상승전환해 또 사상최고…7,498 마감",
+      "time": "16:35",
+      "source": "v.daum.net",
+      "headline": "‘롤러코스터’ 코스피, 사상 최고치 경신…현대차그룹주 일제히 급등",
       "sentiment": "positive",
       "tags": [
         "증시"
