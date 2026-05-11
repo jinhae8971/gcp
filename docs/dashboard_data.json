@@ -1,12 +1,12 @@
 {
-  "asOf": "2026-05-11 13:13:53",
+  "asOf": "2026-05-11 14:01:20",
   "marketStatus": "OPEN",
   "kospi": {
-    "value": 7830.09,
-    "change": 332.09,
-    "changePct": 4.43,
-    "volume": 19247403000000,
-    "high": 7876.6,
+    "value": 7875.06,
+    "change": 377.06,
+    "changePct": 5.03,
+    "volume": 35496987000000,
+    "high": 7878.56,
     "low": 7713.49,
     "open": 7775.31,
     "foreignNet": 0,
@@ -87,33 +87,33 @@
       ],
       [
         "05-11",
-        7830.09
+        7875.06
       ]
     ]
   },
   "kosdaq": {
-    "value": 1209.5,
-    "change": 1.78,
-    "changePct": 0.15,
+    "value": 1206.89,
+    "change": -0.83,
+    "changePct": -0.07,
     "high": 1212.89,
     "low": 1190.6,
     "open": 1212.88,
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1474.5799560546875,
-    "change": 19.7899169921875,
-    "changePct": 1.3603280515269802
+    "usdkrw": 1474.7900390625,
+    "change": 20.0,
+    "changePct": 1.374768830070383
   },
   "oil": {
-    "value": 100.18000030517578,
-    "change": 4.760002136230469,
-    "changePct": 4.988474352936661
+    "value": 100.12999725341797,
+    "change": 4.709999084472656,
+    "changePct": 4.936071237533871
   },
   "gold": {
-    "value": 4682.89990234375,
-    "change": -37.5,
-    "changePct": -0.7944242177740212
+    "value": 4683.10009765625,
+    "change": -37.2998046875,
+    "changePct": -0.7901831509864257
   },
   "rate": {
     "value": 3.25,
@@ -125,19 +125,19 @@
       "id": "semi",
       "name": "반도체",
       "theme": "주도",
-      "changePct": 11.8,
+      "changePct": 9.79,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 59.4,
-      "weightActual": 89.8,
+      "weight": 62.8,
+      "weightActual": 89.1,
       "leadStocks": [
-        "SK하이닉스",
         "삼성전자",
+        "SK하이닉스",
         "한미반도체"
       ],
       "leadCodes": [
-        "000660",
         "005930",
+        "000660",
         "042700"
       ],
       "momentum": "strong-up"
@@ -146,7 +146,7 @@
       "id": "bio",
       "name": "바이오/제약",
       "theme": "회복",
-      "changePct": -2.08,
+      "changePct": -2.45,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 0.0,
@@ -167,20 +167,20 @@
       "id": "battery",
       "name": "2차전지",
       "theme": "조정",
-      "changePct": -4.55,
+      "changePct": -2.46,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 4.5,
-      "weightActual": 0.5,
+      "weight": 0.0,
+      "weightActual": 0.0,
       "leadStocks": [
-        "엘앤에프",
         "LG에너지솔루션",
-        "에코프로비엠"
+        "에코프로비엠",
+        "포스코퓨처엠"
       ],
       "leadCodes": [
-        "066970",
         "373220",
-        "247540"
+        "247540",
+        "003670"
       ],
       "momentum": "strong-down"
     },
@@ -188,20 +188,20 @@
       "id": "auto",
       "name": "자동차",
       "theme": "강세",
-      "changePct": 10.23,
+      "changePct": 9.24,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 12.2,
-      "weightActual": 3.8,
+      "weight": 12.8,
+      "weightActual": 3.7,
       "leadStocks": [
+        "기아",
         "현대모비스",
-        "한온시스템",
-        "현대차"
+        "한온시스템"
       ],
       "leadCodes": [
+        "000270",
         "012330",
-        "018880",
-        "005380"
+        "018880"
       ],
       "momentum": "strong-up"
     },
@@ -209,7 +209,7 @@
       "id": "finance",
       "name": "금융",
       "theme": "안정",
-      "changePct": -0.05,
+      "changePct": -0.29,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 0.0,
@@ -230,7 +230,7 @@
       "id": "platform",
       "name": "플랫폼/IT",
       "theme": "반등",
-      "changePct": -0.36,
+      "changePct": -0.5,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 0.0,
@@ -251,7 +251,7 @@
       "id": "shipbuild",
       "name": "조선",
       "theme": "주도",
-      "changePct": 3.49,
+      "changePct": 3.73,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 0.0,
@@ -272,7 +272,7 @@
       "id": "steel",
       "name": "철강/소재",
       "theme": "약세",
-      "changePct": -0.51,
+      "changePct": -0.56,
       "foreignNet": 0,
       "instNet": 0,
       "weight": 0.0,
@@ -296,8 +296,8 @@
       "changePct": 7.05,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 2.5,
-      "weightActual": 0.2,
+      "weight": 1.8,
+      "weightActual": 0.1,
       "leadStocks": [
         "한국콜마",
         "아모레퍼시픽",
@@ -314,11 +314,11 @@
       "id": "energy",
       "name": "정유/에너지",
       "theme": "조정",
-      "changePct": -5.39,
+      "changePct": -5.91,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 5.7,
-      "weightActual": 0.8,
+      "weight": 4.0,
+      "weightActual": 0.4,
       "leadStocks": [
         "S-Oil",
         "SK이노베이션",
@@ -335,11 +335,11 @@
       "id": "power_eq",
       "name": "전력기기",
       "theme": "신규",
-      "changePct": -5.22,
+      "changePct": -7.02,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 1.9,
-      "weightActual": 0.1,
+      "weight": 1.3,
+      "weightActual": 0.0,
       "leadStocks": [
         "대원전선",
         "HD현대일렉트릭",
@@ -356,19 +356,19 @@
       "id": "holding",
       "name": "지주/기타대형",
       "theme": "안정",
-      "changePct": 6.86,
+      "changePct": 8.59,
       "foreignNet": 0,
       "instNet": 0,
-      "weight": 13.9,
-      "weightActual": 4.9,
+      "weight": 17.3,
+      "weightActual": 6.8,
       "leadStocks": [
-        "삼성물산",
         "SK스퀘어",
+        "삼성물산",
         "SK"
       ],
       "leadCodes": [
-        "028260",
         "402340",
+        "028260",
         "034730"
       ],
       "momentum": "strong-up"
@@ -379,90 +379,90 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "net": 3907,
-      "price": 1885000,
-      "changePct": 11.8,
+      "net": 4547,
+      "price": 1915000,
+      "changePct": 13.58,
+      "_proxy": true
+    },
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "sector": "반도체",
+      "net": 3864,
+      "price": 286500,
+      "changePct": 6.7,
+      "_proxy": true
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "지주/기타대형",
+      "net": 548,
+      "price": 1194000,
+      "changePct": 8.74,
       "_proxy": true
     },
     {
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "net": 445,
-      "price": 196800,
-      "changePct": 7.72,
+      "net": 490,
+      "price": 197400,
+      "changePct": 8.05,
       "_proxy": true
     },
     {
       "code": "018880",
       "name": "한온시스템",
       "sector": "자동차",
-      "net": 335,
-      "price": 5670,
-      "changePct": 18.87,
+      "net": 359,
+      "price": 5740,
+      "changePct": 20.34,
       "_proxy": true
     },
     {
       "code": "307950",
       "name": "현대오토에버",
       "sector": "기타",
-      "net": 247,
-      "price": 655000,
-      "changePct": 10.64,
+      "net": 338,
+      "price": 648000,
+      "changePct": 9.46,
       "_proxy": true
     },
     {
       "code": "012330",
       "name": "현대모비스",
       "sector": "자동차",
-      "net": 215,
-      "price": 556000,
-      "changePct": 9.23,
+      "net": 243,
+      "price": 560000,
+      "changePct": 10.02,
       "_proxy": true
     },
     {
       "code": "028260",
       "name": "삼성물산",
       "sector": "지주/기타대형",
-      "net": 205,
-      "price": 451500,
-      "changePct": 6.86,
+      "net": 228,
+      "price": 457500,
+      "changePct": 8.28,
+      "_proxy": true
+    },
+    {
+      "code": "000270",
+      "name": "기아",
+      "sector": "자동차",
+      "net": 209,
+      "price": 177200,
+      "changePct": 7.72,
       "_proxy": true
     },
     {
       "code": "017900",
       "name": "광전자",
       "sector": "기타",
-      "net": 124,
-      "price": 13560,
-      "changePct": 20.96,
-      "_proxy": true
-    },
-    {
-      "code": "336260",
-      "name": "두산퓨얼셀",
-      "sector": "기타",
-      "net": 94,
-      "price": 98900,
-      "changePct": 14.6,
-      "_proxy": true
-    },
-    {
-      "code": "000990",
-      "name": "DB하이텍",
-      "sector": "기타",
-      "net": 90,
-      "price": 184100,
-      "changePct": 9.52,
-      "_proxy": true
-    },
-    {
-      "code": "011070",
-      "name": "LG이노텍",
-      "sector": "기타",
-      "net": 86,
-      "price": 683000,
-      "changePct": 9.46,
+      "net": 131,
+      "price": 13475,
+      "changePct": 20.21,
       "_proxy": true
     }
   ],
@@ -471,90 +471,90 @@
       "code": "028050",
       "name": "삼성E&A",
       "sector": "기타",
-      "net": -74,
-      "price": 59200,
-      "changePct": -5.13,
-      "_proxy": true
-    },
-    {
-      "code": "066970",
-      "name": "엘앤에프",
-      "sector": "2차전지",
-      "net": -71,
-      "price": 186900,
-      "changePct": -4.55,
+      "net": -88,
+      "price": 58900,
+      "changePct": -5.61,
       "_proxy": true
     },
     {
       "code": "006340",
       "name": "대원전선",
       "sector": "전력기기",
-      "net": -62,
-      "price": 17070,
-      "changePct": -5.22,
+      "net": -68,
+      "price": 16745,
+      "changePct": -7.02,
       "_proxy": true
     },
     {
       "code": "010950",
       "name": "S-Oil",
       "sector": "정유/에너지",
-      "net": -41,
-      "price": 110500,
-      "changePct": -5.39,
+      "net": -49,
+      "price": 109900,
+      "changePct": -5.91,
       "_proxy": true
     },
     {
       "code": "450080",
       "name": "에코프로머티",
       "sector": "기타",
-      "net": -37,
-      "price": 75900,
-      "changePct": -5.24,
+      "net": -39,
+      "price": 75800,
+      "changePct": -5.37,
       "_proxy": true
     },
     {
       "code": "120110",
       "name": "코오롱인더",
       "sector": "기타",
-      "net": -24,
-      "price": 86900,
-      "changePct": -5.44,
-      "_proxy": true
-    },
-    {
-      "code": "007610",
-      "name": "선도전기",
-      "sector": "기타",
-      "net": -12,
-      "price": 8980,
-      "changePct": -9.29,
+      "net": -27,
+      "price": 86000,
+      "changePct": -6.42,
       "_proxy": true
     },
     {
       "code": "100840",
       "name": "SNT에너지",
       "sector": "기타",
-      "net": -8,
-      "price": 53200,
-      "changePct": -6.34,
-      "_proxy": true
-    },
-    {
-      "code": "011690",
-      "name": "와이투솔루션",
-      "sector": "기타",
-      "net": -6,
-      "price": 8310,
-      "changePct": -7.56,
+      "net": -10,
+      "price": 52900,
+      "changePct": -6.87,
       "_proxy": true
     },
     {
       "code": "005690",
       "name": "파미셀",
       "sector": "기타",
+      "net": -8,
+      "price": 17870,
+      "changePct": -7.51,
+      "_proxy": true
+    },
+    {
+      "code": "011690",
+      "name": "와이투솔루션",
+      "sector": "기타",
+      "net": -7,
+      "price": 8150,
+      "changePct": -9.34,
+      "_proxy": true
+    },
+    {
+      "code": "058430",
+      "name": "포스코스틸리온",
+      "sector": "기타",
       "net": -6,
-      "price": 18050,
-      "changePct": -6.57,
+      "price": 7800,
+      "changePct": -5.68,
+      "_proxy": true
+    },
+    {
+      "code": "017550",
+      "name": "수산세보틱스",
+      "sector": "기타",
+      "net": -5,
+      "price": 3300,
+      "changePct": -8.33,
       "_proxy": true
     }
   ],
@@ -562,72 +562,72 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "amount": 78155,
-      "price": 1885000,
-      "changePct": 11.8
+      "amount": 90941,
+      "price": 1915000,
+      "changePct": 13.58
+    },
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "amount": 77283,
+      "price": 286500,
+      "changePct": 6.7
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "amount": 10967,
+      "price": 1194000,
+      "changePct": 8.74
     },
     {
       "code": "005935",
       "name": "삼성전자우",
-      "amount": 8915,
-      "price": 196800,
-      "changePct": 7.72
+      "amount": 9806,
+      "price": 197400,
+      "changePct": 8.05
     },
     {
       "code": "018880",
       "name": "한온시스템",
-      "amount": 6704,
-      "price": 5670,
-      "changePct": 18.87
+      "amount": 7187,
+      "price": 5740,
+      "changePct": 20.34
     },
     {
       "code": "307950",
       "name": "현대오토에버",
-      "amount": 4944,
-      "price": 655000,
-      "changePct": 10.64
+      "amount": 6778,
+      "price": 648000,
+      "changePct": 9.46
     },
     {
       "code": "012330",
       "name": "현대모비스",
-      "amount": 4310,
-      "price": 556000,
-      "changePct": 9.23
+      "amount": 4872,
+      "price": 560000,
+      "changePct": 10.02
     },
     {
       "code": "028260",
       "name": "삼성물산",
-      "amount": 4104,
-      "price": 451500,
-      "changePct": 6.86
+      "amount": 4575,
+      "price": 457500,
+      "changePct": 8.28
+    },
+    {
+      "code": "000270",
+      "name": "기아",
+      "amount": 4199,
+      "price": 177200,
+      "changePct": 7.72
     },
     {
       "code": "017900",
       "name": "광전자",
-      "amount": 2491,
-      "price": 13560,
-      "changePct": 20.96
-    },
-    {
-      "code": "336260",
-      "name": "두산퓨얼셀",
-      "amount": 1885,
-      "price": 98900,
-      "changePct": 14.6
-    },
-    {
-      "code": "000990",
-      "name": "DB하이텍",
-      "amount": 1806,
-      "price": 184100,
-      "changePct": 9.52
-    },
-    {
-      "code": "011070",
-      "name": "LG이노텍",
-      "amount": 1729,
-      "price": 683000,
-      "changePct": 9.46
+      "amount": 2631,
+      "price": 13475,
+      "changePct": 20.21
     }
   ],
   "specialStocks": {
@@ -639,46 +639,46 @@
         "price": 14140
       },
       {
-        "code": "017900",
-        "name": "광전자",
-        "changePct": 20.96,
-        "price": 13560
-      },
-      {
         "code": "018880",
         "name": "한온시스템",
-        "changePct": 18.87,
-        "price": 5670
+        "changePct": 20.34,
+        "price": 5740
       },
       {
-        "code": "336260",
-        "name": "두산퓨얼셀",
-        "changePct": 14.6,
-        "price": 98900
-      },
-      {
-        "code": "012610",
-        "name": "경인양행",
-        "changePct": 13.4,
-        "price": 5840
+        "code": "017900",
+        "name": "광전자",
+        "changePct": 20.21,
+        "price": 13475
       },
       {
         "code": "031820",
         "name": "아이티센씨티에스",
-        "changePct": 13.23,
-        "price": 9330
+        "changePct": 17.6,
+        "price": 9690
       },
       {
         "code": "004150",
         "name": "한솔홀딩스",
-        "changePct": 13.04,
-        "price": 4160
+        "changePct": 15.63,
+        "price": 4255
+      },
+      {
+        "code": "012610",
+        "name": "경인양행",
+        "changePct": 13.98,
+        "price": 5870
       },
       {
         "code": "000660",
         "name": "SK하이닉스",
-        "changePct": 11.8,
-        "price": 1885000
+        "changePct": 13.58,
+        "price": 1915000
+      },
+      {
+        "code": "336260",
+        "name": "두산퓨얼셀",
+        "changePct": 12.98,
+        "price": 97500
       }
     ],
     "upperLimit": [
@@ -703,7 +703,7 @@
     {
       "name": "HBM/AI 반도체",
       "heat": 100,
-      "changePct": 11.8,
+      "changePct": 9.79,
       "stocks": [
         "SK하이닉스",
         "한미반도체",
@@ -731,24 +731,9 @@
       ]
     },
     {
-      "name": "2차전지",
-      "heat": 100,
-      "changePct": -4.55,
-      "stocks": [
-        "LG에너지솔루션",
-        "에코프로비엠",
-        "포스코퓨처엠"
-      ],
-      "codes": [
-        "373220",
-        "247540",
-        "003670"
-      ]
-    },
-    {
       "name": "조선/방산",
-      "heat": 91,
-      "changePct": 3.49,
+      "heat": 94,
+      "changePct": 3.73,
       "stocks": [
         "HD현대중공업",
         "한화오션",
@@ -762,8 +747,8 @@
     },
     {
       "name": "바이오 신약",
-      "heat": 74,
-      "changePct": -2.08,
+      "heat": 79,
+      "changePct": -2.45,
       "stocks": [
         "셀트리온",
         "유한양행",
@@ -773,6 +758,21 @@
         "068270",
         "000100",
         "069620"
+      ]
+    },
+    {
+      "name": "2차전지",
+      "heat": 79,
+      "changePct": -2.46,
+      "stocks": [
+        "LG에너지솔루션",
+        "에코프로비엠",
+        "포스코퓨처엠"
+      ],
+      "codes": [
+        "373220",
+        "247540",
+        "003670"
       ]
     },
     {
@@ -850,19 +850,19 @@
       ]
     },
     {
-      "time": "11:30",
-      "source": "연합뉴스TV",
-      "headline": "JP모건 ″코스피 10,000 간다″…현대차증권 ″최대 12,000″",
-      "sentiment": "neutral",
+      "time": "10:40",
+      "source": "헤럴드경제",
+      "headline": "‘평균 848만원 벌었다’…개미들, 코스피 급등에 ‘활짝’, 1분기 10명 중 8명이 수익 실현",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "12:08",
-      "source": "MBC 뉴스",
-      "headline": "장중 7,800선 돌파‥코스피 또 사상 최고치",
-      "sentiment": "positive",
+      "time": "13:46",
+      "source": "한국경제",
+      "headline": "삼전닉스 독주에...코스피50 vs. 동일가중 수익률 12배 차이",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
@@ -877,10 +877,10 @@
       ]
     },
     {
-      "time": "11:46",
-      "source": "v.daum.net",
-      "headline": "코스피 첫 7800 돌파…JP모건 “10000P 간다”",
-      "sentiment": "neutral",
+      "time": "12:08",
+      "source": "MBC 뉴스",
+      "headline": "장중 7,800선 돌파‥코스피 또 사상 최고치",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
@@ -904,9 +904,9 @@
       ]
     },
     {
-      "time": "11:45",
-      "source": "문화일보",
-      "headline": "코스피 7500 환호만큼 그림자도 짙다[포럼]",
+      "time": "06:00",
+      "source": "비즈니스포스트",
+      "headline": "1년 사이 3배 넘게 오른 이재명 '코스피 ETF', 새로 투자한다면 따져봐야 하는 것들",
       "sentiment": "neutral",
       "tags": [
         "증시"
