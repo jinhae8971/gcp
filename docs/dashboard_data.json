@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-11 17:24:05",
+  "asOf": "2026-05-11 17:57:54",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7822.24,
@@ -101,19 +101,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1470.0,
-    "change": 15.2099609375,
-    "changePct": 1.045509010173155
+    "usdkrw": 1470.699951171875,
+    "change": 15.909912109375,
+    "changePct": 1.0936225628564045
   },
   "oil": {
-    "value": 97.33000183105469,
-    "change": 1.910003662109375,
-    "changePct": 2.0016806736127046
+    "value": 97.55999755859375,
+    "change": 2.1399993896484375,
+    "changePct": 2.2427158150427484
   },
   "gold": {
-    "value": 4679.60009765625,
-    "change": -40.7998046875,
-    "changePct": -0.8643294113120009
+    "value": 4679.10009765625,
+    "change": -41.2998046875,
+    "changePct": -0.8749217342156544
   },
   "rate": {
     "value": 3.25,
@@ -839,45 +839,9 @@
       ]
     },
     {
-      "time": "16:28",
-      "source": "매일일보",
-      "headline": "구윤철 \"코스피 아직 낮은 수준…최고가격제 당분간 유지\"",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "17:13",
-      "source": "v.daum.net",
-      "headline": "구윤철 \"코스피 시장 선진국 비해서 아직 낮아‥시장 논리 반영된 결과\"",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:00",
-      "source": "연합인포맥스",
-      "headline": "구윤철 \"올해 성장률 2% 상회 전망…코스피 PBR 선진국보다 낮아\"",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
       "time": "09:30",
       "source": "연합인포맥스",
       "headline": "코스피 1만 전망 나왔다…JP모건 \"삼전닉스만 있는 게 아냐\"",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "10:21",
-      "source": "v.daum.net",
-      "headline": "코스피 팔천 찍고 '만스피' 갈까…증권사들 앞다퉈 전망치 높여",
       "sentiment": "neutral",
       "tags": [
         "증시"
@@ -893,31 +857,66 @@
       ]
     },
     {
-      "time": "10:48",
-      "source": "조선일보",
-      "headline": "파죽지세 코스피 7870선도 뚫어내, 1만2000간다 전망까지 등장",
+      "time": "17:18",
+      "source": "한국경제",
+      "headline": "끝없는 이익 상향...코스피 내년 영업이익 1000조",
       "sentiment": "neutral",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "17:01",
-      "source": "네이버 프리미엄콘텐츠",
-      "headline": "나스닥·니케이도 쏠림에 휘청…반도체 축제 끝난 코스피 “멀쩡할까”",
+      "time": "17:49",
+      "source": "한국경제",
+      "headline": "내년 영업익 1000兆 시대…반도체가 바꾼 '코스피 체급'",
       "sentiment": "neutral",
       "tags": [
         "반도체"
       ]
     },
     {
-      "time": "16:00",
-      "source": "v.daum.net",
-      "headline": "“외국인 4조 던져도 더 올랐다”…반도체 불기둥에 코스피 7900 눈앞",
+      "time": "15:59",
+      "source": "한겨레",
+      "headline": "코스피 ‘단타’ 경고음…1일 거래 회전율, 미국의 6배 달해",
       "sentiment": "neutral",
       "tags": [
-        "반도체",
-        "수급"
+        "증시"
+      ]
+    },
+    {
+      "time": "17:43",
+      "source": "Investing.com 한국어",
+      "headline": "금감원, 코스피 급등 속 단타·빚투 경고…“리스크 점검해야” By 알파경제 alphabiz",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "15:07",
+      "source": "v.daum.net",
+      "headline": "코스피 8000 앞두고...\"10주당 7주꼴 하루 만에 주인 바뀌어\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "17:17",
+      "source": "v.daum.net",
+      "headline": "코스피, 사상 첫 7800선 돌파… JP모건 \"코스피 1만 시대 온다\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "10:48",
+      "source": "조선일보",
+      "headline": "파죽지세 코스피 7870선도 뚫어내, 1만2000간다 전망까지 등장",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
       ]
     }
   ],
