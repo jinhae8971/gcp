@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-11 16:59:20",
+  "asOf": "2026-05-11 17:24:05",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7822.24,
@@ -101,19 +101,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1472.1199951171875,
-    "change": 17.3299560546875,
-    "changePct": 1.1912341705236944
+    "usdkrw": 1470.0,
+    "change": 15.2099609375,
+    "changePct": 1.045509010173155
   },
   "oil": {
-    "value": 98.91000366210938,
-    "change": 3.4900054931640625,
-    "changePct": 3.6575199749897855
+    "value": 97.33000183105469,
+    "change": 1.910003662109375,
+    "changePct": 2.0016806736127046
   },
   "gold": {
-    "value": 4677.10009765625,
-    "change": -43.2998046875,
-    "changePct": -0.9172910258302689
+    "value": 4679.60009765625,
+    "change": -40.7998046875,
+    "changePct": -0.8643294113120009
   },
   "rate": {
     "value": 3.25,
@@ -830,9 +830,54 @@
   ],
   "news": [
     {
-      "time": "10:48",
-      "source": "조선일보",
-      "headline": "파죽지세 코스피 7870선도 뚫어내, 1만2000간다 전망까지 등장",
+      "time": "16:31",
+      "source": "한겨레",
+      "headline": "코스피 7800 돌파, 4일 연속 ‘사상 최고’…반도체 랠리 지속",
+      "sentiment": "positive",
+      "tags": [
+        "반도체"
+      ]
+    },
+    {
+      "time": "16:28",
+      "source": "매일일보",
+      "headline": "구윤철 \"코스피 아직 낮은 수준…최고가격제 당분간 유지\"",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "17:13",
+      "source": "v.daum.net",
+      "headline": "구윤철 \"코스피 시장 선진국 비해서 아직 낮아‥시장 논리 반영된 결과\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "16:00",
+      "source": "연합인포맥스",
+      "headline": "구윤철 \"올해 성장률 2% 상회 전망…코스피 PBR 선진국보다 낮아\"",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "09:30",
+      "source": "연합인포맥스",
+      "headline": "코스피 1만 전망 나왔다…JP모건 \"삼전닉스만 있는 게 아냐\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "10:21",
+      "source": "v.daum.net",
+      "headline": "코스피 팔천 찍고 '만스피' 갈까…증권사들 앞다퉈 전망치 높여",
       "sentiment": "neutral",
       "tags": [
         "증시"
@@ -848,75 +893,31 @@
       ]
     },
     {
-      "time": "09:30",
-      "source": "연합인포맥스",
-      "headline": "코스피 1만 전망 나왔다…JP모건 \"삼전닉스만 있는 게 아냐\"",
+      "time": "10:48",
+      "source": "조선일보",
+      "headline": "파죽지세 코스피 7870선도 뚫어내, 1만2000간다 전망까지 등장",
       "sentiment": "neutral",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "16:21",
-      "source": "v.daum.net",
-      "headline": "국내외서 '코스피 1만' 전망 속속…JP모건 1만·현대차 證 1.2만 제시",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:19",
-      "source": "v.daum.net",
-      "headline": "코스피 급등에도 커지는 불안감… 야간 선물 거래 14조 돌파",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:18",
-      "source": "노컷뉴스",
-      "headline": "'8천피'까지 단 177포인트…코스피 사상 첫 7800선 돌파",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:33",
-      "source": "마켓인",
-      "headline": "“코스피, 연내 1만1600 간다…반도체 정점은 8월 전망”",
+      "time": "17:01",
+      "source": "네이버 프리미엄콘텐츠",
+      "headline": "나스닥·니케이도 쏠림에 휘청…반도체 축제 끝난 코스피 “멀쩡할까”",
       "sentiment": "neutral",
       "tags": [
         "반도체"
       ]
     },
     {
-      "time": "15:59",
-      "source": "한겨레",
-      "headline": "코스피 ‘단타’ 경고음…1일 거래 회전율, 미국의 6배 달해",
+      "time": "16:00",
+      "source": "v.daum.net",
+      "headline": "“외국인 4조 던져도 더 올랐다”…반도체 불기둥에 코스피 7900 눈앞",
       "sentiment": "neutral",
       "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:03",
-      "source": "v.daum.net",
-      "headline": "금감원 \"코스피 9천 가능성에 빚투·단기투자 증가…리스크 관리 필요\"",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:00",
-      "source": "머니투데이",
-      "headline": "\"내 주식만 마이너스 이유 있었네\"…올들어 코스피 종목 30%는 하락 - 머니투데이",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
+        "반도체",
+        "수급"
       ]
     }
   ],
