@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-12 17:25:21",
+  "asOf": "2026-05-12 18:15:06",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7643.15,
@@ -105,19 +105,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1488.81005859375,
-    "change": 28.260009765625,
-    "changePct": 1.9348881463048437
+    "usdkrw": 1490.1800537109375,
+    "change": 29.6300048828125,
+    "changePct": 2.0286880895718835
   },
   "oil": {
-    "value": 101.33000183105469,
-    "change": 3.2600021362304688,
-    "changePct": 3.324158403563776
+    "value": 100.97000122070312,
+    "change": 2.9000015258789062,
+    "changePct": 2.957073044665216
   },
   "gold": {
-    "value": 4704.60009765625,
-    "change": -14.10009765625,
-    "changePct": -0.29881317042046596
+    "value": 4709.60009765625,
+    "change": -9.10009765625,
+    "changePct": -0.19285178713599832
   },
   "rate": {
     "value": 3.25,
@@ -850,33 +850,6 @@
       ]
     },
     {
-      "time": "15:34",
-      "source": "한국경제",
-      "headline": "'팔천피' 턱밑 찍고 7600대 후퇴한 코스피…\"반도체 쏠림 부작용\"",
-      "sentiment": "neutral",
-      "tags": [
-        "반도체"
-      ]
-    },
-    {
-      "time": "17:02",
-      "source": "v.daum.net",
-      "headline": "‘8000피’ 문턱서 급락한 코스피…‘1만피’ 전망 속 변동성도 극대화",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "15:51",
-      "source": "뉴스1",
-      "headline": "'코스피·코스닥 급락'",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
       "time": "15:38",
       "source": "조선일보",
       "headline": "블룸버그 \"코스피 5% 급락은 김용범 AI 국민배당금 제안 탓\"",
@@ -904,27 +877,54 @@
       ]
     },
     {
-      "time": "15:39",
-      "source": "YTN",
-      "headline": "속보 코스피, 2.29% 급락한 7,643.15로 마감",
+      "time": "17:52",
+      "source": "매일경제 마켓",
+      "headline": "577P 출렁 … '롤러코스피'에 어질했던 하루",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "16:21",
+      "source": "v.daum.net",
+      "headline": "코스피, 외국인 5조 순매도에 2%대 하락…7640선 마감",
+      "sentiment": "negative",
+      "tags": [
+        "수급"
+      ]
+    },
+    {
+      "time": "17:25",
+      "source": "v.daum.net",
+      "headline": "‘7,999’ 찍었던 코스피, 2.3% 하락 마감",
       "sentiment": "negative",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "15:23",
-      "source": "매일경제 마켓",
-      "headline": "“코스피 상승분 87% 차지”…삼전닉스 등 실적에도 외국인 매도 우려",
-      "sentiment": "positive",
+      "time": "16:43",
+      "source": "YTN",
+      "headline": "코스피, 8천 고지 앞두고 급락...7,600대로 마감",
+      "sentiment": "negative",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "16:19",
+      "source": "머니투데이",
+      "headline": "이달 코스피서 14조 던진 외국인…그래도 시총대비 비중은↑ - 머니투데이",
+      "sentiment": "neutral",
       "tags": [
         "수급"
       ]
     },
     {
-      "time": "16:29",
-      "source": "뉴스1",
-      "headline": "코스피 7999p 찍고 내려와 -2.29% 마감…삼전닉스 동반 하락[시황종합]",
+      "time": "15:33",
+      "source": "newsis.com",
+      "headline": "[속보]멀어진 '팔천피'…코스피 2.29% 하락한 7643.15 마감",
       "sentiment": "negative",
       "tags": [
         "증시"
