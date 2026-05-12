@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-12 16:21:51",
+  "asOf": "2026-05-12 16:42:03",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7643.15,
@@ -105,19 +105,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1489.6400146484375,
-    "change": 29.0899658203125,
-    "changePct": 1.9917130428808578
+    "usdkrw": 1488.56005859375,
+    "change": 28.010009765625,
+    "changePct": 1.9177713073303366
   },
   "oil": {
-    "value": 100.33000183105469,
-    "change": 2.2600021362304688,
-    "changePct": 2.3044785798543685
+    "value": 100.47000122070312,
+    "change": 2.4000015258789062,
+    "changePct": 2.447233132810512
   },
   "gold": {
-    "value": 4706.0,
-    "change": -12.7001953125,
-    "changePct": -0.26914605265908226
+    "value": 4705.0,
+    "change": -13.7001953125,
+    "changePct": -0.2903383293159758
   },
   "rate": {
     "value": 3.25,
@@ -850,6 +850,24 @@
       ]
     },
     {
+      "time": "15:34",
+      "source": "한국경제",
+      "headline": "'팔천피' 턱밑 찍고 7600대 후퇴한 코스피…\"반도체 쏠림 부작용\"",
+      "sentiment": "neutral",
+      "tags": [
+        "반도체"
+      ]
+    },
+    {
+      "time": "16:21",
+      "source": "v.daum.net",
+      "headline": "8천피 직전 하락한 코스피, 외국인 매도에 상승 랠리 쉼표",
+      "sentiment": "positive",
+      "tags": [
+        "수급"
+      ]
+    },
+    {
       "time": "15:51",
       "source": "뉴스1",
       "headline": "'코스피·코스닥 급락'",
@@ -886,19 +904,19 @@
       ]
     },
     {
-      "time": "15:59",
-      "source": "newsis.com",
-      "headline": "하락한 코스피와 상승한 원달러 환율",
-      "sentiment": "positive",
+      "time": "15:39",
+      "source": "YTN",
+      "headline": "속보 코스피, 2.29% 급락한 7,643.15로 마감",
+      "sentiment": "negative",
       "tags": [
-        "거시"
+        "증시"
       ]
     },
     {
-      "time": "09:48",
-      "source": "연합뉴스",
-      "headline": "코스피, 장중 사상 첫 7,999 찍었다…'8천피' 턱밑(종합)",
-      "sentiment": "neutral",
+      "time": "10:44",
+      "source": "문화일보",
+      "headline": "[속보]코스피 5% 급락 전환…외인 2.5조 매물 폭탄",
+      "sentiment": "negative",
       "tags": [
         "증시"
       ]
@@ -911,25 +929,6 @@
       "tags": [
         "금융",
         "거시"
-      ]
-    },
-    {
-      "time": "13:58",
-      "source": "YTN",
-      "headline": "[경제]8천 턱밑까지 갔던 코스피, 하락세 전환",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "10:19",
-      "source": "동아일보",
-      "headline": "반도체 질주에 “코스피 1만” 간다는데…숨은 변수는 금리·유가·CPI",
-      "sentiment": "neutral",
-      "tags": [
-        "반도체",
-        "금융"
       ]
     }
   ],
