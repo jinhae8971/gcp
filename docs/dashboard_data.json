@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-12 18:15:06",
+  "asOf": "2026-05-12 18:37:12",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7643.15,
@@ -105,19 +105,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1490.1800537109375,
-    "change": 29.6300048828125,
-    "changePct": 2.0286880895718835
+    "usdkrw": 1491.050048828125,
+    "change": 30.5,
+    "changePct": 2.088254354889908
   },
   "oil": {
-    "value": 100.97000122070312,
-    "change": 2.9000015258789062,
-    "changePct": 2.957073044665216
+    "value": 101.47000122070312,
+    "change": 3.4000015258789062,
+    "changePct": 3.4669129565199195
   },
   "gold": {
-    "value": 4709.60009765625,
-    "change": -9.10009765625,
-    "changePct": -0.19285178713599832
+    "value": 4707.7001953125,
+    "change": -11.0,
+    "changePct": -0.23311504322582874
   },
   "rate": {
     "value": 3.25,
@@ -868,37 +868,19 @@
       ]
     },
     {
-      "time": "16:59",
-      "source": "매일경제 마켓",
-      "headline": "코스피 폭락, ‘AI 국민배당금’ 언급 때문?…야권 “공산당 본색” 맹공",
-      "sentiment": "neutral",
+      "time": "18:20",
+      "source": "v.daum.net",
+      "headline": "코스피 급락에…외신 \"김용범 AI 국민배당금 제안 때문\"",
+      "sentiment": "negative",
       "tags": [
         "AI"
       ]
     },
     {
-      "time": "17:52",
-      "source": "매일경제 마켓",
-      "headline": "577P 출렁 … '롤러코스피'에 어질했던 하루",
+      "time": "11:16",
+      "source": "연합인포맥스",
+      "headline": "코스피 8천선 코앞서 '와르르'…지수 끌어내린 이유는",
       "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:21",
-      "source": "v.daum.net",
-      "headline": "코스피, 외국인 5조 순매도에 2%대 하락…7640선 마감",
-      "sentiment": "negative",
-      "tags": [
-        "수급"
-      ]
-    },
-    {
-      "time": "17:25",
-      "source": "v.daum.net",
-      "headline": "‘7,999’ 찍었던 코스피, 2.3% 하락 마감",
-      "sentiment": "negative",
       "tags": [
         "증시"
       ]
@@ -913,6 +895,24 @@
       ]
     },
     {
+      "time": "15:33",
+      "source": "newsis.com",
+      "headline": "[속보]멀어진 '팔천피'…코스피 2.29% 하락한 7643.15 마감",
+      "sentiment": "negative",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "09:03",
+      "source": "조선일보",
+      "headline": "코스피 1.68% 오른 7953.41 출발...8000 고지 눈앞",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
       "time": "16:19",
       "source": "머니투데이",
       "headline": "이달 코스피서 14조 던진 외국인…그래도 시총대비 비중은↑ - 머니투데이",
@@ -922,10 +922,10 @@
       ]
     },
     {
-      "time": "15:33",
-      "source": "newsis.com",
-      "headline": "[속보]멀어진 '팔천피'…코스피 2.29% 하락한 7643.15 마감",
-      "sentiment": "negative",
+      "time": "11:43",
+      "source": "지디넷코리아",
+      "headline": "비트코인 흔들리고 코스피 오르자…국내 코인 투자 위축",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
