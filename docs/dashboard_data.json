@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-05-12 15:36:15",
+  "asOf": "2026-05-12 16:21:51",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7643.15,
     "change": -179.09,
     "changePct": -2.29,
-    "volume": 17756857500000,
+    "volume": 17761543500000,
     "high": 7999.67,
     "low": 7421.71,
     "open": 7953.41,
@@ -105,19 +105,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1486.8399658203125,
-    "change": 26.2899169921875,
-    "changePct": 1.8000011032337622
+    "usdkrw": 1489.6400146484375,
+    "change": 29.0899658203125,
+    "changePct": 1.9917130428808578
   },
   "oil": {
-    "value": 99.4800033569336,
-    "change": 1.410003662109375,
-    "changePct": 1.4377522856093063
+    "value": 100.33000183105469,
+    "change": 2.2600021362304688,
+    "changePct": 2.3044785798543685
   },
   "gold": {
-    "value": 4706.2998046875,
-    "change": -12.400390625,
-    "changePct": -0.26279250877854876
+    "value": 4706.0,
+    "change": -12.7001953125,
+    "changePct": -0.26914605265908226
   },
   "rate": {
     "value": 3.25,
@@ -566,14 +566,14 @@
     {
       "code": "009150",
       "name": "삼성전기",
-      "amount": 20663,
+      "amount": 20665,
       "price": 958000,
       "changePct": 6.44
     },
     {
       "code": "066570",
       "name": "LG전자",
-      "amount": 18752,
+      "amount": 18754,
       "price": 184900,
       "changePct": 18.0
     },
@@ -587,28 +587,28 @@
     {
       "code": "005490",
       "name": "POSCO홀딩스",
-      "amount": 6314,
+      "amount": 6316,
       "price": 479000,
       "changePct": -6.45
     },
     {
       "code": "006800",
       "name": "미래에셋증권",
-      "amount": 5896,
+      "amount": 5897,
       "price": 74300,
       "changePct": -6.42
     },
     {
       "code": "007610",
       "name": "선도전기",
-      "amount": 4621,
+      "amount": 4625,
       "price": 14600,
       "changePct": 13.44
     },
     {
       "code": "010140",
       "name": "삼성중공업",
-      "amount": 4453,
+      "amount": 4454,
       "price": 31400,
       "changePct": -7.51
     },
@@ -622,14 +622,14 @@
     {
       "code": "042660",
       "name": "한화오션",
-      "amount": 3344,
+      "amount": 3345,
       "price": 122000,
       "changePct": -6.51
     },
     {
       "code": "018880",
       "name": "한온시스템",
-      "amount": 3089,
+      "amount": 3091,
       "price": 5160,
       "changePct": -9.95
     }
@@ -841,6 +841,33 @@
   ],
   "news": [
     {
+      "time": "11:22",
+      "source": "경향신문",
+      "headline": "8000 눈앞에 왔는데···코스피, 7999 찍고 외인 던지기에 5% 넘게 밀렸다",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "15:51",
+      "source": "뉴스1",
+      "headline": "'코스피·코스닥 급락'",
+      "sentiment": "negative",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "15:38",
+      "source": "조선일보",
+      "headline": "블룸버그 \"코스피 5% 급락은 김용범 AI 국민배당금 제안 탓\"",
+      "sentiment": "negative",
+      "tags": [
+        "AI"
+      ]
+    },
+    {
       "time": "15:05",
       "source": "동아일보",
       "headline": "블룸버그 “김용범 ‘AI 국민배당금’ 발언에 韓 코스피 출렁”",
@@ -850,72 +877,27 @@
       ]
     },
     {
-      "time": "15:06",
-      "source": "매일경제 마켓",
-      "headline": "블룸버그 “코스피 5% 급락원인은…김용범 AI 국민배당금 제안”",
-      "sentiment": "negative",
-      "tags": [
-        "AI"
-      ]
-    },
-    {
-      "time": "15:28",
-      "source": "newsis.com",
-      "headline": "'팔천피' 목전 코스피 급락은 김용범 '국민배당금' 제안 때문?",
-      "sentiment": "negative",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "10:39",
-      "source": "Chosunbiz",
-      "headline": "급랭한 증시… 차익 실현 물량 나오며 코스피 폭락 중 - 조선비즈",
-      "sentiment": "neutral",
-      "tags": [
-        "조선"
-      ]
-    },
-    {
-      "time": "15:30",
+      "time": "15:48",
       "source": "v.daum.net",
-      "headline": "8천피 앞둔 코스피의 그늘…대구·경북 체감 온도는 낮았다",
-      "sentiment": "neutral",
+      "headline": "\"다 왔던 8000피\" 김용범 발언에 급제동…코스피 2.28% 급락 마감",
+      "sentiment": "negative",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "15:23",
-      "source": "매일경제 마켓",
-      "headline": "“코스피 상승분 87% 차지”…삼전닉스 등 실적에도 외국인 매도 우려",
+      "time": "15:59",
+      "source": "newsis.com",
+      "headline": "하락한 코스피와 상승한 원달러 환율",
       "sentiment": "positive",
       "tags": [
-        "수급"
+        "거시"
       ]
     },
     {
-      "time": "17:18",
-      "source": "dt.co.kr",
-      "headline": "[기획] 100층 넘어 120층까지… 삼전닉스에 뚫린 코스피 상단",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "08:03",
-      "source": "연합인포맥스",
-      "headline": "코스피 8천도 코앞…하이닉스GDR 유럽서 16% 폭등·DRAM ETF 광풍",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "11:22",
-      "source": "경향신문",
-      "headline": "8000 눈앞에 왔는데···코스피, 7999 찍고 외인 던지기에 5% 넘게 밀렸다",
+      "time": "09:48",
+      "source": "연합뉴스",
+      "headline": "코스피, 장중 사상 첫 7,999 찍었다…'8천피' 턱밑(종합)",
       "sentiment": "neutral",
       "tags": [
         "증시"
@@ -929,6 +911,25 @@
       "tags": [
         "금융",
         "거시"
+      ]
+    },
+    {
+      "time": "13:58",
+      "source": "YTN",
+      "headline": "[경제]8천 턱밑까지 갔던 코스피, 하락세 전환",
+      "sentiment": "negative",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "10:19",
+      "source": "동아일보",
+      "headline": "반도체 질주에 “코스피 1만” 간다는데…숨은 변수는 금리·유가·CPI",
+      "sentiment": "neutral",
+      "tags": [
+        "반도체",
+        "금융"
       ]
     }
   ],
