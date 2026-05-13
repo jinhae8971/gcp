@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-13 16:34:10",
+  "asOf": "2026-05-13 16:49:06",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7844.01,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1487.6800537109375,
-    "change": 13.2301025390625,
-    "changePct": 0.8972907170261951
+    "usdkrw": 1489.1800537109375,
+    "change": 14.7301025390625,
+    "changePct": 0.9990235699323122
   },
   "oil": {
-    "value": 100.86000061035156,
-    "change": -1.3199996948242188,
-    "changePct": -1.291837630536155
+    "value": 100.94000244140625,
+    "change": -1.2399978637695312,
+    "changePct": -1.2135426307164738
   },
   "gold": {
-    "value": 4713.2001953125,
-    "change": 35.60009765625,
-    "changePct": 0.7610761269243116
+    "value": 4712.2001953125,
+    "change": 34.60009765625,
+    "changePct": 0.7396976426776343
   },
   "rate": {
     "value": 3.25,
@@ -852,19 +852,19 @@
   ],
   "news": [
     {
-      "time": "08:24",
-      "source": "조선일보",
-      "headline": "코스피 1만 간다는데 나흘간 20조 ‘매도 폭탄’ 던진 외국인들...왜?",
-      "sentiment": "neutral",
+      "time": "09:02",
+      "source": "v.daum.net",
+      "headline": "외국인 코스피 80조 순매도에도 보유 지분율 상승한 까닭",
+      "sentiment": "positive",
       "tags": [
         "수급"
       ]
     },
     {
-      "time": "09:02",
-      "source": "v.daum.net",
-      "headline": "외국인 코스피 80조 순매도에도 보유 지분율 상승한 까닭",
-      "sentiment": "positive",
+      "time": "08:24",
+      "source": "조선일보",
+      "headline": "코스피 1만 간다는데 나흘간 20조 ‘매도 폭탄’ 던진 외국인들...왜?",
+      "sentiment": "neutral",
       "tags": [
         "수급"
       ]
@@ -879,27 +879,36 @@
       ]
     },
     {
-      "time": "12:36",
-      "source": "한국경제",
-      "headline": "\"코스피 1만 간다\" 깜짝 전망…모건스탠리가 콕 찍은 '이 종목'",
-      "sentiment": "neutral",
+      "time": "16:15",
+      "source": "연합인포맥스",
+      "headline": "모건스탠리도 \"코스피 1만 간다\"…환율 1,420원 회복 가능성",
+      "sentiment": "positive",
+      "tags": [
+        "거시"
+      ]
+    },
+    {
+      "time": "14:22",
+      "source": "newsis.com",
+      "headline": "모건스탠리 \"올해 코스피 전망치 9500…강세장서 1만 가능\"",
+      "sentiment": "positive",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "12:26",
-      "source": "연합뉴스",
-      "headline": "모건스탠리, 올해 코스피 전망치 9,500 제시…\"1만도 가능\"",
+      "time": "16:41",
+      "source": "Chosunbiz",
+      "headline": "또 나온 파격 전망…모건스탠리 “코스피 최대 1만 간다” - 조선비즈",
       "sentiment": "neutral",
       "tags": [
-        "증시"
+        "조선"
       ]
     },
     {
-      "time": "16:00",
+      "time": "16:19",
       "source": "v.daum.net",
-      "headline": "‘개미’가 밀어올린 코스피, 또 사상 최고치…모건스탠리 “1만피 가능”",
+      "headline": "코스피, 하루만에 상승·변동성 지속…'사상 최고' 7,844 마감(종합)",
       "sentiment": "positive",
       "tags": [
         "증시"
@@ -915,15 +924,6 @@
       ]
     },
     {
-      "time": "16:00",
-      "source": "YTN",
-      "headline": "'롤러코스피' 7,844로 마감...사상 최고치 재경신",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
       "time": "15:39",
       "source": "JTBC",
       "headline": "[속보] 코스피, 하루만에 상승전환 또 사상최고…7844 마감",
@@ -933,10 +933,10 @@
       ]
     },
     {
-      "time": "11:16",
-      "source": "연합인포맥스",
-      "headline": "코스피 8천선 코앞서 '와르르'…지수 끌어내린 이유는",
-      "sentiment": "neutral",
+      "time": "15:44",
+      "source": "중앙일보",
+      "headline": "블룸버그 “코스피 급락, 김용범 ‘국민배당금’ 발언 때문”",
+      "sentiment": "negative",
       "tags": [
         "증시"
       ]
