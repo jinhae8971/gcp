@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-05-14 15:45:40",
+  "asOf": "2026-05-14 16:27:09",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7981.41,
     "change": 137.4,
     "changePct": 1.75,
-    "volume": 13146477000000,
+    "volume": 13154356500000,
     "high": 7991.04,
     "low": 7842.72,
     "open": 7873.91,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1489.760009765625,
-    "change": -3.22998046875,
-    "changePct": -0.21634307596683525
+    "usdkrw": 1488.280029296875,
+    "change": -4.7099609375,
+    "changePct": -0.3154717023093111
   },
   "oil": {
-    "value": 101.06999969482422,
-    "change": 0.0500030517578125,
-    "changePct": 0.04949817206437662
+    "value": 101.2300033569336,
+    "change": 0.2100067138671875,
+    "changePct": 0.20788628078181737
   },
   "gold": {
-    "value": 4701.5,
-    "change": 3.7998046875,
-    "changePct": 0.08088648763264106
+    "value": 4705.39990234375,
+    "change": 7.69970703125,
+    "changePct": 0.16390375526588497
   },
   "rate": {
     "value": 3.25,
@@ -479,7 +479,7 @@
       "code": "329180",
       "name": "HD현대중공업",
       "sector": "조선",
-      "net": -239,
+      "net": -240,
       "price": 671000,
       "changePct": -8.46,
       "_proxy": true
@@ -584,28 +584,28 @@
     {
       "code": "322000",
       "name": "HD현대에너지솔루션",
-      "amount": 5452,
+      "amount": 5453,
       "price": 244000,
       "changePct": 15.09
     },
     {
       "code": "047040",
       "name": "대우건설",
-      "amount": 4820,
+      "amount": 4835,
       "price": 32600,
       "changePct": 12.61
     },
     {
       "code": "329180",
       "name": "HD현대중공업",
-      "amount": 4783,
+      "amount": 4805,
       "price": 671000,
       "changePct": -8.46
     },
     {
       "code": "034220",
       "name": "LG디스플레이",
-      "amount": 4470,
+      "amount": 4473,
       "price": 15340,
       "changePct": 8.26
     },
@@ -845,10 +845,19 @@
   ],
   "news": [
     {
-      "time": "09:24",
-      "source": "v.daum.net",
-      "headline": "코스피, 장 초반 7900선 돌파…코스닥도 1%대 상승 출발",
-      "sentiment": "positive",
+      "time": "06:00",
+      "source": "Chosunbiz",
+      "headline": "코스닥 협회 “제발 남아달라” 호소에… 알테오젠 ‘코스피 이전’ 안갯속 - 조선비즈",
+      "sentiment": "neutral",
+      "tags": [
+        "조선"
+      ]
+    },
+    {
+      "time": "10:02",
+      "source": "newsis.com",
+      "headline": "코스피, 7900 넘어 8000선 돌파 시도…'30만전자' 목전",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
@@ -863,73 +872,64 @@
       ]
     },
     {
-      "time": "14:32",
+      "time": "15:33",
+      "source": "연합뉴스",
+      "headline": "[코스피] 137.40p(1.75%) 오른 7,981.41(장종료)",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "16:06",
+      "source": "뉴스1",
+      "headline": "빚투에 레버리지…블룸버그 \"200% 랠리 코스피 과열 조짐\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "09:24",
+      "source": "v.daum.net",
+      "headline": "삼성전자·SK하이닉스 보합권 등락…코스피 7900선 강보합[개장시황]",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "12:33",
+      "source": "오마이뉴스",
+      "headline": "[오마이포토] 코스피 7000 시대... \"금융과세 정상화하라\"",
+      "sentiment": "neutral",
+      "tags": [
+        "금융"
+      ]
+    },
+    {
+      "time": "08:38",
+      "source": "조선일보",
+      "headline": "증권가 첫 코스피 1만선 돌파 전망 나왔다...KB증권 \"연내 코스피 1만500 가능\"",
+      "sentiment": "neutral",
+      "tags": [
+        "증시"
+      ]
+    },
+    {
+      "time": "14:35",
       "source": "서울경제",
-      "headline": "오후 2:31 현재 코스피는 45:55으로 매수우위, 매도강세 업종은 유통업(2.86%↑)",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "14:46",
-      "source": "한겨레",
-      "headline": "코스피 8천 앞인데 언제까지…시민단체 “금투세 도입하라”",
+      "headline": "모건스탠리도 “코스피 1만 가능”…관심 종목은 SK스퀘어·NC [마켓시그널]",
       "sentiment": "neutral",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "14:56",
+      "time": "14:45",
       "source": "v.daum.net",
-      "headline": "코스피 8000 눈앞…노동·시민단체 \"금투세 도입해야\"",
+      "headline": "증권가 첫 '1만피' 전망 등장…KB증권 \"연내 코스피 1만500 가능\"",
       "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "10:58",
-      "source": "Chosunbiz",
-      "headline": "코스피 8000 앞두고… 시민·노동단체, ‘금투세’ 재추진 요구 - 조선비즈",
-      "sentiment": "neutral",
-      "tags": [
-        "조선"
-      ]
-    },
-    {
-      "time": "21:17",
-      "source": "v.daum.net",
-      "headline": "\"한국 증시 왜 이렇게 뛰나\"…코스피 랠리에 이탈리아도 놀랐다",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "17:58",
-      "source": "한국경제",
-      "headline": "\"힘내자 포모들\"…개리, '사상 최고' 코스피에 씁쓸한 심경",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "23:06",
-      "source": "헤럴드경제",
-      "headline": "리쌍 개리 “난 뭘 한 걸까”…코스피 최고가에 포모의 시름은 깊어져 간다",
-      "sentiment": "positive",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "11:12",
-      "source": "v.daum.net",
-      "headline": "주식창 쳐다보다 '화병' 난다…\"난 뭘 한 걸까\" 급등한 코스피에 '포모(FOMO)' 확산",
-      "sentiment": "positive",
       "tags": [
         "증시"
       ]
