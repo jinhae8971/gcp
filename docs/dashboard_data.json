@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-05-14 18:11:22",
+  "asOf": "2026-05-14 18:33:45",
   "marketStatus": "OPEN",
   "kospi": {
     "value": 7981.41,
@@ -109,19 +109,19 @@
     "volume": 0
   },
   "fx": {
-    "usdkrw": 1490.3800048828125,
-    "change": -2.6099853515625,
-    "changePct": -0.1748159980063078
+    "usdkrw": 1491.280029296875,
+    "change": -1.7099609375,
+    "changePct": -0.11453264581040923
   },
   "oil": {
-    "value": 101.44000244140625,
-    "change": 0.42000579833984375,
-    "changePct": 0.4157650092029291
+    "value": 101.66000366210938,
+    "change": 0.6400070190429688,
+    "changePct": 0.6335448825090574
   },
   "gold": {
-    "value": 4699.2001953125,
-    "change": 1.5,
-    "changePct": 0.031930517862692534
+    "value": 4701.7998046875,
+    "change": 4.099609375,
+    "changePct": 0.08726843358566619
   },
   "rate": {
     "value": 3.25,
@@ -845,6 +845,15 @@
   ],
   "news": [
     {
+      "time": "17:56",
+      "source": "한겨레",
+      "headline": "‘던져라 외국인, 다 받아주마’…코스피 떠받치는 개미들, 6일째 순매수",
+      "sentiment": "neutral",
+      "tags": [
+        "수급"
+      ]
+    },
+    {
       "time": "16:14",
       "source": "MBC 뉴스",
       "headline": "코스피, 또 한 번 사상 최고치 경신‥8천까지 '19포인트'",
@@ -855,11 +864,20 @@
     },
     {
       "time": "17:46",
-      "source": "매일경제 마켓",
+      "source": "매일경제",
       "headline": "코스피 톱10 선수교체 … 삼성바이오 OUT, 삼성전기 IN",
       "sentiment": "neutral",
       "tags": [
         "바이오"
+      ]
+    },
+    {
+      "time": "18:25",
+      "source": "v.daum.net",
+      "headline": "단기 급등에 숨 가쁜 롤러코스피…공포지수 이란 사태 이후 최고치 [투자360]",
+      "sentiment": "positive",
+      "tags": [
+        "증시"
       ]
     },
     {
@@ -872,21 +890,12 @@
       ]
     },
     {
-      "time": "17:08",
-      "source": "v.daum.net",
-      "headline": "‘8000은 시간 문제, 10000도 꿈 아니다’···코스피, 외인이 던져도 개미가 끌어올려",
+      "time": "06:00",
+      "source": "Chosunbiz",
+      "headline": "코스닥 협회 “제발 남아달라” 호소에… 알테오젠 ‘코스피 이전’ 안갯속 - 조선비즈",
       "sentiment": "neutral",
       "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "08:32",
-      "source": "연합인포맥스",
-      "headline": "외인이 코스피 파는 이유…80조 '셀코리아'에도 지분율 31→38%",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
+        "조선"
       ]
     },
     {
@@ -899,37 +908,28 @@
       ]
     },
     {
-      "time": "16:08",
-      "source": "v.daum.net",
-      "headline": "빚투에 레버리지…블룸버그 \"200% 랠리 코스피 과열 조짐\"",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "17:15",
-      "source": "남도일보",
-      "headline": "코스피 불장에 ‘마통’ 급증…3영업일 만에 7천억 늘었다",
-      "sentiment": "neutral",
-      "tags": [
-        "증시"
-      ]
-    },
-    {
-      "time": "16:02",
+      "time": "10:02",
       "source": "뉴시스",
-      "headline": "코스피와 코스닥 지수 상승 마감",
-      "sentiment": "positive",
+      "headline": "코스피, 7900 넘어 8000선 돌파 시도…'30만전자' 목전",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
     },
     {
-      "time": "17:58",
-      "source": "한국경제",
-      "headline": "\"힘내자 포모들\"…개리, '사상 최고' 코스피에 씁쓸한 심경",
-      "sentiment": "positive",
+      "time": "18:04",
+      "source": "KBS 뉴스",
+      "headline": "코스피 8천 선 근접…개인 1조 8천 억 순매수",
+      "sentiment": "neutral",
+      "tags": [
+        "수급"
+      ]
+    },
+    {
+      "time": "08:38",
+      "source": "조선일보",
+      "headline": "증권가 첫 코스피 1만선 돌파 전망 나왔다...KB증권 \"연내 코스피 1만500 가능\"",
+      "sentiment": "neutral",
       "tags": [
         "증시"
       ]
