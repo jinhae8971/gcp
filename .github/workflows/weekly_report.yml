@@ -8,7 +8,7 @@ on:
     # Tue 23:00 UTC → Wed 08:00 KST
     # Wed 23:00 UTC → Thu 08:00 KST
     # Thu 23:00 UTC → Fri 08:00 KST
-    - cron: '0 23 * * 0-4'
+    - cron: '30 23 * * 0-4'
   workflow_dispatch:
     # 수동 실행 (테스트용)
 
