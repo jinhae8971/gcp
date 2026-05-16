@@ -13,6 +13,14 @@ Run via .github/workflows/global_flow_data.yml on a schedule.
 Reads ANTHROPIC_API_KEY from the environment.
 """
 
+# === anthropic_usage_reporter (auto-injected) ===
+try:
+    from anthropic_usage_reporter import patch_anthropic_client
+    patch_anthropic_client(workflow="gcp-global-flow-data")
+except Exception:
+    pass
+# === end auto-injection ===
+
 from __future__ import annotations
 
 import json
