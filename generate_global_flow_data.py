@@ -190,7 +190,7 @@ def main() -> int:
         iterations += 1
         with client.messages.stream(
             model=MODEL,
-            max_tokens=32000,
+            max_tokens=8000,
             system=SYSTEM_PROMPT,
             thinking={"type": "adaptive"},
             output_config={"effort": "high"},
