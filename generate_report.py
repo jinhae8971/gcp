@@ -5,6 +5,14 @@ Schedule: Every Sunday 7:00 AM KST (Saturday 22:00 UTC)
 Author: Winter AI Assistant
 """
 
+# === anthropic_usage_reporter (auto-injected) ===
+try:
+    from anthropic_usage_reporter import patch_anthropic_client
+    patch_anthropic_client(workflow="gcp-weekly-report")
+except Exception:
+    pass
+# === end auto-injection ===
+
 import os
 import json
 import glob
