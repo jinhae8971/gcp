@@ -13,6 +13,9 @@ Run via .github/workflows/global_flow_data.yml on a schedule.
 Reads ANTHROPIC_API_KEY from the environment.
 """
 
+
+from __future__ import annotations
+
 # === anthropic_usage_reporter (auto-injected) ===
 try:
     from anthropic_usage_reporter import patch_anthropic_client
@@ -20,8 +23,6 @@ try:
 except Exception:
     pass
 # === end auto-injection ===
-
-from __future__ import annotations
 
 import json
 import os
