@@ -37,6 +37,7 @@ jobs:
       - name: 🌐 Generate global flow data via Claude Opus 4.7
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          USAGE_DISPATCH_TOKEN: ${{ secrets.USAGE_DISPATCH_TOKEN }}
         run: python generate_global_flow_data.py
 
       - name: 💾 Commit & push if changed
