@@ -10,6 +10,14 @@ Author: Winter AI Assistant
 - 링크: HEAD 요청으로 사전 검증, 깨진 링크 제거
 """
 
+# === anthropic_usage_reporter (auto-injected) ===
+try:
+    from anthropic_usage_reporter import patch_anthropic_client
+    patch_anthropic_client(workflow="gcp-weekly-finance")
+except Exception:
+    pass
+# === end auto-injection ===
+
 import os
 import glob
 import re
