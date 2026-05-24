@@ -1,7 +1,7 @@
 # Convenience shortcuts for the local Docker dev environment.
 # Run `make` (no target) for the list.
 
-.PHONY: help up down restart logs logs-data ps refresh refresh-kospi shell-web shell-data shell-gen build-pull clean
+.PHONY: help up down restart logs logs-data ps refresh refresh-kospi refresh-strategy shell-web shell-data shell-gen build-pull clean
 
 help: ## 사용 가능한 명령 목록
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -44,6 +44,9 @@ refresh: ## Global Money MOVE AI 번들 1회 갱신 (.env 의 ANTHROPIC_API_KEY 
 
 refresh-kospi: ## KOSPI Intel 데이터 즉시 재생성 (data 컨테이너 재시작)
 	docker compose restart data
+
+refresh-strategy: ## 전략테스터 백테스트 실데이터 1회 생성 (requests/pykrx 필요)
+	python3 generate_strategy_tester_data.py
 
 shell-web: ## 웹 컨테이너 안에서 sh
 	docker compose exec web sh

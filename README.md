@@ -10,6 +10,10 @@ GitHub Pages 로 자동 배포되는 정적 대시보드 + 일별 데이터 갱�
 - **`docs/Dashboard.html`** — 코스피 주도섹터·수급 대시보드 (`generate_dashboard_data.py`)
 - **`docs/dashboard.html`** — 윈터 자동화 대시보드 (리포트 인덱스)
 - **`docs/index.html`** — 메인 인덱스
+- **`docs/전략테스터.html`** — KOSPI 백테스트 시스템 (DCA/VA·RSI/MACD 매도 빌더·벤치마크 비교·리스크 지표). 단일 자족형 페이지 (React + Babel CDN).
+  - 라이브: https://jinhae8971.github.io/gcp/전략테스터.html
+  - 데이터: `generate_strategy_tester_data.py` → `docs/strategy_tester_data.json` (KOSPI/KOSPI200/KOSDAQ 일봉, Naver siseJson + pykrx 폴백). JSON 이 없으면 페이지가 모의 데이터로 자동 폴백.
+  - 워크플로: `.github/workflows/strategy_tester_data.yml` (평일 17:00 KST)
 
 ## 로컬 개발 (Docker)
 
@@ -84,5 +88,6 @@ GMM_WEB_PORT=9000 make up
 - `.github/workflows/weekly_finance.yml` — 주간 예적금/금융 보고서
 - `.github/workflows/weekly_kosdaq.yml` — 주간 코스닥 분석
 - `.github/workflows/weekly_report.yml` — 평일 일일 코스피 리포트
+- `.github/workflows/strategy_tester_data.yml` — 전략테스터 백테스트 실데이터 (평일 17:00 KST → `docs/strategy_tester_data.json`)
 
 새 워크플로우 첫 실행 시 GitHub Secret 으로 `ANTHROPIC_API_KEY` (그리고 다른 워크플로우용 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) 가 등록되어 있어야 합니다.

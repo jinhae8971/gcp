@@ -1140,12 +1140,53 @@ input:focus { border-color: var(--accent); }
   }
 
   // ---------- 노출 ----------
-  const universe = buildUniverse();
-  window.SBTEngine = {
-    universe,
+  function rangeOf(uni) {
+    let start = null, end = null;
+    for (const k of Object.keys(uni)) {
+      const arr = uni[k];
+      if (arr && arr.length) {
+        if (start === null || arr[0].date < start) start = arr[0].date;
+        if (end === null || arr[arr.length - 1].date > end) end = arr[arr.length - 1].date;
+      }
+    }
+    return { start, end };
+  }
+
+  const mockUniverse = buildUniverse();
+  const SBT = {
+    universe: mockUniverse,
     runBacktest,
     indicators: { sma, ema, rsi, macd, drawdown },
+    meta: Object.assign({ source: "mock" }, rangeOf(mockUniverse)),
   };
+
+  // 실데이터(strategy_tester_data.json)가 있으면 모의 데이터를 대체.
+  // 없거나 실패하면 조용히 모의 데이터를 유지한다 (레포의 폴백 관례).
+  SBT.ready = (async function loadReal() {
+    try {
+      const res = await fetch("strategy_tester_data.json");
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      const real = {};
+      for (const code of ["KOSPI", "KOSPI200", "KOSDAQ"]) {
+        if (!Array.isArray(data[code]) || data[code].length < 100) {
+          throw new Error("불완전한 시리즈: " + code);
+        }
+        real[code] = data[code];
+      }
+      SBT.universe = real;
+      SBT.meta = Object.assign(
+        {}, data.meta || {},
+        { source: "real", provider: (data.meta && data.meta.source) || "file" },
+        rangeOf(real)
+      );
+    } catch (e) {
+      console.warn("[SBTEngine] 실데이터 미사용 → 모의 데이터:", e.message);
+    }
+    return SBT.meta;
+  })();
+
+  window.SBTEngine = SBT;
 })();
   </script>
 </head>
@@ -2226,8 +2267,10 @@ function Seg({ value, onChange, options }) {
 // ============================================================
 // 전략 설정
 // ============================================================
-function StrategyView({ cfg, setCfg, onRun, isRunning }) {
+function StrategyView({ cfg, setCfg, onRun, isRunning, dataMeta }) {
   const update = (patch) => setCfg({ ...cfg, ...patch });
+  const dmin = (dataMeta && dataMeta.start) || "2014-01-02";
+  const dmax = (dataMeta && dataMeta.end) || "2024-12-30";
   const updateSC = (i, patch) => {
     const arr = [...cfg.sellConditions];
     arr[i] = { ...arr[i], ...patch };
@@ -2303,11 +2346,11 @@ function StrategyView({ cfg, setCfg, onRun, isRunning }) {
             </Field>
 
             <Field label="시작일">
-              <input type="date" value={cfg.startDate} min="2014-01-02" max="2024-11-30"
+              <input type="date" value={cfg.startDate} min={dmin} max={dmax}
                 onChange={(e) => update({ startDate: e.target.value })} />
             </Field>
             <Field label="종료일">
-              <input type="date" value={cfg.endDate} min="2014-02-01" max="2024-12-30"
+              <input type="date" value={cfg.endDate} min={dmin} max={dmax}
                 onChange={(e) => update({ endDate: e.target.value })} />
             </Field>
           </div>
@@ -3029,6 +3072,11 @@ function App() {
   const [result, setResult] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [dataMeta, setDataMeta] = useState(SBTEngine.meta);
+
+  // runBacktest 가 항상 최신 cfg 를 읽도록 (데이터 준비 후 지연 실행 포함)
+  const cfgRef = useRef(cfg);
+  useEffect(() => { cfgRef.current = cfg; }, [cfg]);
 
   // 테마 적용
   useEffect(() => {
@@ -3057,9 +3105,10 @@ function App() {
     }, 60);
     setTimeout(() => {
       try {
-        const prices = SBTEngine.universe[cfg.universe];
-        const bench = SBTEngine.universe[cfg.universe];
-        const r = SBTEngine.runBacktest(cfg, prices, bench);
+        const c = cfgRef.current;
+        const prices = SBTEngine.universe[c.universe];
+        const bench = SBTEngine.universe[c.universe];
+        const r = SBTEngine.runBacktest(c, prices, bench);
         clearInterval(tick);
         setProgress(1);
         setResult(r);
@@ -3073,10 +3122,21 @@ function App() {
     }, 900);
   }
 
-  // 초기 1회 자동 실행
+  // 데이터(실데이터 우선) 준비 후 초기 1회 자동 실행
   useEffect(() => {
-    const id = setTimeout(() => runBacktest(), 200);
-    return () => clearTimeout(id);
+    let alive = true;
+    SBTEngine.ready.then((meta) => {
+      if (!alive) return;
+      setDataMeta(meta);
+      if (meta && meta.start && meta.end) {
+        setCfg((prev) => {
+          const within = prev.startDate >= meta.start && prev.startDate <= meta.end;
+          return { ...prev, startDate: within ? prev.startDate : meta.start, endDate: meta.end };
+        });
+      }
+      setTimeout(() => { if (alive) runBacktest(); }, 60);
+    });
+    return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -3089,11 +3149,11 @@ function App() {
         gridTemplateColumns: tweaks.showSidebar ? "232px 1fr" : "1fr"
       }}>
         {tweaks.showSidebar && (
-          <Sidebar view={view} setView={setView} result={result} />
+          <Sidebar view={view} setView={setView} result={result} dataMeta={dataMeta} />
         )}
         <main className="main">
           {view === "strategy" && (
-            <StrategyView cfg={cfg} setCfg={setCfg} onRun={runBacktest} isRunning={isRunning} />
+            <StrategyView cfg={cfg} setCfg={setCfg} onRun={runBacktest} isRunning={isRunning} dataMeta={dataMeta} />
           )}
           {view === "run" && (
             <RunView cfg={cfg} result={result} runProgress={progress}
@@ -3220,7 +3280,10 @@ function TopBar({ tweaks, setTweak, cfg, result }) {
 }
 
 // ---------- Sidebar ----------
-function Sidebar({ view, setView, result }) {
+function Sidebar({ view, setView, result, dataMeta }) {
+  const meta = dataMeta || { source: "mock" };
+  const isReal = meta.source === "real";
+  const yr = (d) => (d ? String(d).slice(0, 4) : "—");
   return (
     <aside className="sidebar">
       <nav className="nav">
@@ -3240,9 +3303,9 @@ function Sidebar({ view, setView, result }) {
       </nav>
       <div className="sidebar-footer">
         <div className="sf-line">market data</div>
-        <div className="sf-line mono">MOCK · 2014–2024</div>
+        <div className="sf-line mono">{isReal ? "KRX·NAVER" : "MOCK"} · {yr(meta.start)}–{yr(meta.end)}</div>
         <div className="sf-line sf-dot">
-          <span className="dot live"></span> 데이터 정상
+          <span className="dot live"></span> {isReal ? "실데이터 연결됨" : "모의 데이터"}
         </div>
       </div>
     </aside>

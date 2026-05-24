@@ -1,0 +1,48 @@
+name: 📈 전략테스터 Backtest Data
+
+on:
+  schedule:
+    - cron: '0 8 * * 1-5'   # 평일 17:00 KST (장마감 후 일봉 확정)
+  workflow_dispatch:
+  # 생성기/워크플로 변경 시 즉시 1회 생성
+  push:
+    branches: [main]
+    paths:
+      - 'generate_strategy_tester_data.py'
+      - '.github/workflows/strategy_tester_data.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-strategy-tester-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: strategy-tester-data
+      cancel-in-progress: false
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests pykrx
+
+      - name: 📈 Generate backtest data (KOSPI / KOSPI200 / KOSDAQ)
+        run: python3 generate_strategy_tester_data.py
+
+      - name: 💾 Commit & push docs/strategy_tester_data.json
+        run: |
+          git config user.name  "Winter Bot"
+          git config user.email "winter-bot@github-actions"
+          git add docs/strategy_tester_data.json
+          git diff --staged --quiet || git commit -m "📈 전략테스터 data $(TZ='Asia/Seoul' date +'%Y-%m-%d %H:%M KST')"
+          git push
